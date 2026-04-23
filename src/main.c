@@ -87,6 +87,7 @@ int main(void) {
     float *zbuf = NULL;
 
     Menu menu = { 0 };
+    int game_over = 0;
     int running = 1;
     SDL_Event e;
     Uint32 last_ticks = SDL_GetTicks();
@@ -94,6 +95,9 @@ int main(void) {
         Uint32 now = SDL_GetTicks();
         float dt = (now - last_ticks) / 1000.0f;
         last_ticks = now;
+
+        int w, h;
+        SDL_GetWindowSize(window, &w, &h);
 
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
@@ -124,14 +128,32 @@ int main(void) {
             }
         }
 
-        if (!menu.is_open) {
+        if (!menu.is_open && !game_over) {
             input_update(&player, &map, dt);
             game_update_enemies(&game, &player, &map, dt);
             game_update_timers(&game, dt);
+            if (game.health <= 0) {
+                game_over = 1;
+            }
         }
 
-        int w, h;
-        SDL_GetWindowSize(window, &w, &h);
+        if (game_over) {
+            while (SDL_PollEvent(&e)) {
+                if (e.type == SDL_QUIT) {
+                    running = 0;
+                }
+                GameOverResult result = game_over_handle_event(&e, w, h);
+                if (result == GAME_OVER_QUIT) {
+                    running = 0;
+                } else if (result == GAME_OVER_NEW_GAME) {
+                    map_free(&map);
+                    map_load(&map, "assets/maps/level1.map");
+                    player_init(&player, 14.5f, 10.5f, 0.0f);
+                    game_init(&game);
+                    game_over = 0;
+                }
+            }
+        }
 
         if (w != zbuf_w) {
             zbuf = realloc(zbuf, w * sizeof(float));
@@ -154,6 +176,9 @@ int main(void) {
         }
         if (menu.is_open) {
             menu_render(renderer, &menu, w, h);
+        }
+        if (game_over) {
+            game_over_render(renderer, w, h);
         }
         SDL_RenderPresent(renderer);
     }

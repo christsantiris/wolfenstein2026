@@ -210,3 +210,51 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
     int quit_x = bx + (bw - str_px_w("QUIT") - 16) / 2;
     draw_button(r, "QUIT", quit_x, y);
 }
+
+static void game_over_button_rects(int sw, int sh, SDL_Rect *rn, SDL_Rect *rl, SDL_Rect *rq) {
+    int nw = str_px_w("NEW GAME") + 16;
+    int lw = str_px_w("LOAD") + 16;
+    int qw = str_px_w("QUIT") + 16;
+    int bh = CH + 8;
+    int total = nw + 20 + lw + 20 + qw;
+    int bx = sw / 2 - total / 2;
+    int by = sh / 2 + 30;
+    rn->x = bx;              rn->y = by; rn->w = nw; rn->h = bh;
+    rl->x = bx + nw + 20;   rl->y = by; rl->w = lw; rl->h = bh;
+    rq->x = bx + nw + 20 + lw + 20; rq->y = by; rq->w = qw; rq->h = bh;
+}
+
+void game_over_render(SDL_Renderer *r, int sw, int sh) {
+    SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(r, 0, 0, 0, 210);
+    SDL_Rect overlay = { 0, 0, sw, sh };
+    SDL_RenderFillRect(r, &overlay);
+    SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_NONE);
+
+    SDL_Color red = { 200, 40, 40, 255 };
+    int tx = sw / 2 - str_px_w("GAME OVER") / 2;
+    draw_string(r, "GAME OVER", tx, sh / 2 - 40, red);
+
+    SDL_Rect rn, rl, rq;
+    game_over_button_rects(sw, sh, &rn, &rl, &rq);
+    draw_button(r, "NEW GAME", rn.x, rn.y + 4);
+    draw_button(r, "LOAD",     rl.x, rl.y + 4);
+    draw_button(r, "QUIT",     rq.x, rq.y + 4);
+}
+
+GameOverResult game_over_handle_event(const SDL_Event *e, int sw, int sh) {
+    if (e->type != SDL_MOUSEBUTTONDOWN || e->button.button != SDL_BUTTON_LEFT) {
+        return GAME_OVER_NONE;
+    }
+    int mx = e->button.x;
+    int my = e->button.y;
+    SDL_Rect rn, rl, rq;
+    game_over_button_rects(sw, sh, &rn, &rl, &rq);
+    if (mx >= rn.x && mx < rn.x + rn.w && my >= rn.y && my < rn.y + rn.h) {
+        return GAME_OVER_NEW_GAME;
+    }
+    if (mx >= rq.x && mx < rq.x + rq.w && my >= rq.y && my < rq.y + rq.h) {
+        return GAME_OVER_QUIT;
+    }
+    return GAME_OVER_NONE;
+}
