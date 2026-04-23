@@ -52,13 +52,7 @@ Pull requests are welcome. Please keep changes small and focused — one feature
 MIT
 
 ## Roadmap
-- Raycasting engine with solid-color walls
-- Textured walls, floor, and ceiling
-- Player movement and rotation
-- Minimap overlay
-- Enemy AI and line-of-sight
-- Weapons and combat
-- HUD (health, ammo, face)
-- Multiple levels with plain-text map format
-- Sound effects and music via SDL2_mixer
-- macOS and Linux installer packages
+- Sound — SDL2_mixer, gunshot, reload click, enemy alert bark
+- Door mechanics — E key to open, map cell value for door state
+- Level exit + multiple levels — exit tile triggers next map load
+- Wall texture variants — map cells 1-9 already route through, just need different textures per value

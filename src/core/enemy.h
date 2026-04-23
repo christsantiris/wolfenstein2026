@@ -1,13 +1,24 @@
 #ifndef ENEMY_H
 #define ENEMY_H
 
+#include "core/map.h"
+#include "core/player.h"
+
 #define MAX_ENEMIES 32
+
+typedef enum {
+    ENEMY_IDLE,
+    ENEMY_ALERT,
+    ENEMY_ATTACK
+} EnemyState;
 
 typedef struct {
     float x;
     float y;
     int health;
     int active;
+    EnemyState state;
+    float attack_timer;
 } Enemy;
 
 typedef struct {
@@ -16,5 +27,6 @@ typedef struct {
 } EnemyList;
 
 void enemy_list_init(EnemyList *el);
+int  enemy_update(Enemy *e, const Player *p, const Map *m, float dt);
 
 #endif

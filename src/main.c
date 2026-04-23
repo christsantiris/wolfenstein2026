@@ -105,9 +105,13 @@ int main(void) {
             if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
                 game_shoot(&game, &player);
             }
+            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_r) {
+                game_reload(&game);
+            }
         }
 
         input_update(&player, &map, dt);
+        game_update_enemies(&game, &player, &map, dt);
         game_update_timers(&game, dt);
 
         int w, h;
