@@ -3,6 +3,7 @@
 #include "map.h"
 #include "player.h"
 #include "raycaster.h"
+#include "input.h"
 
 #define SCREEN_W 800
 #define SCREEN_H 600
@@ -17,7 +18,7 @@ int main(void) {
         "Wolfenstein 2026",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         SCREEN_W, SCREEN_H,
-        SDL_WINDOW_SHOWN
+        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
     if (!window) {
         fprintf(stderr, "SDL_CreateWindow: %s\n", SDL_GetError());
@@ -46,7 +47,12 @@ int main(void) {
 
     int running = 1;
     SDL_Event e;
+    Uint32 last_ticks = SDL_GetTicks();
     while (running) {
+        Uint32 now = SDL_GetTicks();
+        float dt = (now - last_ticks) / 1000.0f;
+        last_ticks = now;
+
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
                 running = 0;
@@ -56,9 +62,14 @@ int main(void) {
             }
         }
 
+        input_update(&player, &map, dt);
+
+        int w, h;
+        SDL_GetWindowSize(window, &w, &h);
+
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
-        raycaster_render(renderer, &map, &player, SCREEN_W, SCREEN_H);
+        raycaster_render(renderer, &map, &player, w, h);
         SDL_RenderPresent(renderer);
     }
 

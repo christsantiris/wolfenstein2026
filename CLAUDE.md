@@ -55,6 +55,12 @@ If a signature is too long, shorten the parameter names rather than wrapping.
 
 ---
 
+## 9. Always ask before writing code
+
+Before making any file edit or creation, present the proposed change and ask for confirmation. Never write to a file without explicit approval in that turn.
+
+---
+
 ## 4. Minimal code per change set
 
 - Provide the smallest possible change per step
