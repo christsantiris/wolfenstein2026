@@ -1,4 +1,4 @@
-#include "hud.h"
+#include "render/hud.h"
 
 #define BAR_PADDING   10
 #define BAR_H         20

@@ -1,16 +1,16 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
-#include "map.h"
-#include "player.h"
-#include "raycaster.h"
-#include "input.h"
-#include "texture.h"
-#include "minimap.h"
-#include "hud.h"
-#include "game.h"
-#include "sprite.h"
-#include "weapon.h"
 #include <stdlib.h>
+#include "core/map.h"
+#include "core/player.h"
+#include "core/game.h"
+#include "render/raycaster.h"
+#include "render/texture.h"
+#include "render/minimap.h"
+#include "render/hud.h"
+#include "render/sprite.h"
+#include "render/weapon.h"
+#include "input/input.h"
 
 #define SCREEN_W 800
 #define SCREEN_H 600

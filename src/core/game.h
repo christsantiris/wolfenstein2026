@@ -1,7 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "enemy.h"
+#include "core/enemy.h"
 
 typedef struct {
     int health;

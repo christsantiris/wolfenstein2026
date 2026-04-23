@@ -1,4 +1,4 @@
-#include "minimap.h"
+#include "render/minimap.h"
 #include <math.h>
 
 #define CELL_SIZE   6

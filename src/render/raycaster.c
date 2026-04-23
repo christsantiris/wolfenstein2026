@@ -1,4 +1,4 @@
-#include "raycaster.h"
+#include "render/raycaster.h"
 #include <math.h>
 
 #define FOV_FACTOR  0.66f

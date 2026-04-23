@@ -1,4 +1,4 @@
-#include "enemy.h"
+#include "core/enemy.h"
 #include <string.h>
 
 static void place(EnemyList *el, float x, float y) {

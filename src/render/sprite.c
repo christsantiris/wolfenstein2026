@@ -1,4 +1,4 @@
-#include "sprite.h"
+#include "render/sprite.h"
 #include <math.h>
 #include <stdlib.h>
 

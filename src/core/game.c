@@ -1,4 +1,4 @@
-#include "game.h"
+#include "core/game.h"
 
 void game_init(GameState *g) {
     g->health = 100;

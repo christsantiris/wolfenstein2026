@@ -1,4 +1,4 @@
-#include "weapon.h"
+#include "render/weapon.h"
 
 #define WEAPON_SCALE 3
 

@@ -1,4 +1,4 @@
-#include "player.h"
+#include "core/player.h"
 
 #define DEFAULT_MOVE_SPEED 3.0f
 #define DEFAULT_ROT_SPEED  2.0f
