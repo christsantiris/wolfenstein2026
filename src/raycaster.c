@@ -11,7 +11,7 @@
 #define FLOOR_G     30
 #define FLOOR_B     30
 
-void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, const Texture *wall_tex, int screen_w, int screen_h) {
+void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, const Texture *wall_tex, float *zbuf, int screen_w, int screen_h) {
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
     float plane_x = -dir_y * FOV_FACTOR;
@@ -72,6 +72,7 @@ void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, con
         if (perp_dist < 0.001f) {
             perp_dist = 0.001f;
         }
+        zbuf[x] = perp_dist;
         wall_x -= floorf(wall_x);
 
         int wall_h = (int)(screen_h / perp_dist);

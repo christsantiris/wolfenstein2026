@@ -7,6 +7,9 @@
 #include "texture.h"
 #include "minimap.h"
 #include "hud.h"
+#include "game.h"
+#include "sprite.h"
+#include <stdlib.h>
 
 #define SCREEN_W 800
 #define SCREEN_H 600
@@ -48,6 +51,9 @@ int main(void) {
     Player player;
     player_init(&player, 14.5f, 10.5f, 0.0f);
 
+    GameState game;
+    game_init(&game);
+
     Texture wall_tex;
     if (texture_create(&wall_tex, 64, 64) != 0) {
         map_free(&map);
@@ -57,6 +63,9 @@ int main(void) {
         return 1;
     }
     texture_generate_brick(&wall_tex);
+
+    int zbuf_w = 0;
+    float *zbuf = NULL;
 
     int running = 1;
     SDL_Event e;
@@ -80,14 +89,21 @@ int main(void) {
         int w, h;
         SDL_GetWindowSize(window, &w, &h);
 
+        if (w != zbuf_w) {
+            zbuf = realloc(zbuf, w * sizeof(float));
+            zbuf_w = w;
+        }
+
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
-        raycaster_render(renderer, &map, &player, &wall_tex, w, h - HUD_HEIGHT);
+        raycaster_render(renderer, &map, &player, &wall_tex, zbuf, w, h - HUD_HEIGHT);
+        sprite_render_all(renderer, &player, &game.enemies, zbuf, w, h - HUD_HEIGHT);
         minimap_render(renderer, &map, &player);
-        hud_render(renderer, w, h, 100, 8);
+        hud_render(renderer, w, h, game.health, game.ammo);
         SDL_RenderPresent(renderer);
     }
 
+    free(zbuf);
     texture_free(&wall_tex);
     map_free(&map);
     SDL_DestroyRenderer(renderer);
