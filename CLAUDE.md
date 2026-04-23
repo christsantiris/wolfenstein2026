@@ -97,6 +97,19 @@ Never:
 
 ---
 
+## 8. Use GLOB_RECURSE for CMake source collection
+
+Never list source files individually in `add_executable`. Always use:
+
+```cmake
+file(GLOB_RECURSE SOURCES src/*.c)
+add_executable(wolf ${SOURCES})
+```
+
+This scales as new `.c` files are added without requiring CMakeLists.txt edits.
+
+---
+
 ## 7. All game state changes must be reflected in save/load
 
 Any new game state added or any struct that is part of persistent game state must also be:
