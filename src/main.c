@@ -99,9 +99,16 @@ int main(void) {
             if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
                 running = 0;
             }
+            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
+                game_shoot(&game, &player);
+            }
+            if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+                game_shoot(&game, &player);
+            }
         }
 
         input_update(&player, &map, dt);
+        game_update_timers(&game, dt);
 
         int w, h;
         SDL_GetWindowSize(window, &w, &h);
@@ -115,7 +122,7 @@ int main(void) {
         SDL_RenderClear(renderer);
         raycaster_render(renderer, &map, &player, &wall_tex, zbuf, w, h - HUD_HEIGHT);
         sprite_render_all(renderer, &player, &game.enemies, zbuf, &guard_tex, w, h - HUD_HEIGHT);
-        weapon_render(renderer, &pistol_tex, w, h - HUD_HEIGHT);
+        weapon_render(renderer, &pistol_tex, game.shot_timer, w, h - HUD_HEIGHT);
         minimap_render(renderer, &map, &player);
         hud_render(renderer, w, h, game.health, game.ammo);
         SDL_RenderPresent(renderer);

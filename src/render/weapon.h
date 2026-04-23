@@ -4,6 +4,6 @@
 #include <SDL2/SDL.h>
 #include "render/texture.h"
 
-void weapon_render(SDL_Renderer *renderer, const Texture *tex, int screen_w, int screen_h);
+void weapon_render(SDL_Renderer *renderer, const Texture *tex, float shot_timer, int screen_w, int screen_h);
 
 #endif

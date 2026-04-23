@@ -2,7 +2,7 @@
 
 #define WEAPON_SCALE 3
 
-void weapon_render(SDL_Renderer *renderer, const Texture *tex, int screen_w, int screen_h) {
+void weapon_render(SDL_Renderer *renderer, const Texture *tex, float shot_timer, int screen_w, int screen_h) {
     int w = tex->width  * WEAPON_SCALE;
     int h = tex->height * WEAPON_SCALE;
     int x0 = (screen_w - w) / 2;
@@ -20,5 +20,16 @@ void weapon_render(SDL_Renderer *renderer, const Texture *tex, int screen_w, int
             SDL_SetRenderDrawColor(renderer, r, g, b, 255);
             SDL_RenderDrawPoint(renderer, x0 + sx, y0 + sy);
         }
+    }
+
+    if (shot_timer > 0.0f) {
+        int fx = x0 + w / 2 - 12;
+        int fy = y0 - 30;
+        SDL_SetRenderDrawColor(renderer, 255, 220, 80, 255);
+        SDL_Rect flash = { fx, fy, 24, 30 };
+        SDL_RenderFillRect(renderer, &flash);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 200, 255);
+        SDL_Rect core = { fx + 7, fy + 4, 10, 18 };
+        SDL_RenderFillRect(renderer, &core);
     }
 }
