@@ -4,7 +4,7 @@
 
 #define FOV_FACTOR 0.66f
 
-void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, const float *zbuf, int screen_w, int screen_h) {
+void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, const float *zbuf, const Texture *sprite_tex, int screen_w, int screen_h) {
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
     float plane_x = -dir_y * FOV_FACTOR;
@@ -41,12 +41,25 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
         if (draw_x0 < 0) { draw_x0 = 0; }
         if (draw_x1 > screen_w) { draw_x1 = screen_w; }
 
+        int tex_y_base = screen_h / 2 - sprite_h / 2;
+
         for (int x = draw_x0; x < draw_x1; x++) {
             if (transform_y >= zbuf[x]) {
                 continue;
             }
-            SDL_SetRenderDrawColor(renderer, 150, 110, 60, 255);
-            SDL_RenderDrawLine(renderer, x, draw_y0, x, draw_y1);
+            float u = (float)(x - (screen_x - sprite_w / 2)) / sprite_w;
+            for (int y = draw_y0; y < draw_y1; y++) {
+                float v = (float)(y - tex_y_base) / sprite_h;
+                unsigned int colour = texture_sample(sprite_tex, u, v);
+                unsigned char r = (colour >> 16) & 0xFF;
+                unsigned char g = (colour >> 8)  & 0xFF;
+                unsigned char b =  colour        & 0xFF;
+                if (r == 255 && g == 0 && b == 255) {
+                    continue;
+                }
+                SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+                SDL_RenderDrawPoint(renderer, x, y);
+            }
         }
     }
 }

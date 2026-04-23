@@ -1,5 +1,6 @@
 #include "texture.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 int texture_create(Texture *t, int width, int height) {
     t->pixels = malloc(width * height * 3);
@@ -8,6 +9,56 @@ int texture_create(Texture *t, int width, int height) {
     }
     t->width = width;
     t->height = height;
+    return 0;
+}
+
+int texture_load_ppm(Texture *t, const char *path) {
+    FILE *f = fopen(path, "rb");
+    if (!f) {
+        fprintf(stderr, "texture_load_ppm: cannot open %s\n", path);
+        return -1;
+    }
+
+    char magic[3] = {0};
+    int w = 0, h = 0, maxval = 0;
+
+    if (fscanf(f, "%2s", magic) != 1 || magic[0] != 'P' || magic[1] != '6') {
+        fprintf(stderr, "texture_load_ppm: not a P6 PPM\n");
+        fclose(f);
+        return -1;
+    }
+
+    int c;
+    while ((c = fgetc(f)) != EOF) {
+        if (c == '#') {
+            while ((c = fgetc(f)) != '\n' && c != EOF) {}
+        } else if (c != ' ' && c != '\t' && c != '\n' && c != '\r') {
+            ungetc(c, f);
+            break;
+        }
+    }
+
+    if (fscanf(f, "%d %d %d", &w, &h, &maxval) != 3 || w <= 0 || h <= 0) {
+        fprintf(stderr, "texture_load_ppm: invalid header in %s\n", path);
+        fclose(f);
+        return -1;
+    }
+    fgetc(f);
+
+    if (texture_create(t, w, h) != 0) {
+        fclose(f);
+        return -1;
+    }
+
+    size_t want = (size_t)(w * h * 3);
+    if (fread(t->pixels, 1, want, f) != want) {
+        fprintf(stderr, "texture_load_ppm: short read in %s\n", path);
+        texture_free(t);
+        fclose(f);
+        return -1;
+    }
+
+    fclose(f);
     return 0;
 }
 

@@ -9,6 +9,7 @@
 #include "hud.h"
 #include "game.h"
 #include "sprite.h"
+#include "weapon.h"
 #include <stdlib.h>
 
 #define SCREEN_W 800
@@ -64,6 +65,22 @@ int main(void) {
     }
     texture_generate_brick(&wall_tex);
 
+    Texture pistol_tex;
+    if (texture_load_ppm(&pistol_tex, "assets/sprites/pistol.ppm") != 0) {
+        texture_create(&pistol_tex, 64, 64);
+        for (int i = 0; i < 64 * 64 * 3; i++) { pistol_tex.pixels[i] = 0; }
+    }
+
+    Texture guard_tex;
+    if (texture_load_ppm(&guard_tex, "assets/sprites/guard_front.ppm") != 0) {
+        texture_create(&guard_tex, 64, 64);
+        for (int i = 0; i < 64 * 64 * 3; i += 3) {
+            guard_tex.pixels[i]     = 150;
+            guard_tex.pixels[i + 1] = 110;
+            guard_tex.pixels[i + 2] = 60;
+        }
+    }
+
     int zbuf_w = 0;
     float *zbuf = NULL;
 
@@ -97,13 +114,15 @@ int main(void) {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
         raycaster_render(renderer, &map, &player, &wall_tex, zbuf, w, h - HUD_HEIGHT);
-        sprite_render_all(renderer, &player, &game.enemies, zbuf, w, h - HUD_HEIGHT);
+        sprite_render_all(renderer, &player, &game.enemies, zbuf, &guard_tex, w, h - HUD_HEIGHT);
+        weapon_render(renderer, &pistol_tex, w, h - HUD_HEIGHT);
         minimap_render(renderer, &map, &player);
         hud_render(renderer, w, h, game.health, game.ammo);
         SDL_RenderPresent(renderer);
     }
 
     free(zbuf);
+    texture_free(&pistol_tex);
     texture_free(&wall_tex);
     map_free(&map);
     SDL_DestroyRenderer(renderer);
