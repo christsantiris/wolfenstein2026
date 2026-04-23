@@ -12,6 +12,7 @@
 #include "render/sprite.h"
 #include "render/weapon.h"
 #include "input/input.h"
+#include "ui/menu.h"
 
 #define SCREEN_W 800
 #define SCREEN_H 600
@@ -85,6 +86,7 @@ int main(void) {
     int zbuf_w = 0;
     float *zbuf = NULL;
 
+    Menu menu = { 0 };
     int running = 1;
     SDL_Event e;
     Uint32 last_ticks = SDL_GetTicks();
@@ -98,29 +100,35 @@ int main(void) {
                 running = 0;
             }
             if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
-                running = 0;
+                menu.is_open = !menu.is_open;
             }
-            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
-                game_shoot(&game, &player);
-            }
-            if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
-                game_shoot(&game, &player);
-            }
-            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_r) {
-                game_reload(&game);
-            }
-            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_o) {
-                int door_x = (int)(player.x + cosf(player.angle));
-                int door_y = (int)(player.y + sinf(player.angle));
-                if (map_is_door(&map, door_x, door_y)) {
-                    map_toggle_door(&map, door_x, door_y);
+            if (menu.is_open) {
+                menu_handle_event(&menu, &e, &running);
+            } else {
+                if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
+                    game_shoot(&game, &player);
+                }
+                if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+                    game_shoot(&game, &player);
+                }
+                if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_r) {
+                    game_reload(&game);
+                }
+                if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_o) {
+                    int door_x = (int)(player.x + cosf(player.angle));
+                    int door_y = (int)(player.y + sinf(player.angle));
+                    if (map_is_door(&map, door_x, door_y)) {
+                        map_toggle_door(&map, door_x, door_y);
+                    }
                 }
             }
         }
 
-        input_update(&player, &map, dt);
-        game_update_enemies(&game, &player, &map, dt);
-        game_update_timers(&game, dt);
+        if (!menu.is_open) {
+            input_update(&player, &map, dt);
+            game_update_enemies(&game, &player, &map, dt);
+            game_update_timers(&game, dt);
+        }
 
         int w, h;
         SDL_GetWindowSize(window, &w, &h);
@@ -143,6 +151,9 @@ int main(void) {
             SDL_Rect flash = { 0, 0, w, h };
             SDL_RenderFillRect(renderer, &flash);
             SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+        }
+        if (menu.is_open) {
+            menu_render(renderer, &menu, w, h);
         }
         SDL_RenderPresent(renderer);
     }
