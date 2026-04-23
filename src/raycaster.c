@@ -1,25 +1,17 @@
 #include "raycaster.h"
 #include <math.h>
 
-#define FOV_FACTOR   0.66f
+#define FOV_FACTOR  0.66f
 
-#define CEILING_R    50
-#define CEILING_G    50
-#define CEILING_B    60
+#define CEILING_R   50
+#define CEILING_G   50
+#define CEILING_B   60
 
-#define FLOOR_R      30
-#define FLOOR_G      30
-#define FLOOR_B      30
+#define FLOOR_R     30
+#define FLOOR_G     30
+#define FLOOR_B     30
 
-#define WALL_LIGHT_R 200
-#define WALL_LIGHT_G 200
-#define WALL_LIGHT_B 200
-
-#define WALL_DARK_R  130
-#define WALL_DARK_G  130
-#define WALL_DARK_B  130
-
-void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, int screen_w, int screen_h) {
+void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, const Texture *wall_tex, int screen_w, int screen_h) {
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
     float plane_x = -dir_y * FOV_FACTOR;
@@ -69,14 +61,18 @@ void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, int
         }
 
         float perp_dist;
+        float wall_x;
         if (side == 0) {
             perp_dist = (map_x - p->x + (1 - step_x) * 0.5f) / ray_dx;
+            wall_x = p->y + perp_dist * ray_dy;
         } else {
             perp_dist = (map_y - p->y + (1 - step_y) * 0.5f) / ray_dy;
+            wall_x = p->x + perp_dist * ray_dx;
         }
         if (perp_dist < 0.001f) {
             perp_dist = 0.001f;
         }
+        wall_x -= floorf(wall_x);
 
         int wall_h = (int)(screen_h / perp_dist);
         int draw_start = (screen_h - wall_h) / 2;
@@ -91,14 +87,22 @@ void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, int
         SDL_SetRenderDrawColor(renderer, CEILING_R, CEILING_G, CEILING_B, 255);
         SDL_RenderDrawLine(renderer, x, 0, x, draw_start - 1);
 
-        if (side == 0) {
-            SDL_SetRenderDrawColor(renderer, WALL_LIGHT_R, WALL_LIGHT_G, WALL_LIGHT_B, 255);
-        } else {
-            SDL_SetRenderDrawColor(renderer, WALL_DARK_R, WALL_DARK_G, WALL_DARK_B, 255);
+        for (int y = draw_start; y < draw_end; y++) {
+            float tex_v = (y - (screen_h - wall_h) * 0.5f) / wall_h;
+            unsigned int colour = texture_sample(wall_tex, wall_x, tex_v);
+            unsigned char r = (colour >> 16) & 0xFF;
+            unsigned char g = (colour >> 8)  & 0xFF;
+            unsigned char b =  colour        & 0xFF;
+            if (side == 1) {
+                r /= 2;
+                g /= 2;
+                b /= 2;
+            }
+            SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+            SDL_RenderDrawPoint(renderer, x, y);
         }
-        SDL_RenderDrawLine(renderer, x, draw_start, x, draw_end);
 
         SDL_SetRenderDrawColor(renderer, FLOOR_R, FLOOR_G, FLOOR_B, 255);
-        SDL_RenderDrawLine(renderer, x, draw_end + 1, x, screen_h - 1);
+        SDL_RenderDrawLine(renderer, x, draw_end, x, screen_h - 1);
     }
 }

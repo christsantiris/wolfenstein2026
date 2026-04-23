@@ -4,6 +4,7 @@
 #include "player.h"
 #include "raycaster.h"
 #include "input.h"
+#include "texture.h"
 
 #define SCREEN_W 800
 #define SCREEN_H 600
@@ -45,6 +46,16 @@ int main(void) {
     Player player;
     player_init(&player, 14.5f, 10.5f, 0.0f);
 
+    Texture wall_tex;
+    if (texture_create(&wall_tex, 64, 64) != 0) {
+        map_free(&map);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+    texture_generate_brick(&wall_tex);
+
     int running = 1;
     SDL_Event e;
     Uint32 last_ticks = SDL_GetTicks();
@@ -69,10 +80,11 @@ int main(void) {
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
-        raycaster_render(renderer, &map, &player, w, h);
+        raycaster_render(renderer, &map, &player, &wall_tex, w, h);
         SDL_RenderPresent(renderer);
     }
 
+    texture_free(&wall_tex);
     map_free(&map);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

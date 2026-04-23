@@ -55,9 +55,14 @@ If a signature is too long, shorten the parameter names rather than wrapping.
 
 ---
 
-## 9. Always ask before writing code
+## 9. How to propose and apply changes
 
-Before making any file edit or creation, present the proposed change and ask for confirmation. Never write to a file without explicit approval in that turn.
+For every change, follow this exact sequence:
+
+1. **Describe** the change briefly in text — what file, what it does, why
+2. **Call the tool** — use Edit or Write directly. Do not paste code blocks in chat as a substitute
+3. **The VS Code diff prompt is the approval step** — the extension shows a diff with Yes / No / Tell Claude what to do instead. Wait for that response before proceeding
+4. **Never chain tool calls without a prompt in between** — one tool call, one approval, then stop and wait
 
 ---
 
