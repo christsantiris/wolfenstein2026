@@ -1,0 +1,8 @@
+wold
+obj/
+.vscode
+game.cfg
+/assets/game.cfg
+saves/
+build/
+dist/

@@ -1,0 +1,28 @@
+.PHONY: all run clean debug test linux
+
+all:
+	cmake -B build -DCMAKE_BUILD_TYPE=Release
+	cmake --build build
+
+run: all
+	./build/wolf
+
+dmg:
+	cmake --build build --config Release
+	bash package/macos/build_dmg.sh
+
+linux:
+	bash package/linux/build_linux.sh
+
+debug:
+	cmake -B build -DCMAKE_BUILD_TYPE=Debug
+	cmake --build build
+	./build/wolf
+
+test:
+	cmake -B build -DCMAKE_BUILD_TYPE=Debug
+	cmake --build build --target test_runner
+	./build/test_runner
+
+clean:
+	rm -rf build
