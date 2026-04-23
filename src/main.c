@@ -5,6 +5,7 @@
 #include "raycaster.h"
 #include "input.h"
 #include "texture.h"
+#include "minimap.h"
 
 #define SCREEN_W 800
 #define SCREEN_H 600
@@ -81,6 +82,7 @@ int main(void) {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
         raycaster_render(renderer, &map, &player, &wall_tex, w, h);
+        minimap_render(renderer, &map, &player);
         SDL_RenderPresent(renderer);
     }
 
