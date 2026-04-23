@@ -17,8 +17,9 @@ void game_init(GameState *g) {
     g->score          = 0;
     g->shot_timer     = 0.0f;
     g->shot_cooldown  = 0.0f;
-    g->reload_timer   = 0.0f;
-    g->is_reloading   = 0;
+    g->reload_timer    = 0.0f;
+    g->hit_flash_timer = 0.0f;
+    g->is_reloading    = 0;
     enemy_list_init(&g->enemies);
 }
 
@@ -80,13 +81,15 @@ void game_update_enemies(GameState *g, const Player *p, const Map *m, float dt) 
             if (g->health < 0) {
                 g->health = 0;
             }
+            g->hit_flash_timer = 0.3f;
         }
     }
 }
 
 void game_update_timers(GameState *g, float dt) {
-    if (g->shot_timer    > 0.0f) { g->shot_timer    -= dt; }
-    if (g->shot_cooldown > 0.0f) { g->shot_cooldown -= dt; }
+    if (g->shot_timer      > 0.0f) { g->shot_timer      -= dt; }
+    if (g->shot_cooldown   > 0.0f) { g->shot_cooldown   -= dt; }
+    if (g->hit_flash_timer > 0.0f) { g->hit_flash_timer -= dt; }
     if (g->is_reloading) {
         g->reload_timer -= dt;
         if (g->reload_timer <= 0.0f) {

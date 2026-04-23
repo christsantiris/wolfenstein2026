@@ -18,6 +18,7 @@ typedef struct {
     float shot_timer;
     float shot_cooldown;
     float reload_timer;
+    float hit_flash_timer;
     int is_reloading;
     WeaponDef current_weapon;
     EnemyList enemies;
