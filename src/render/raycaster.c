@@ -75,6 +75,8 @@ void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, con
         zbuf[x] = perp_dist;
         wall_x -= floorf(wall_x);
 
+        int cell_type = map_cell(m, map_x, map_y);
+
         int wall_h = (int)(screen_h / perp_dist);
         int draw_start = (screen_h - wall_h) / 2;
         int draw_end = (screen_h + wall_h) / 2;
@@ -89,17 +91,22 @@ void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, con
         SDL_RenderDrawLine(renderer, x, 0, x, draw_start - 1);
 
         for (int y = draw_start; y < draw_end; y++) {
-            float tex_v = (y - (screen_h - wall_h) * 0.5f) / wall_h;
-            unsigned int colour = texture_sample(wall_tex, wall_x, tex_v);
-            unsigned char r = (colour >> 16) & 0xFF;
-            unsigned char g = (colour >> 8)  & 0xFF;
-            unsigned char b =  colour        & 0xFF;
-            if (side == 1) {
-                r /= 2;
-                g /= 2;
-                b /= 2;
+            if (cell_type == MAP_CELL_DOOR) {
+                unsigned char dv = side ? 80 : 160;
+                SDL_SetRenderDrawColor(renderer, dv, dv, dv, 255);
+            } else {
+                float tex_v = (y - (screen_h - wall_h) * 0.5f) / wall_h;
+                unsigned int colour = texture_sample(wall_tex, wall_x, tex_v);
+                unsigned char r = (colour >> 16) & 0xFF;
+                unsigned char g = (colour >> 8)  & 0xFF;
+                unsigned char b =  colour        & 0xFF;
+                if (side == 1) {
+                    r /= 2;
+                    g /= 2;
+                    b /= 2;
+                }
+                SDL_SetRenderDrawColor(renderer, r, g, b, 255);
             }
-            SDL_SetRenderDrawColor(renderer, r, g, b, 255);
             SDL_RenderDrawPoint(renderer, x, y);
         }
 

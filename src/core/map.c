@@ -44,7 +44,13 @@ int map_load(Map *m, const char *path) {
         int len = (int)strlen(lines[y]);
         for (int x = 0; x < len; x++) {
             char c = lines[y][x];
-            m->cells[y * width + x] = (c >= '1' && c <= '9') ? (c - '0') : 0;
+            if (c == 'D') {
+                m->cells[y * width + x] = MAP_CELL_DOOR;
+            } else if (c >= '1' && c <= '9') {
+                m->cells[y * width + x] = c - '0';
+            } else {
+                m->cells[y * width + x] = 0;
+            }
         }
     }
 
@@ -66,5 +72,23 @@ int map_cell(const Map *m, int x, int y) {
 }
 
 int map_is_wall(const Map *m, int x, int y) {
-    return map_cell(m, x, y) > 0;
+    int c = map_cell(m, x, y);
+    return c > 0 && c != MAP_CELL_DOOR_OPEN;
+}
+
+int map_is_door(const Map *m, int x, int y) {
+    int c = map_cell(m, x, y);
+    return c == MAP_CELL_DOOR || c == MAP_CELL_DOOR_OPEN;
+}
+
+void map_toggle_door(Map *m, int x, int y) {
+    if (x < 0 || x >= m->width || y < 0 || y >= m->height) {
+        return;
+    }
+    int *cell = &m->cells[y * m->width + x];
+    if (*cell == MAP_CELL_DOOR) {
+        *cell = MAP_CELL_DOOR_OPEN;
+    } else if (*cell == MAP_CELL_DOOR_OPEN) {
+        *cell = MAP_CELL_DOOR;
+    }
 }

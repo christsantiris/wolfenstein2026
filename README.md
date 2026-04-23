@@ -53,6 +53,5 @@ MIT
 
 ## Roadmap
 - Sound — SDL2_mixer, gunshot, reload click, enemy alert bark
-- Door mechanics — E key to open, map cell value for door state
 - Level exit + multiple levels — exit tile triggers next map load
 - Wall texture variants — map cells 1-9 already route through, just need different textures per value

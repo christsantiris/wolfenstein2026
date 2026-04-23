@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "core/map.h"
 #include "core/player.h"
 #include "core/game.h"
@@ -107,6 +108,13 @@ int main(void) {
             }
             if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_r) {
                 game_reload(&game);
+            }
+            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_o) {
+                int door_x = (int)(player.x + cosf(player.angle));
+                int door_y = (int)(player.y + sinf(player.angle));
+                if (map_is_door(&map, door_x, door_y)) {
+                    map_toggle_door(&map, door_x, door_y);
+                }
             }
         }
 
