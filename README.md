@@ -52,8 +52,9 @@ Pull requests are welcome. Please keep changes small and focused — one feature
 MIT
 
 ## Roadmap
-- Sound — Upgraded guns
+- Upgraded guns - more damage, faster firing rate.
 - Randomly spawn enemy positions
+- Difficulty settings
 - Sound — SDL2_mixer, gunshot, reload click, enemy alert bark
 - Level exit + multiple levels — exit tile triggers next map load
 - Wall texture variants — map cells 1-9 already route through, just need different textures per value
