@@ -33,6 +33,7 @@ static int start_game(Map *map, Player *player, GameState *game, int level) {
     }
     player_init(player, 14.5f, 10.5f, 0.0f);
     game_init(game);
+    enemy_list_init(&game->enemies, map, level, player->x, player->y);
     return 0;
 }
 
@@ -41,6 +42,7 @@ int main(void) {
         fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
         return 1;
     }
+    srand((unsigned int)SDL_GetTicks());
 
     SDL_Window *window = SDL_CreateWindow(
         "Wolfenstein 2026",

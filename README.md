@@ -53,9 +53,15 @@ MIT
 
 ## Roadmap
 - Upgraded guns - more damage, faster firing rate.
-- Randomly spawn enemy positions
 - Difficulty settings
+- Enemy variety
 - Sound — SDL2_mixer, gunshot, reload click, enemy alert bark
 - Wall texture variants — map cells 1-9 already route through, just need different textures per value
 - Health and ammo pickups 
 - Score on the HUD
+- Save / load
+- Score shown
+- High Scores
+- Enemy sprites by angle - currently enemies always face you regardless of direction — breaks immersion
+- Minimap toggle
+

@@ -1,6 +1,7 @@
 #include "core/enemy.h"
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
 
 #define ENEMY_SIGHT_RANGE    12.0f
 #define ENEMY_ATTACK_RANGE    2.0f
@@ -89,11 +90,37 @@ static void place(EnemyList *el, float x, float y) {
     e->active = 1;
 }
 
-void enemy_list_init(EnemyList *el) {
+void enemy_list_init(EnemyList *el, const Map *m, int level, float px, float py) {
     memset(el, 0, sizeof(EnemyList));
-    place(el,  7.5f,  5.5f);
-    place(el, 22.5f,  5.5f);
-    place(el,  5.5f, 14.5f);
-    place(el, 22.5f, 14.5f);
-    place(el, 14.5f,  3.5f);
+
+    int count = 4 + level;
+    if (count > MAX_ENEMIES) { count = MAX_ENEMIES; }
+
+    typedef struct { float x; float y; } Pos;
+    Pos candidates[1024];
+    int nc = 0;
+
+    for (int y = 1; y < m->height - 1; y++) {
+        for (int x = 1; x < m->width - 1; x++) {
+            if (map_cell(m, x, y) != 0) { continue; }
+            float ex = x + 0.5f;
+            float ey = y + 0.5f;
+            float dx = ex - px;
+            float dy = ey - py;
+            if (dx * dx + dy * dy < 25.0f) { continue; }
+            if (nc < 1024) {
+                candidates[nc].x = ex;
+                candidates[nc].y = ey;
+                nc++;
+            }
+        }
+    }
+
+    for (int i = 0; i < count && i < nc; i++) {
+        int j = i + rand() % (nc - i);
+        Pos tmp = candidates[i];
+        candidates[i] = candidates[j];
+        candidates[j] = tmp;
+        place(el, candidates[i].x, candidates[i].y);
+    }
 }

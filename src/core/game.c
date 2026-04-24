@@ -1,6 +1,7 @@
 #include "core/game.h"
 #include <math.h>
 #include <stddef.h>
+#include <string.h>
 
 #define SHOT_DAMAGE    34
 #define ENEMY_HIT_DMG  8
@@ -21,7 +22,7 @@ void game_init(GameState *g) {
     g->hit_flash_timer = 0.0f;
     g->is_reloading = 0;
     g->level_clear_timer = 0.0f;
-    enemy_list_init(&g->enemies);
+    memset(&g->enemies, 0, sizeof(g->enemies));
 }
 
 void game_reload(GameState *g) {
