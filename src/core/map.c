@@ -68,7 +68,7 @@ void map_free(Map *m) {
 
 int map_cell(const Map *m, int x, int y) {
     if (x < 0 || x >= m->width || y < 0 || y >= m->height) {
-        return 1;
+        return MAP_CELL_VOID;
     }
     return m->cells[y * m->width + x];
 }

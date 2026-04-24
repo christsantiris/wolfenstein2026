@@ -5,6 +5,7 @@
 #define MAP_CELL_DOOR_OPEN 11
 #define MAP_CELL_EXIT      12
 #define MAP_CELL_EXIT_OPEN 13
+#define MAP_CELL_VOID      255
 
 typedef struct {
     int *cells;

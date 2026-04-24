@@ -91,18 +91,23 @@ void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, con
         SDL_RenderDrawLine(renderer, x, 0, x, draw_start - 1);
 
         for (int y = draw_start; y < draw_end; y++) {
-            float tex_v = (y - (screen_h - wall_h) * 0.5f) / wall_h;
-            const Texture *src = (cell_type == MAP_CELL_DOOR) ? door_tex
-                               : (cell_type == MAP_CELL_EXIT) ? exit_tex
-                               : wall_tex;
-            unsigned int colour = texture_sample(src, wall_x, tex_v);
-            unsigned char r = (colour >> 16) & 0xFF;
-            unsigned char g = (colour >> 8)  & 0xFF;
-            unsigned char b =  colour        & 0xFF;
-            if (side == 1) {
-                r /= 2;
-                g /= 2;
-                b /= 2;
+            unsigned char r, g, b;
+            if (cell_type == MAP_CELL_VOID) {
+                r = 220; g = 180; b = 50;
+            } else {
+                float tex_v = (y - (screen_h - wall_h) * 0.5f) / wall_h;
+                const Texture *src = (cell_type == MAP_CELL_DOOR) ? door_tex
+                                   : (cell_type == MAP_CELL_EXIT) ? exit_tex
+                                   : wall_tex;
+                unsigned int colour = texture_sample(src, wall_x, tex_v);
+                r = (colour >> 16) & 0xFF;
+                g = (colour >> 8)  & 0xFF;
+                b =  colour        & 0xFF;
+                if (side == 1) {
+                    r /= 2;
+                    g /= 2;
+                    b /= 2;
+                }
             }
             SDL_SetRenderDrawColor(renderer, r, g, b, 255);
             SDL_RenderDrawPoint(renderer, x, y);

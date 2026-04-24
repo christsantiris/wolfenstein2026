@@ -57,3 +57,5 @@ MIT
 - Difficulty settings
 - Sound — SDL2_mixer, gunshot, reload click, enemy alert bark
 - Wall texture variants — map cells 1-9 already route through, just need different textures per value
+- Health and ammo pickups 
+- Score on the HUD
