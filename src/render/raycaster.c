@@ -11,7 +11,7 @@
 #define FLOOR_G     30
 #define FLOOR_B     30
 
-void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, const Texture *wall_tex, float *zbuf, int screen_w, int screen_h) {
+void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, const Texture *wall_tex, const Texture *door_tex, float *zbuf, int screen_w, int screen_h) {
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
     float plane_x = -dir_y * FOV_FACTOR;
@@ -91,22 +91,18 @@ void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, con
         SDL_RenderDrawLine(renderer, x, 0, x, draw_start - 1);
 
         for (int y = draw_start; y < draw_end; y++) {
-            if (cell_type == MAP_CELL_DOOR) {
-                unsigned char dv = side ? 80 : 160;
-                SDL_SetRenderDrawColor(renderer, dv, dv, dv, 255);
-            } else {
-                float tex_v = (y - (screen_h - wall_h) * 0.5f) / wall_h;
-                unsigned int colour = texture_sample(wall_tex, wall_x, tex_v);
-                unsigned char r = (colour >> 16) & 0xFF;
-                unsigned char g = (colour >> 8)  & 0xFF;
-                unsigned char b =  colour        & 0xFF;
-                if (side == 1) {
-                    r /= 2;
-                    g /= 2;
-                    b /= 2;
-                }
-                SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+            float tex_v = (y - (screen_h - wall_h) * 0.5f) / wall_h;
+            const Texture *src = (cell_type == MAP_CELL_DOOR) ? door_tex : wall_tex;
+            unsigned int colour = texture_sample(src, wall_x, tex_v);
+            unsigned char r = (colour >> 16) & 0xFF;
+            unsigned char g = (colour >> 8)  & 0xFF;
+            unsigned char b =  colour        & 0xFF;
+            if (side == 1) {
+                r /= 2;
+                g /= 2;
+                b /= 2;
             }
+            SDL_SetRenderDrawColor(renderer, r, g, b, 255);
             SDL_RenderDrawPoint(renderer, x, y);
         }
 

@@ -80,6 +80,41 @@ unsigned int texture_sample(const Texture *t, float u, float v) {
          |  (unsigned int)t->pixels[idx + 2];
 }
 
+void texture_generate_door(Texture *t) {
+    int border = 6;
+    int mid = t->width / 2;
+
+    for (int y = 0; y < t->height; y++) {
+        for (int x = 0; x < t->width; x++) {
+            int on_border = (x < border || x >= t->width - border ||
+                             y < border || y >= t->height - border ||
+                             (x >= mid - 2 && x < mid + 2));
+            unsigned char r, g, b;
+            if (on_border) {
+                int vary = ((x * 5 + y * 11) % 14) - 7;
+                r = (unsigned char)(90 + vary);
+                g = (unsigned char)(55 + vary / 2);
+                b = (unsigned char)(30 + vary / 2);
+            } else {
+                int vary = ((x * 3 + y * 7) % 18) - 9;
+                r = (unsigned char)(160 + vary);
+                g = (unsigned char)(100 + vary / 2);
+                b = (unsigned char)(55  + vary / 2);
+            }
+            int panel_cx = (x < mid) ? (border + (mid - border) / 2) : (mid + (t->width - border - mid) / 2);
+            int panel_cy = t->height * 2 / 3;
+            int handle = (abs(x - panel_cx) <= 2 && abs(y - panel_cy) <= 2);
+            if (handle) {
+                r = 200; g = 170; b = 80;
+            }
+            int idx = (y * t->width + x) * 3;
+            t->pixels[idx]     = r;
+            t->pixels[idx + 1] = g;
+            t->pixels[idx + 2] = b;
+        }
+    }
+}
+
 void texture_generate_brick(Texture *t) {
     int brick_w = 16;
     int brick_h = 8;

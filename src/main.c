@@ -67,6 +67,17 @@ int main(void) {
     }
     texture_generate_brick(&wall_tex);
 
+    Texture door_tex;
+    if (texture_create(&door_tex, 64, 64) != 0) {
+        texture_free(&wall_tex);
+        map_free(&map);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+    texture_generate_door(&door_tex);
+
     Texture pistol_tex;
     if (texture_load_ppm(&pistol_tex, "assets/sprites/pistol.ppm") != 0) {
         texture_create(&pistol_tex, 64, 64);
@@ -162,7 +173,7 @@ int main(void) {
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
-        raycaster_render(renderer, &map, &player, &wall_tex, zbuf, w, h - HUD_HEIGHT);
+        raycaster_render(renderer, &map, &player, &wall_tex, &door_tex, zbuf, w, h - HUD_HEIGHT);
         sprite_render_all(renderer, &player, &game.enemies, zbuf, &guard_tex, w, h - HUD_HEIGHT);
         weapon_render(renderer, &pistol_tex, game.shot_timer, w, h - HUD_HEIGHT);
         minimap_render(renderer, &map, &player);
@@ -185,6 +196,7 @@ int main(void) {
 
     free(zbuf);
     texture_free(&pistol_tex);
+    texture_free(&door_tex);
     texture_free(&wall_tex);
     map_free(&map);
     SDL_DestroyRenderer(renderer);
