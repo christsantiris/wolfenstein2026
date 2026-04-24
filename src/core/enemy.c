@@ -5,7 +5,7 @@
 #define ENEMY_SIGHT_RANGE    12.0f
 #define ENEMY_ATTACK_RANGE    2.0f
 #define ENEMY_SPEED           1.8f
-#define ENEMY_ATTACK_COOLDOWN 1.2f
+#define ENEMY_ATTACK_COOLDOWN 2.0f
 
 static int enemy_has_los(const Enemy *e, const Player *p, const Map *m) {
     float dx = p->x - e->x;
@@ -66,6 +66,18 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt) {
     return 0;
 }
 
+int enemy_list_all_dead(const EnemyList *el) {
+    if (el->count == 0) {
+        return 0;
+    }
+    for (int i = 0; i < el->count; i++) {
+        if (el->enemies[i].active) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 static void place(EnemyList *el, float x, float y) {
     if (el->count >= MAX_ENEMIES) {
         return;
@@ -79,7 +91,7 @@ static void place(EnemyList *el, float x, float y) {
 
 void enemy_list_init(EnemyList *el) {
     memset(el, 0, sizeof(EnemyList));
-    place(el,  5.5f,  5.5f);
+    place(el,  7.5f,  5.5f);
     place(el, 22.5f,  5.5f);
     place(el,  5.5f, 14.5f);
     place(el, 22.5f, 14.5f);

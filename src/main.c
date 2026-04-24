@@ -178,6 +178,9 @@ int main(void) {
         weapon_render(renderer, &pistol_tex, game.shot_timer, w, h - HUD_HEIGHT);
         minimap_render(renderer, &map, &player);
         hud_render(renderer, w, h, game.health, game.ammo);
+        if (game.level_clear_timer > 0.0f) {
+            hud_draw_level_clear(renderer, w, h - HUD_HEIGHT, game.level_clear_timer);
+        }
         if (game.hit_flash_timer > 0.0f) {
             SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
             SDL_SetRenderDrawColor(renderer, 180, 0, 0, 100);

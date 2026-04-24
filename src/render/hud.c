@@ -1,4 +1,6 @@
 #include "render/hud.h"
+#include "ui/font.h"
+#include <math.h>
 
 #define BAR_PADDING   10
 #define BAR_H         20
@@ -7,6 +9,25 @@
 #define AMMO_GAP      3
 #define FACE_W        50
 #define FACE_H        50
+
+void hud_draw_level_clear(SDL_Renderer *renderer, int screen_w, int screen_h, float timer) {
+    if (fmodf(timer, 0.5f) < 0.25f) {
+        return;
+    }
+    const char *msg = "LEVEL CLEARED";
+    int tw = font_str_px_w(msg);
+    int tx = (screen_w - tw) / 2;
+    int ty = screen_h / 3 - FONT_CH / 2;
+
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 160);
+    SDL_Rect bar = { tx - 20, ty - 10, tw + 40, FONT_CH + 20 };
+    SDL_RenderFillRect(renderer, &bar);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+
+    SDL_Color gold = { 220, 180, 50, 255 };
+    font_draw_string(renderer, msg, tx, ty, gold);
+}
 
 void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, int ammo) {
     int bar_y = screen_h - HUD_HEIGHT;

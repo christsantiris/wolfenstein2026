@@ -20,6 +20,7 @@ typedef struct {
     float reload_timer;
     float hit_flash_timer;
     int is_reloading;
+    float level_clear_timer;
     WeaponDef current_weapon;
     EnemyList enemies;
 } GameState;

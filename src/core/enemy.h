@@ -28,5 +28,6 @@ typedef struct {
 
 void enemy_list_init(EnemyList *el);
 int  enemy_update(Enemy *e, const Player *p, const Map *m, float dt);
+int  enemy_list_all_dead(const EnemyList *el);
 
 #endif

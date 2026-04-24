@@ -3,7 +3,7 @@
 #include <stddef.h>
 
 #define SHOT_DAMAGE    34
-#define ENEMY_HIT_DMG  15
+#define ENEMY_HIT_DMG  8
 #define SHOT_RANGE   20.0f
 #define SHOT_CONE    0.15f
 #define KILL_SCORE   100
@@ -19,7 +19,8 @@ void game_init(GameState *g) {
     g->shot_cooldown  = 0.0f;
     g->reload_timer    = 0.0f;
     g->hit_flash_timer = 0.0f;
-    g->is_reloading    = 0;
+    g->is_reloading = 0;
+    g->level_clear_timer = 0.0f;
     enemy_list_init(&g->enemies);
 }
 
@@ -84,12 +85,16 @@ void game_update_enemies(GameState *g, const Player *p, const Map *m, float dt) 
             g->hit_flash_timer = 0.3f;
         }
     }
+    if (enemy_list_all_dead(&g->enemies) && g->level_clear_timer == 0.0f) {
+        g->level_clear_timer = 4.0f;
+    }
 }
 
 void game_update_timers(GameState *g, float dt) {
-    if (g->shot_timer      > 0.0f) { g->shot_timer      -= dt; }
-    if (g->shot_cooldown   > 0.0f) { g->shot_cooldown   -= dt; }
+    if (g->shot_timer > 0.0f) { g->shot_timer -= dt; }
+    if (g->shot_cooldown > 0.0f) { g->shot_cooldown -= dt; }
     if (g->hit_flash_timer > 0.0f) { g->hit_flash_timer -= dt; }
+    if (g->level_clear_timer > 0.0f) { g->level_clear_timer -= dt; }
     if (g->is_reloading) {
         g->reload_timer -= dt;
         if (g->reload_timer <= 0.0f) {
