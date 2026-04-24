@@ -57,7 +57,7 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt) {
     } else if (e->state == ENEMY_ATTACK) {
         if (dist > ENEMY_ATTACK_RANGE) {
             e->state = ENEMY_ALERT;
-        } else if (e->attack_timer <= 0.0f) {
+        } else if (e->attack_timer <= 0.0f && enemy_has_los(e, p, m)) {
             e->attack_timer = ENEMY_ATTACK_COOLDOWN;
             return 1;
         }
