@@ -24,11 +24,16 @@ typedef enum {
     APP_PLAYING
 } AppState;
 
-static void start_game(Map *map, Player *player, GameState *game) {
+static int start_game(Map *map, Player *player, GameState *game, int level) {
+    char path[64];
+    snprintf(path, sizeof(path), "assets/maps/level%d.map", level);
     map_free(map);
-    map_load(map, "assets/maps/level1.map");
+    if (map_load(map, path) != 0) {
+        return -1;
+    }
     player_init(player, 14.5f, 10.5f, 0.0f);
     game_init(game);
+    return 0;
 }
 
 int main(void) {
@@ -92,6 +97,18 @@ int main(void) {
     }
     texture_generate_door(&door_tex);
 
+    Texture exit_tex;
+    if (texture_create(&exit_tex, 64, 64) != 0) {
+        texture_free(&door_tex);
+        texture_free(&wall_tex);
+        map_free(&map);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+    texture_generate_exit_door(&exit_tex);
+
     Texture pistol_tex;
     if (texture_load_ppm(&pistol_tex, "assets/sprites/pistol.ppm") != 0) {
         texture_create(&pistol_tex, 64, 64);
@@ -113,6 +130,7 @@ int main(void) {
 
     AppState app_state = APP_LANDING;
     Menu menu = { 0 };
+    int current_level = 1;
     int game_over = 0;
     int running = 1;
     SDL_Event e;
@@ -145,7 +163,8 @@ int main(void) {
                 }
                 Difficulty d = difficulty_screen_handle_event(&e, w, h);
                 if (d != DIFF_COUNT) {
-                    start_game(&map, &player, &game);
+                    current_level = 1;
+                    start_game(&map, &player, &game, current_level);
                     game_over = 0;
                     menu.is_open = 0;
                     app_state = APP_PLAYING;
@@ -193,6 +212,17 @@ int main(void) {
             if (game.health <= 0) {
                 game_over = 1;
             }
+            if (enemy_list_all_dead(&game.enemies)) {
+                map_unlock_exits(&map);
+            }
+            if (map_cell(&map, (int)player.x, (int)player.y) == MAP_CELL_EXIT_OPEN) {
+                current_level++;
+                if (start_game(&map, &player, &game, current_level) != 0) {
+                    current_level = 1;
+                    landing_reset();
+                    app_state = APP_LANDING;
+                }
+            }
         }
 
         if (w != zbuf_w) {
@@ -208,7 +238,7 @@ int main(void) {
         } else if (app_state == APP_DIFFICULTY) {
             difficulty_screen_render(renderer, w, h);
         } else {
-            raycaster_render(renderer, &map, &player, &wall_tex, &door_tex, zbuf, w, h - HUD_HEIGHT);
+            raycaster_render(renderer, &map, &player, &wall_tex, &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT);
             sprite_render_all(renderer, &player, &game.enemies, zbuf, &guard_tex, w, h - HUD_HEIGHT);
             weapon_render(renderer, &pistol_tex, game.shot_timer, w, h - HUD_HEIGHT);
             minimap_render(renderer, &map, &player);
@@ -236,6 +266,7 @@ int main(void) {
 
     free(zbuf);
     texture_free(&pistol_tex);
+    texture_free(&exit_tex);
     texture_free(&door_tex);
     texture_free(&wall_tex);
     map_free(&map);

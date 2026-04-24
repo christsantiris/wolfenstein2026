@@ -46,6 +46,8 @@ int map_load(Map *m, const char *path) {
             char c = lines[y][x];
             if (c == 'D') {
                 m->cells[y * width + x] = MAP_CELL_DOOR;
+            } else if (c == 'E') {
+                m->cells[y * width + x] = MAP_CELL_EXIT;
             } else if (c >= '1' && c <= '9') {
                 m->cells[y * width + x] = c - '0';
             } else {
@@ -73,12 +75,21 @@ int map_cell(const Map *m, int x, int y) {
 
 int map_is_wall(const Map *m, int x, int y) {
     int c = map_cell(m, x, y);
-    return c > 0 && c != MAP_CELL_DOOR_OPEN;
+    return c > 0 && c != MAP_CELL_DOOR_OPEN && c != MAP_CELL_EXIT_OPEN;
 }
 
 int map_is_door(const Map *m, int x, int y) {
     int c = map_cell(m, x, y);
     return c == MAP_CELL_DOOR || c == MAP_CELL_DOOR_OPEN;
+}
+
+void map_unlock_exits(Map *m) {
+    int total = m->width * m->height;
+    for (int i = 0; i < total; i++) {
+        if (m->cells[i] == MAP_CELL_EXIT) {
+            m->cells[i] = MAP_CELL_EXIT_OPEN;
+        }
+    }
 }
 
 void map_toggle_door(Map *m, int x, int y) {

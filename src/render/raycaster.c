@@ -11,7 +11,7 @@
 #define FLOOR_G     30
 #define FLOOR_B     30
 
-void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, const Texture *wall_tex, const Texture *door_tex, float *zbuf, int screen_w, int screen_h) {
+void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, const Texture *wall_tex, const Texture *door_tex, const Texture *exit_tex, float *zbuf, int screen_w, int screen_h) {
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
     float plane_x = -dir_y * FOV_FACTOR;
@@ -92,7 +92,9 @@ void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, con
 
         for (int y = draw_start; y < draw_end; y++) {
             float tex_v = (y - (screen_h - wall_h) * 0.5f) / wall_h;
-            const Texture *src = (cell_type == MAP_CELL_DOOR) ? door_tex : wall_tex;
+            const Texture *src = (cell_type == MAP_CELL_DOOR) ? door_tex
+                               : (cell_type == MAP_CELL_EXIT) ? exit_tex
+                               : wall_tex;
             unsigned int colour = texture_sample(src, wall_x, tex_v);
             unsigned char r = (colour >> 16) & 0xFF;
             unsigned char g = (colour >> 8)  & 0xFF;

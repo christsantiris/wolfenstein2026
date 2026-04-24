@@ -115,6 +115,32 @@ void texture_generate_door(Texture *t) {
     }
 }
 
+void texture_generate_exit_door(Texture *t) {
+    int rivet_spacing = 16;
+    int rivet_size    = 2;
+
+    for (int y = 0; y < t->height; y++) {
+        for (int x = 0; x < t->width; x++) {
+            int vary = ((x * 7 + y * 3) % 12) - 6;
+            unsigned char r = (unsigned char)(45 + vary);
+            unsigned char g = (unsigned char)(15 + vary / 2);
+            unsigned char b = (unsigned char)(15 + vary / 2);
+
+            int rx = x % rivet_spacing;
+            int ry = y % rivet_spacing;
+            int on_rivet = (rx < rivet_size && ry < rivet_size);
+            if (on_rivet) {
+                r = 80; g = 80; b = 80;
+            }
+
+            int idx = (y * t->width + x) * 3;
+            t->pixels[idx]     = r;
+            t->pixels[idx + 1] = g;
+            t->pixels[idx + 2] = b;
+        }
+    }
+}
+
 void texture_generate_brick(Texture *t) {
     int brick_w = 16;
     int brick_h = 8;

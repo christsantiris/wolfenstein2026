@@ -3,6 +3,8 @@
 
 #define MAP_CELL_DOOR      10
 #define MAP_CELL_DOOR_OPEN 11
+#define MAP_CELL_EXIT      12
+#define MAP_CELL_EXIT_OPEN 13
 
 typedef struct {
     int *cells;
@@ -16,5 +18,6 @@ int  map_cell(const Map *m, int x, int y);
 int  map_is_wall(const Map *m, int x, int y);
 int  map_is_door(const Map *m, int x, int y);
 void map_toggle_door(Map *m, int x, int y);
+void map_unlock_exits(Map *m);
 
 #endif
