@@ -1,6 +1,7 @@
 #include "render/hud.h"
 #include "ui/font.h"
 #include <math.h>
+#include <stdio.h>
 
 #define BAR_PADDING   10
 #define BAR_H         20
@@ -29,7 +30,7 @@ void hud_draw_level_clear(SDL_Renderer *renderer, int screen_w, int screen_h, fl
     font_draw_string(renderer, msg, tx, ty, gold);
 }
 
-void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, int ammo) {
+void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, int ammo, int score) {
     int bar_y = screen_h - HUD_HEIGHT;
 
     SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
@@ -77,4 +78,11 @@ void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, 
         SDL_Rect block = { bx, ammo_top, AMMO_BLOCK_W, AMMO_BLOCK_H };
         SDL_RenderFillRect(renderer, &block);
     }
+
+    char score_buf[32];
+    snprintf(score_buf, sizeof(score_buf), "%d", score);
+    int score_x = bar_x;
+    int score_y = bar_top + BAR_H + 4;
+    SDL_Color white = { 220, 220, 220, 255 };
+    font_draw_string(renderer, score_buf, score_x, score_y, white);
 }

@@ -245,7 +245,7 @@ int main(void) {
             sprite_render_all(renderer, &player, &game.enemies, zbuf, guard_tex, w, h - HUD_HEIGHT);
             weapon_render(renderer, &pistol_tex, game.shot_timer, w, h - HUD_HEIGHT);
             minimap_render(renderer, &map, &player);
-            hud_render(renderer, w, h, game.health, game.ammo);
+            hud_render(renderer, w, h, game.health, game.ammo, game.score);
             if (game.level_clear_timer > 0.0f) {
                 hud_draw_level_clear(renderer, w, h - HUD_HEIGHT, game.level_clear_timer);
             }
