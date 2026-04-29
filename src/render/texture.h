@@ -15,5 +15,6 @@ void texture_generate_brick(Texture *t);
 void texture_generate_door(Texture *t);
 void texture_generate_exit_door(Texture *t);
 void texture_generate_guard_dir(Texture *t, int dir);
+void texture_derive_guard_dirs(Texture guard_tex[8]);
 
 #endif

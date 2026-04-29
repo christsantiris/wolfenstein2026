@@ -118,12 +118,15 @@ int main(void) {
     }
 
     Texture guard_tex[8];
-    for (int d = 0; d < 8; d++) {
-        if (texture_load_ppm(&guard_tex[d], "assets/sprites/guard_front.ppm") != 0) {
-            texture_create(&guard_tex[d], 64, 64);
-            texture_generate_guard_dir(&guard_tex[d], d);
-        }
+    if (texture_load_ppm(&guard_tex[4], "assets/sprites/guard_front.ppm") != 0) {
+        texture_create(&guard_tex[4], 64, 64);
+        texture_generate_guard_dir(&guard_tex[4], 4);
     }
+    for (int d = 0; d < 8; d++) {
+        if (d == 4) { continue; }
+        texture_create(&guard_tex[d], guard_tex[4].width, guard_tex[4].height);
+    }
+    texture_derive_guard_dirs(guard_tex);
 
     int zbuf_w = 0;
     float *zbuf = NULL;

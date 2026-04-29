@@ -17,7 +17,7 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
             continue;
         }
 
-        float view_angle = atan2f(p->y - e->y, p->x - e->x);
+        float view_angle = atan2f(e->y - p->y, e->x - p->x);
         float rel = view_angle - e->angle;
         while (rel <  0.0f)           { rel += 2.0f * (float)M_PI; }
         while (rel >= 2.0f * (float)M_PI) { rel -= 2.0f * (float)M_PI; }

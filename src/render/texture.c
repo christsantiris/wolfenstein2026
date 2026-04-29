@@ -245,6 +245,65 @@ void texture_generate_guard_dir(Texture *t, int dir) {
     }
 }
 
+void texture_derive_guard_dirs(Texture guard_tex[8]) {
+    const Texture *src = &guard_tex[4];
+    int W = src->width;
+    int H = src->height;
+
+    /* body_pct: apparent width as % of full width (side=narrow, front/back=wide)
+       is_back:  darken face region (player sees enemy's back)
+       mirror:   flip source x (left-side views are mirror of right-side) */
+    static const int BODY_PCT[8] = { 88, 65, 38, 65,  0, 65, 38, 65 };
+    static const int IS_BACK[8]  = {  1,  1,  0,  0,  0,  0,  0,  1 };
+    static const int MIRROR[8]   = {  0,  0,  0,  0,  0,  1,  1,  1 };
+
+    for (int d = 0; d < 8; d++) {
+        if (d == 4) { continue; }
+
+        int pct     = BODY_PCT[d];
+        int is_back = IS_BACK[d];
+        int do_mirror = MIRROR[d];
+        Texture *dst = &guard_tex[d];
+
+        for (int i = 0; i < W * H * 3; i += 3) {
+            dst->pixels[i] = 255; dst->pixels[i + 1] = 0; dst->pixels[i + 2] = 255;
+        }
+
+        int body_w  = W * pct / 100;
+        int x_start = (W - body_w) / 2;
+        float sx0   = (float)(W - body_w) / 2.0f;
+        float sx1   = sx0 + (float)body_w;
+
+        for (int out_y = 0; out_y < H; out_y++) {
+            for (int bx = 0; bx < body_w; bx++) {
+                float t = (body_w > 1) ? (float)bx / (float)(body_w - 1) : 0.5f;
+                if (do_mirror) { t = 1.0f - t; }
+
+                int sx = (int)(sx0 + t * (sx1 - sx0));
+                if (sx < 0) { sx = 0; }
+                if (sx >= W) { sx = W - 1; }
+
+                int si = (out_y * W + sx) * 3;
+                unsigned char r = src->pixels[si];
+                unsigned char g = src->pixels[si + 1];
+                unsigned char b = src->pixels[si + 2];
+                if (r == 255 && g == 0 && b == 255) { continue; }
+
+                if (is_back && out_y < H * 38 / 100) {
+                    r = (unsigned char)(r * 2 / 3);
+                    g = (unsigned char)(g * 2 / 3);
+                    b = (unsigned char)(b * 2 / 3);
+                }
+
+                int di = (out_y * W + x_start + bx) * 3;
+                dst->pixels[di]     = r;
+                dst->pixels[di + 1] = g;
+                dst->pixels[di + 2] = b;
+            }
+        }
+    }
+}
+
 void texture_generate_brick(Texture *t) {
     int brick_w = 16;
     int brick_h = 8;
