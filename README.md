@@ -62,6 +62,5 @@ MIT
 - Save / load
 - Score shown
 - High Scores
-- Enemy sprites by angle - currently enemies always face you regardless of direction — breaks immersion
 - Minimap toggle
 

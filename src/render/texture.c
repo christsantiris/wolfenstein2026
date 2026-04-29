@@ -141,6 +141,110 @@ void texture_generate_exit_door(Texture *t) {
     }
 }
 
+void texture_generate_guard_dir(Texture *t, int dir) {
+    int W = t->width;
+    int H = t->height;
+
+    /* dir 0=back, 1=back-right, 2=right, 3=front-right,
+           4=front, 5=front-left, 6=left, 7=back-left     */
+    static const int BODY_W[8]    = { 34, 28, 18, 28, 36, 28, 18, 28 };
+    static const int SHOW_FACE[8] = {  0,  0,  0,  1,  1,  1,  0,  0 };
+
+    int body_w  = BODY_W[dir]  * W / 64;
+    int show_face = SHOW_FACE[dir];
+
+    int cx = W / 2;
+
+    /* magenta background */
+    for (int i = 0; i < W * H * 3; i += 3) {
+        t->pixels[i]     = 255;
+        t->pixels[i + 1] = 0;
+        t->pixels[i + 2] = 255;
+    }
+
+    int bx0 = cx - body_w / 2;
+    int bx1 = cx + body_w / 2;
+
+    /* boots — two separate legs */
+    int boot_y0 = H * 50 / 64;
+    int leg_w   = body_w / 3;
+    int leg_gap = body_w / 6;
+    int llx0 = cx - leg_w - leg_gap / 2;
+    int llx1 = cx - leg_gap / 2;
+    int lrx0 = cx + leg_gap / 2;
+    int lrx1 = cx + leg_w + leg_gap / 2;
+    for (int y = boot_y0; y < H; y++) {
+        for (int x = llx0; x < llx1; x++) {
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = 90; t->pixels[idx + 1] = 50; t->pixels[idx + 2] = 20;
+        }
+        for (int x = lrx0; x < lrx1; x++) {
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = 90; t->pixels[idx + 1] = 50; t->pixels[idx + 2] = 20;
+        }
+    }
+
+    /* uniform body — khaki */
+    int body_y0 = H * 26 / 64;
+    for (int y = body_y0; y < boot_y0; y++) {
+        for (int x = bx0; x < bx1; x++) {
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = 200; t->pixels[idx + 1] = 160; t->pixels[idx + 2] = 80;
+        }
+    }
+
+    /* belt stripe */
+    int belt_y = H * 42 / 64;
+    for (int x = bx0; x < bx1; x++) {
+        int idx = (belt_y * W + x) * 3;
+        t->pixels[idx] = 100; t->pixels[idx + 1] = 70; t->pixels[idx + 2] = 20;
+    }
+
+    /* head — warm skin */
+    int head_w  = body_w * 6 / 10;
+    int hx0 = cx - head_w / 2;
+    int hx1 = cx + head_w / 2;
+    int head_y0 = H * 10 / 64;
+    int head_y1 = body_y0;
+    unsigned char hr = show_face ? 220 : 170;
+    unsigned char hg = show_face ? 180 : 130;
+    unsigned char hb = show_face ? 130 :  90;
+    for (int y = head_y0; y < head_y1; y++) {
+        for (int x = hx0; x < hx1; x++) {
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = hr; t->pixels[idx + 1] = hg; t->pixels[idx + 2] = hb;
+        }
+    }
+
+    /* cap — dark olive */
+    int cap_y0 = H * 5 / 64;
+    int cap_x0 = hx0 - W / 16;
+    int cap_x1 = hx1 + W / 16;
+    if (cap_x0 < 0) { cap_x0 = 0; }
+    if (cap_x1 > W) { cap_x1 = W; }
+    for (int y = cap_y0; y < head_y0 + 2; y++) {
+        for (int x = cap_x0; x < cap_x1; x++) {
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = 55; t->pixels[idx + 1] = 65; t->pixels[idx + 2] = 38;
+        }
+    }
+
+    /* eyes — blue for front-facing */
+    if (show_face && head_w >= 6) {
+        int ey = head_y0 + (head_y1 - head_y0) / 2;
+        int ex_l = cx - head_w / 4;
+        int ex_r = cx + head_w / 4;
+        for (int dx = 0; dx < 2; dx++) {
+            for (int dy2 = 0; dy2 < 2; dy2++) {
+                int il = ((ey + dy2) * W + ex_l + dx) * 3;
+                int ir = ((ey + dy2) * W + ex_r + dx) * 3;
+                t->pixels[il]     = 70; t->pixels[il + 1] = 120; t->pixels[il + 2] = 200;
+                t->pixels[ir]     = 70; t->pixels[ir + 1] = 120; t->pixels[ir + 2] = 200;
+            }
+        }
+    }
+}
+
 void texture_generate_brick(Texture *t) {
     int brick_w = 16;
     int brick_h = 8;

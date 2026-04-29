@@ -46,6 +46,7 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt) {
         if (dist <= ENEMY_ATTACK_RANGE) {
             e->state = ENEMY_ATTACK;
         } else {
+            e->angle = atan2f(dy, dx);
             float nx = e->x + (dx / dist) * ENEMY_SPEED * dt;
             float ny = e->y + (dy / dist) * ENEMY_SPEED * dt;
             if (!map_is_wall(m, (int)nx, (int)e->y)) {
@@ -86,6 +87,7 @@ static void place(EnemyList *el, float x, float y) {
     Enemy *e = &el->enemies[el->count++];
     e->x      = x;
     e->y      = y;
+    e->angle  = (float)(rand() % 8) * ((float)M_PI / 4.0f);
     e->health = 100;
     e->active = 1;
 }

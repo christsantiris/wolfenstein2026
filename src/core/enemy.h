@@ -15,6 +15,7 @@ typedef enum {
 typedef struct {
     float x;
     float y;
+    float angle;
     int health;
     int active;
     EnemyState state;

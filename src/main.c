@@ -117,13 +117,11 @@ int main(void) {
         for (int i = 0; i < 64 * 64 * 3; i++) { pistol_tex.pixels[i] = 0; }
     }
 
-    Texture guard_tex;
-    if (texture_load_ppm(&guard_tex, "assets/sprites/guard_front.ppm") != 0) {
-        texture_create(&guard_tex, 64, 64);
-        for (int i = 0; i < 64 * 64 * 3; i += 3) {
-            guard_tex.pixels[i]     = 150;
-            guard_tex.pixels[i + 1] = 110;
-            guard_tex.pixels[i + 2] = 60;
+    Texture guard_tex[8];
+    for (int d = 0; d < 8; d++) {
+        if (texture_load_ppm(&guard_tex[d], "assets/sprites/guard_front.ppm") != 0) {
+            texture_create(&guard_tex[d], 64, 64);
+            texture_generate_guard_dir(&guard_tex[d], d);
         }
     }
 
@@ -241,7 +239,7 @@ int main(void) {
             difficulty_screen_render(renderer, w, h);
         } else {
             raycaster_render(renderer, &map, &player, &wall_tex, &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT);
-            sprite_render_all(renderer, &player, &game.enemies, zbuf, &guard_tex, w, h - HUD_HEIGHT);
+            sprite_render_all(renderer, &player, &game.enemies, zbuf, guard_tex, w, h - HUD_HEIGHT);
             weapon_render(renderer, &pistol_tex, game.shot_timer, w, h - HUD_HEIGHT);
             minimap_render(renderer, &map, &player);
             hud_render(renderer, w, h, game.health, game.ammo);
@@ -268,6 +266,7 @@ int main(void) {
 
     free(zbuf);
     texture_free(&pistol_tex);
+    for (int d = 7; d >= 0; d--) { texture_free(&guard_tex[d]); }
     texture_free(&exit_tex);
     texture_free(&door_tex);
     texture_free(&wall_tex);
