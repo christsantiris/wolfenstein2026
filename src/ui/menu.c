@@ -1,6 +1,7 @@
 #include "ui/menu.h"
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 
 #define SCALE     2
 #define CW        (5 * SCALE)
@@ -224,16 +225,46 @@ static void game_over_button_rects(int sw, int sh, SDL_Rect *rn, SDL_Rect *rl, S
     rq->x = bx + nw + 20 + lw + 20; rq->y = by; rq->w = qw; rq->h = bh;
 }
 
-void game_over_render(SDL_Renderer *r, int sw, int sh) {
+void game_over_render(SDL_Renderer *r, int sw, int sh, int score, int rank, const HighScoreTable *t) {
     SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(r, 0, 0, 0, 210);
     SDL_Rect overlay = { 0, 0, sw, sh };
     SDL_RenderFillRect(r, &overlay);
     SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_NONE);
 
-    SDL_Color red = { 200, 40, 40, 255 };
-    int tx = sw / 2 - str_px_w("GAME OVER") / 2;
-    draw_string(r, "GAME OVER", tx, sh / 2 - 40, red);
+    SDL_Color red   = { 200,  40,  40, 255 };
+    SDL_Color gold  = { 220, 180,  50, 255 };
+    SDL_Color white = { 220, 220, 220, 255 };
+    SDL_Color grey  = { 140, 140, 140, 255 };
+
+    int cx = sw / 2;
+    int y = sh / 2 - 100;
+
+    draw_string(r, "GAME OVER", cx - str_px_w("GAME OVER") / 2, y, red);
+    y += LHEIGHT + 4;
+
+    char score_buf[32];
+    snprintf(score_buf, sizeof(score_buf), "SCORE  %d", score);
+    draw_string(r, score_buf, cx - str_px_w(score_buf) / 2, y, gold);
+    y += LHEIGHT + 2;
+
+    if (rank > 0) {
+        char rank_buf[32];
+        snprintf(rank_buf, sizeof(rank_buf), "RANK  #%d", rank);
+        draw_string(r, rank_buf, cx - str_px_w(rank_buf) / 2, y, gold);
+    }
+    y += LHEIGHT + 12;
+
+    draw_string(r, "HIGH SCORES", cx - str_px_w("HIGH SCORES") / 2, y, white);
+    y += LHEIGHT + 4;
+
+    for (int i = 0; i < t->count; i++) {
+        char line[32];
+        snprintf(line, sizeof(line), "%d.  %d", i + 1, t->scores[i]);
+        SDL_Color col = (i + 1 == rank) ? gold : grey;
+        draw_string(r, line, cx - str_px_w(line) / 2, y, col);
+        y += LHEIGHT;
+    }
 
     SDL_Rect rn, rl, rq;
     game_over_button_rects(sw, sh, &rn, &rl, &rq);

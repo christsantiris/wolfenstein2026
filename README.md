@@ -60,6 +60,5 @@ MIT
 - Wall texture variants — map cells 1-9 already route through, just need different textures per value
 - Health and ammo pickups 
 - Save / load
-- High Scores
 - Minimap toggle
 

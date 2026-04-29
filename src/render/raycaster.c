@@ -60,22 +60,33 @@ void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, con
             }
         }
 
+        int cell_type = map_cell(m, map_x, map_y);
+        int is_door_cell = (cell_type == MAP_CELL_DOOR || cell_type == MAP_CELL_EXIT);
+
         float perp_dist;
         float wall_x;
-        if (side == 0) {
-            perp_dist = (map_x - p->x + (1 - step_x) * 0.5f) / ray_dx;
-            wall_x = p->y + perp_dist * ray_dy;
+        if (is_door_cell) {
+            if (side == 0) {
+                perp_dist = (map_x + 0.5f - p->x) / ray_dx;
+                wall_x = p->y + perp_dist * ray_dy;
+            } else {
+                perp_dist = (map_y + 0.5f - p->y) / ray_dy;
+                wall_x = p->x + perp_dist * ray_dx;
+            }
         } else {
-            perp_dist = (map_y - p->y + (1 - step_y) * 0.5f) / ray_dy;
-            wall_x = p->x + perp_dist * ray_dx;
+            if (side == 0) {
+                perp_dist = (map_x - p->x + (1 - step_x) * 0.5f) / ray_dx;
+                wall_x = p->y + perp_dist * ray_dy;
+            } else {
+                perp_dist = (map_y - p->y + (1 - step_y) * 0.5f) / ray_dy;
+                wall_x = p->x + perp_dist * ray_dx;
+            }
         }
         if (perp_dist < 0.001f) {
             perp_dist = 0.001f;
         }
         zbuf[x] = perp_dist;
         wall_x -= floorf(wall_x);
-
-        int cell_type = map_cell(m, map_x, map_y);
 
         int wall_h = (int)(screen_h / perp_dist);
         int draw_start = (screen_h - wall_h) / 2;

@@ -2,6 +2,7 @@
 #define MENU_H
 
 #include <SDL2/SDL.h>
+#include "ui/highscore.h"
 
 typedef struct {
     int is_open;
@@ -16,7 +17,7 @@ typedef enum {
     GAME_OVER_QUIT
 } GameOverResult;
 
-void           game_over_render(SDL_Renderer *r, int screen_w, int screen_h);
+void           game_over_render(SDL_Renderer *r, int screen_w, int screen_h, int score, int rank, const HighScoreTable *t);
 GameOverResult game_over_handle_event(const SDL_Event *e, int screen_w, int screen_h);
 
 #endif

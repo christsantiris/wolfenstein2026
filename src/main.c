@@ -14,6 +14,7 @@
 #include "input/input.h"
 #include "ui/menu.h"
 #include "ui/landing.h"
+#include "ui/highscore.h"
 
 #define SCREEN_W 800
 #define SCREEN_H 600
@@ -131,6 +132,10 @@ int main(void) {
     int zbuf_w = 0;
     float *zbuf = NULL;
 
+    HighScoreTable hs_table;
+    highscore_load(&hs_table);
+    int hs_rank = 0;
+
     AppState app_state = APP_LANDING;
     Menu menu = { 0 };
     int current_level = 1;
@@ -214,6 +219,8 @@ int main(void) {
             game_update_timers(&game, dt);
             if (game.health <= 0) {
                 game_over = 1;
+                hs_rank = highscore_insert(&hs_table, game.score);
+                highscore_save(&hs_table);
             }
             if (enemy_list_all_dead(&game.enemies)) {
                 map_unlock_exits(&map);
@@ -260,7 +267,7 @@ int main(void) {
                 menu_render(renderer, &menu, w, h);
             }
             if (game_over) {
-                game_over_render(renderer, w, h);
+                game_over_render(renderer, w, h, game.score, hs_rank, &hs_table);
             }
         }
 
