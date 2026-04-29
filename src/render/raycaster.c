@@ -61,26 +61,31 @@ void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, con
         }
 
         int cell_type = map_cell(m, map_x, map_y);
-        int is_door_cell = (cell_type == MAP_CELL_DOOR || cell_type == MAP_CELL_EXIT);
+
+        /* For door/exit cells, determine the correct approach side from the map.
+           A door flanked by walls in X has its slot in Y (correct side == 1).
+           A door flanked by walls in Y has its slot in X (correct side == 0).
+           If a ray hits from the wrong side, fall back to wall_tex so the
+           door doesn't appear as a floating box when seen from the side. */
+        int door_correct_side = -1;
+        if (cell_type == MAP_CELL_DOOR || cell_type == MAP_CELL_EXIT) {
+            int wall_left  = map_is_wall(m, map_x - 1, map_y);
+            int wall_right = map_is_wall(m, map_x + 1, map_y);
+            if (wall_left || wall_right) {
+                door_correct_side = 1;
+            } else {
+                door_correct_side = 0;
+            }
+        }
 
         float perp_dist;
         float wall_x;
-        if (is_door_cell) {
-            if (side == 0) {
-                perp_dist = (map_x + 0.5f - p->x) / ray_dx;
-                wall_x = p->y + perp_dist * ray_dy;
-            } else {
-                perp_dist = (map_y + 0.5f - p->y) / ray_dy;
-                wall_x = p->x + perp_dist * ray_dx;
-            }
+        if (side == 0) {
+            perp_dist = (map_x - p->x + (1 - step_x) * 0.5f) / ray_dx;
+            wall_x = p->y + perp_dist * ray_dy;
         } else {
-            if (side == 0) {
-                perp_dist = (map_x - p->x + (1 - step_x) * 0.5f) / ray_dx;
-                wall_x = p->y + perp_dist * ray_dy;
-            } else {
-                perp_dist = (map_y - p->y + (1 - step_y) * 0.5f) / ray_dy;
-                wall_x = p->x + perp_dist * ray_dx;
-            }
+            perp_dist = (map_y - p->y + (1 - step_y) * 0.5f) / ray_dy;
+            wall_x = p->x + perp_dist * ray_dx;
         }
         if (perp_dist < 0.001f) {
             perp_dist = 0.001f;
@@ -107,9 +112,14 @@ void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, con
                 r = 220; g = 180; b = 50;
             } else {
                 float tex_v = (y - (screen_h - wall_h) * 0.5f) / wall_h;
-                const Texture *src = (cell_type == MAP_CELL_DOOR) ? door_tex
-                                   : (cell_type == MAP_CELL_EXIT) ? exit_tex
-                                   : wall_tex;
+                const Texture *src;
+                if (cell_type == MAP_CELL_DOOR && side == door_correct_side) {
+                    src = door_tex;
+                } else if (cell_type == MAP_CELL_EXIT && side == door_correct_side) {
+                    src = exit_tex;
+                } else {
+                    src = wall_tex;
+                }
                 unsigned int colour = texture_sample(src, wall_x, tex_v);
                 r = (colour >> 16) & 0xFF;
                 g = (colour >> 8)  & 0xFF;
