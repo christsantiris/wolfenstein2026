@@ -4,7 +4,7 @@
 
 #define FOV_FACTOR 0.66f
 
-void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, const float *zbuf, const Texture *sprite_tex, int screen_w, int screen_h) {
+void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, const float *zbuf, const Texture guard_tex[8], int screen_w, int screen_h) {
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
     float plane_x = -dir_y * FOV_FACTOR;
@@ -16,6 +16,13 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
         if (!e->active) {
             continue;
         }
+
+        float view_angle = atan2f(p->y - e->y, p->x - e->x);
+        float rel = view_angle - e->angle;
+        while (rel <  0.0f)           { rel += 2.0f * (float)M_PI; }
+        while (rel >= 2.0f * (float)M_PI) { rel -= 2.0f * (float)M_PI; }
+        int sprite_idx = (int)(rel / ((float)M_PI / 4.0f) + 0.5f) % 8;
+        const Texture *sprite_tex = &guard_tex[sprite_idx];
 
         float ex = e->x - p->x;
         float ey = e->y - p->y;
