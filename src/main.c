@@ -174,6 +174,7 @@ int main(void) {
     Menu menu = { 0 };
     int current_level = 1;
     int game_over = 0;
+    int show_minimap = 1;
     int running = 1;
     SDL_Event e;
     Uint32 last_ticks = SDL_GetTicks();
@@ -242,6 +243,9 @@ int main(void) {
                         if (game_reload(&game)) {
                             sound_play(&reload_sounds[game.current_weapon.type]);
                         }
+                    }
+                    if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_m) {
+                        show_minimap = !show_minimap;
                     }
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_o) {
                         int door_x = (int)(player.x + cosf(player.angle));
@@ -327,7 +331,7 @@ int main(void) {
             sprite_render_all(renderer, &player, &game.enemies, zbuf, guard_tex, w, h - HUD_HEIGHT);
             item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, w, h - HUD_HEIGHT);
             weapon_render(renderer, &pistol_tex, game.shot_timer, game.pistol_whip_timer, w, h - HUD_HEIGHT);
-            minimap_render(renderer, &map, &player);
+            if (show_minimap) { minimap_render(renderer, &map, &player); }
             hud_render(renderer, w, h, game.health, game.ammo, game.reserve_ammo, game.score);
             if (game.level_clear_timer > 0.0f) {
                 hud_draw_level_clear(renderer, w, h - HUD_HEIGHT, game.level_clear_timer);
