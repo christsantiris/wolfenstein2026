@@ -33,7 +33,9 @@ static int start_game(Map *map, Player *player, GameState *game, int level) {
         return -1;
     }
     player_init(player, 14.5f, 10.5f, 0.0f);
+    int saved_score = game->score;
     game_init(game);
+    game->score = saved_score;
     enemy_list_init(&game->enemies, map, level, player->x, player->y);
     return 0;
 }
@@ -172,6 +174,7 @@ int main(void) {
                 Difficulty d = difficulty_screen_handle_event(&e, w, h);
                 if (d != DIFF_COUNT) {
                     current_level = 1;
+                    game.score = 0;
                     start_game(&map, &player, &game, current_level);
                     game_over = 0;
                     menu.is_open = 0;
