@@ -9,7 +9,18 @@
 #define SHOT_CONE    0.15f
 #define KILL_SCORE   100
 
-static const WeaponDef WEAPON_PISTOL = { 8, 0.5f, 0.12f, 1.5f };
+static const WeaponDef WEAPON_PISTOL = { GUN_9MM_HANDGUN, "assets/sounds/handgunshot.mp3", 8, 0.5f, 0.12f, 1.5f };
+
+static const WeaponDef *ALL_WEAPONS[GUN_COUNT] = {
+    [GUN_9MM_HANDGUN] = &WEAPON_PISTOL,
+};
+
+const WeaponDef *weapon_def(GunType type) {
+    if (type < 0 || type >= GUN_COUNT) {
+        return &WEAPON_PISTOL;
+    }
+    return ALL_WEAPONS[type];
+}
 
 void game_init(GameState *g) {
     g->current_weapon = WEAPON_PISTOL;
@@ -33,9 +44,9 @@ void game_reload(GameState *g) {
     g->reload_timer = g->current_weapon.reload_time;
 }
 
-void game_shoot(GameState *g, const Player *p) {
+int game_shoot(GameState *g, const Player *p) {
     if (g->ammo <= 0 || g->shot_cooldown > 0.0f || g->is_reloading) {
-        return;
+        return 0;
     }
     g->ammo--;
     /* if (g->auto_reload && g->ammo == 0) { game_reload(g); } */
@@ -73,6 +84,7 @@ void game_shoot(GameState *g, const Player *p) {
             g->score += KILL_SCORE;
         }
     }
+    return 1;
 }
 
 void game_update_enemies(GameState *g, const Player *p, const Map *m, float dt) {

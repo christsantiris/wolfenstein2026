@@ -15,6 +15,7 @@
 #include "ui/menu.h"
 #include "ui/landing.h"
 #include "ui/highscore.h"
+#include "audio/sound.h"
 
 #define SCREEN_W 800
 #define SCREEN_H 600
@@ -41,9 +42,13 @@ static int start_game(Map *map, Player *player, GameState *game, int level) {
 }
 
 int main(void) {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
         return 1;
+    }
+    Mix_Init(MIX_INIT_MP3);
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) != 0) {
+        fprintf(stderr, "Mix_OpenAudio: %s\n", Mix_GetError());
     }
     srand((unsigned int)SDL_GetTicks());
 
@@ -134,6 +139,11 @@ int main(void) {
     int zbuf_w = 0;
     float *zbuf = NULL;
 
+    Sound gun_sounds[GUN_COUNT] = { 0 };
+    for (int gi = 0; gi < GUN_COUNT; gi++) {
+        sound_load(&gun_sounds[gi], weapon_def((GunType)gi)->sound_path);
+    }
+
     HighScoreTable hs_table;
     highscore_load(&hs_table);
     int hs_rank = 0;
@@ -188,10 +198,14 @@ int main(void) {
                     menu_handle_event(&menu, &e, &running);
                 } else if (!game_over) {
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
-                        game_shoot(&game, &player);
+                        if (game_shoot(&game, &player)) {
+                            sound_play(&gun_sounds[game.current_weapon.type]);
+                        }
                     }
                     if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
-                        game_shoot(&game, &player);
+                        if (game_shoot(&game, &player)) {
+                            sound_play(&gun_sounds[game.current_weapon.type]);
+                        }
                     }
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_r) {
                         game_reload(&game);
@@ -278,6 +292,8 @@ int main(void) {
     }
 
     free(zbuf);
+    for (int g = 0; g < GUN_COUNT; g++) { sound_free(&gun_sounds[g]); }
+    Mix_CloseAudio();
     texture_free(&pistol_tex);
     for (int d = 7; d >= 0; d--) { texture_free(&guard_tex[d]); }
     texture_free(&exit_tex);

@@ -35,15 +35,16 @@ Run `make clean` to remove the compiled build and start fresh.
 ## Dependencies
 - `cmake`
 - `sdl2`
+- `sdl2_mixer`
 
 Install on macOS via Homebrew:
 ```
-brew install cmake sdl2
+brew install cmake sdl2 sdl2_mixer
 ```
 
 Install on Linux (Debian/Ubuntu):
 ```
-sudo apt install cmake libsdl2-dev pkg-config
+sudo apt install cmake libsdl2-dev libsdl2-mixer-dev pkg-config
 ```
 
 ## Contributing
@@ -56,7 +57,7 @@ MIT
 - Upgraded guns - more damage, faster firing rate.
 - Difficulty settings
 - Enemy variety
-- Sound — SDL2_mixer, gunshot, reload click, enemy alert bark
+- Sound — SDL2_mixer, unique gunshots, reload click, enemy alert bark
 - Wall texture variants — map cells 1-9 already route through, just need different textures per value
 - Health and ammo pickups 
 - Save / load
