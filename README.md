@@ -57,7 +57,8 @@ MIT
 - Upgraded guns - more damage, faster firing rate.
 - Difficulty settings
 - Enemy variety
-- Sound — SDL2_mixer, unique gunshots, reload click, enemy alert bark
+- Sound — unique gunshots, unique reload clicks, enemy alert bark, door open, level clear
+- music loop ( different each level? )
 - Wall texture variants — map cells 1-9 already route through, just need different textures per value
 - Health and ammo pickups 
 - Save / load

@@ -9,7 +9,7 @@
 #define SHOT_CONE    0.15f
 #define KILL_SCORE   100
 
-static const WeaponDef WEAPON_PISTOL = { GUN_9MM_HANDGUN, "assets/sounds/handgunshot.mp3", 8, 0.5f, 0.12f, 1.5f };
+static const WeaponDef WEAPON_PISTOL = { GUN_9MM_HANDGUN, "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3", 8, 0.5f, 0.12f, 1.5f };
 
 static const WeaponDef *ALL_WEAPONS[GUN_COUNT] = {
     [GUN_9MM_HANDGUN] = &WEAPON_PISTOL,
@@ -36,12 +36,13 @@ void game_init(GameState *g) {
     memset(&g->enemies, 0, sizeof(g->enemies));
 }
 
-void game_reload(GameState *g) {
+int game_reload(GameState *g) {
     if (g->is_reloading || g->ammo == g->current_weapon.max_ammo) {
-        return;
+        return 0;
     }
     g->is_reloading = 1;
     g->reload_timer = g->current_weapon.reload_time;
+    return 1;
 }
 
 int game_shoot(GameState *g, const Player *p) {

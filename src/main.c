@@ -140,8 +140,13 @@ int main(void) {
     float *zbuf = NULL;
 
     Sound gun_sounds[GUN_COUNT] = { 0 };
+    Sound reload_sounds[GUN_COUNT] = { 0 };
     for (int gi = 0; gi < GUN_COUNT; gi++) {
-        sound_load(&gun_sounds[gi], weapon_def((GunType)gi)->sound_path);
+        const WeaponDef *wd = weapon_def((GunType)gi);
+        sound_load(&gun_sounds[gi], wd->sound_path);
+        if (wd->reload_sound_path) {
+            sound_load(&reload_sounds[gi], wd->reload_sound_path);
+        }
     }
 
     HighScoreTable hs_table;
@@ -208,7 +213,9 @@ int main(void) {
                         }
                     }
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_r) {
-                        game_reload(&game);
+                        if (game_reload(&game)) {
+                            sound_play(&reload_sounds[game.current_weapon.type]);
+                        }
                     }
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_o) {
                         int door_x = (int)(player.x + cosf(player.angle));
@@ -292,7 +299,7 @@ int main(void) {
     }
 
     free(zbuf);
-    for (int g = 0; g < GUN_COUNT; g++) { sound_free(&gun_sounds[g]); }
+    for (int g = 0; g < GUN_COUNT; g++) { sound_free(&gun_sounds[g]); sound_free(&reload_sounds[g]); }
     Mix_CloseAudio();
     texture_free(&pistol_tex);
     for (int d = 7; d >= 0; d--) { texture_free(&guard_tex[d]); }

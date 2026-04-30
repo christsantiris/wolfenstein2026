@@ -12,6 +12,7 @@ typedef enum {
 typedef struct {
     GunType type;
     const char *sound_path;
+    const char *reload_sound_path;
     int max_ammo;
     float shot_cooldown;
     float shot_timer_duration;
@@ -35,7 +36,7 @@ typedef struct {
 const WeaponDef *weapon_def(GunType type);
 void game_init(GameState *g);
 int  game_shoot(GameState *g, const Player *p);
-void game_reload(GameState *g);
+int  game_reload(GameState *g);
 void game_update_timers(GameState *g, float dt);
 void game_update_enemies(GameState *g, const Player *p, const Map *m, float dt);
 
