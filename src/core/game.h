@@ -2,7 +2,12 @@
 #define GAME_H
 
 #include "core/enemy.h"
+#include "core/item.h"
 #include "core/player.h"
+
+#define AMMO_PICKUP_AMOUNT   8
+#define AMMO_RESERVE_MAX    99
+#define HEALTH_PICKUP_AMOUNT 25
 
 typedef enum {
     GUN_9MM_HANDGUN = 0,
@@ -22,6 +27,7 @@ typedef struct {
 typedef struct {
     int health;
     int ammo;
+    int reserve_ammo;
     int score;
     float shot_timer;
     float shot_cooldown;
@@ -31,6 +37,7 @@ typedef struct {
     float level_clear_timer;
     WeaponDef current_weapon;
     EnemyList enemies;
+    ItemList items;
 } GameState;
 
 const WeaponDef *weapon_def(GunType type);

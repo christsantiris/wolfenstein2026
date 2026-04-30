@@ -26,6 +26,7 @@ void game_init(GameState *g) {
     g->current_weapon = WEAPON_PISTOL;
     g->health         = 100;
     g->ammo           = g->current_weapon.max_ammo;
+    g->reserve_ammo   = AMMO_RESERVE_MAX;
     g->score          = 0;
     g->shot_timer     = 0.0f;
     g->shot_cooldown  = 0.0f;
@@ -37,7 +38,7 @@ void game_init(GameState *g) {
 }
 
 int game_reload(GameState *g) {
-    if (g->is_reloading || g->ammo == g->current_weapon.max_ammo) {
+    if (g->is_reloading || g->reserve_ammo == 0 || g->ammo == g->current_weapon.max_ammo) {
         return 0;
     }
     g->is_reloading = 1;
@@ -112,9 +113,12 @@ void game_update_timers(GameState *g, float dt) {
     if (g->is_reloading) {
         g->reload_timer -= dt;
         if (g->reload_timer <= 0.0f) {
-            g->ammo        = g->current_weapon.max_ammo;
-            g->reload_timer = 0.0f;
-            g->is_reloading = 0;
+            int needed = g->current_weapon.max_ammo - g->ammo;
+            int drawn  = (needed > g->reserve_ammo) ? g->reserve_ammo : needed;
+            g->ammo         += drawn;
+            g->reserve_ammo -= drawn;
+            g->reload_timer  = 0.0f;
+            g->is_reloading  = 0;
         }
     }
 }

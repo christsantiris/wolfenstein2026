@@ -30,7 +30,7 @@ void hud_draw_level_clear(SDL_Renderer *renderer, int screen_w, int screen_h, fl
     font_draw_string(renderer, msg, tx, ty, gold);
 }
 
-void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, int ammo, int score) {
+void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, int ammo, int reserve_ammo, int score) {
     int bar_y = screen_h - HUD_HEIGHT;
 
     SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
@@ -79,10 +79,15 @@ void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, 
         SDL_RenderFillRect(renderer, &block);
     }
 
+    char reserve_buf[16];
+    snprintf(reserve_buf, sizeof(reserve_buf), "| %d", reserve_ammo);
+    int reserve_x = ammo_right - font_str_px_w(reserve_buf) - (ammo * (AMMO_BLOCK_W + AMMO_GAP));
+    int reserve_y = bar_y + (HUD_HEIGHT - FONT_CH) / 2;
+    SDL_Color grey = { 160, 160, 160, 255 };
+    font_draw_string(renderer, reserve_buf, reserve_x, reserve_y, grey);
+
     char score_buf[32];
     snprintf(score_buf, sizeof(score_buf), "%d", score);
-    int score_x = bar_x;
-    int score_y = bar_top + BAR_H + 4;
     SDL_Color white = { 220, 220, 220, 255 };
-    font_draw_string(renderer, score_buf, score_x, score_y, white);
+    font_draw_string(renderer, score_buf, bar_x, bar_top + BAR_H + 4, white);
 }

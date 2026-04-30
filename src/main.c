@@ -10,6 +10,7 @@
 #include "render/minimap.h"
 #include "render/hud.h"
 #include "render/sprite.h"
+#include "render/item_render.h"
 #include "render/weapon.h"
 #include "input/input.h"
 #include "ui/menu.h"
@@ -38,6 +39,7 @@ static int start_game(Map *map, Player *player, GameState *game, int level) {
     game_init(game);
     game->score = saved_score;
     enemy_list_init(&game->enemies, map, level, player->x, player->y);
+    item_list_init(&game->items, map, player->x, player->y);
     return 0;
 }
 
@@ -118,6 +120,14 @@ int main(void) {
         return 1;
     }
     texture_generate_exit_door(&exit_tex);
+
+    Texture ammo_pickup_tex;
+    texture_create(&ammo_pickup_tex, 64, 64);
+    texture_generate_ammo_pickup(&ammo_pickup_tex);
+
+    Texture health_pickup_tex;
+    texture_create(&health_pickup_tex, 64, 64);
+    texture_generate_health_pickup(&health_pickup_tex);
 
     Texture pistol_tex;
     if (texture_load_ppm(&pistol_tex, "assets/sprites/pistol.ppm") != 0) {
@@ -246,6 +256,24 @@ int main(void) {
                 hs_rank = highscore_insert(&hs_table, game.score);
                 highscore_save(&hs_table);
             }
+            for (int ii = 0; ii < game.items.count; ii++) {
+                Item *it = &game.items.items[ii];
+                if (!it->active) { continue; }
+                float dx = player.x - it->x;
+                float dy = player.y - it->y;
+                if (dx * dx + dy * dy < 0.5f * 0.5f) {
+                    if (it->type == ITEM_AMMO) {
+                        game.reserve_ammo += AMMO_PICKUP_AMOUNT;
+                        if (game.reserve_ammo > AMMO_RESERVE_MAX) {
+                            game.reserve_ammo = AMMO_RESERVE_MAX;
+                        }
+                    } else {
+                        game.health += HEALTH_PICKUP_AMOUNT;
+                        if (game.health > 100) { game.health = 100; }
+                    }
+                    it->active = 0;
+                }
+            }
             if (enemy_list_all_dead(&game.enemies)) {
                 map_unlock_exits(&map);
             }
@@ -274,9 +302,10 @@ int main(void) {
         } else {
             raycaster_render(renderer, &map, &player, &wall_tex, &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT);
             sprite_render_all(renderer, &player, &game.enemies, zbuf, guard_tex, w, h - HUD_HEIGHT);
+            item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, w, h - HUD_HEIGHT);
             weapon_render(renderer, &pistol_tex, game.shot_timer, w, h - HUD_HEIGHT);
             minimap_render(renderer, &map, &player);
-            hud_render(renderer, w, h, game.health, game.ammo, game.score);
+            hud_render(renderer, w, h, game.health, game.ammo, game.reserve_ammo, game.score);
             if (game.level_clear_timer > 0.0f) {
                 hud_draw_level_clear(renderer, w, h - HUD_HEIGHT, game.level_clear_timer);
             }

@@ -304,6 +304,79 @@ void texture_derive_guard_dirs(Texture guard_tex[8]) {
     }
 }
 
+static void set_px(Texture *t, int x, int y, unsigned char r, unsigned char g, unsigned char b) {
+    if (x < 0 || x >= t->width || y < 0 || y >= t->height) { return; }
+    int idx = (y * t->width + x) * 3;
+    t->pixels[idx] = r; t->pixels[idx + 1] = g; t->pixels[idx + 2] = b;
+}
+
+void texture_generate_ammo_pickup(Texture *t) {
+    int W = t->width;
+    int H = t->height;
+    /* magenta background */
+    for (int i = 0; i < W * H * 3; i += 3) {
+        t->pixels[i] = 255; t->pixels[i + 1] = 0; t->pixels[i + 2] = 255;
+    }
+    /* draw two bullets side by side, vertically oriented */
+    int offsets[2] = { W * 11 / 32, W * 20 / 32 };
+    int bw = W * 5 / 32;
+    int body_top = H * 28 / 64;
+    int body_bot = H * 56 / 64;
+    int tip_top  = H * 14 / 64;
+    for (int b = 0; b < 2; b++) {
+        int bx = offsets[b];
+        /* brass body */
+        for (int y = body_top; y <= body_bot; y++) {
+            for (int x = bx; x < bx + bw; x++) {
+                int shade = ((x - bx) == 1) ? 20 : 0;
+                set_px(t, x, y, 190 + shade, 148 + shade, 42);
+            }
+        }
+        /* silver tapering tip */
+        for (int y = tip_top; y < body_top; y++) {
+            int dist = body_top - y;
+            int half  = bw / 2;
+            int shrink = (dist * half) / (body_top - tip_top);
+            if (shrink > half) { shrink = half; }
+            for (int x = bx + shrink; x < bx + bw - shrink; x++) {
+                unsigned char lum = (unsigned char)(160 + (bx + bw / 2 - x) * 8);
+                set_px(t, x, y, lum, lum, lum);
+            }
+        }
+        /* base rim */
+        for (int x = bx; x < bx + bw; x++) {
+            set_px(t, x, body_bot,     80, 60, 20);
+            set_px(t, x, body_bot - 1, 80, 60, 20);
+        }
+    }
+}
+
+void texture_generate_health_pickup(Texture *t) {
+    int W = t->width;
+    int H = t->height;
+    /* white background */
+    for (int i = 0; i < W * H * 3; i += 3) {
+        t->pixels[i] = 240; t->pixels[i + 1] = 240; t->pixels[i + 2] = 240;
+    }
+    /* red cross */
+    int cx = W / 2;
+    int cy = H / 2;
+    int arm_w = W / 5;
+    int arm_l = W * 2 / 5;
+    for (int y = 0; y < H; y++) {
+        for (int x = 0; x < W; x++) {
+            int in_h = (abs(y - cy) <= arm_w && abs(x - cx) <= arm_l);
+            int in_v = (abs(x - cx) <= arm_w && abs(y - cy) <= arm_l);
+            if (in_h || in_v) {
+                set_px(t, x, y, 200, 30, 30);
+            }
+        }
+    }
+    /* thin border */
+    for (int x = 0; x < W; x++) { set_px(t, x, 0, 180, 180, 180); set_px(t, x, H-1, 180, 180, 180); }
+    for (int y = 0; y < H; y++) { set_px(t, y, 0, 180, 180, 180); set_px(t, W-1, y, 180, 180, 180); }
+}
+
 void texture_generate_brick(Texture *t) {
     int brick_w = 16;
     int brick_h = 8;
