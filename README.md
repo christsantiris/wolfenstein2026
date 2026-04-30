@@ -63,4 +63,5 @@ MIT
 - Save / load
 - Minimap toggle
 - Pistol whip or knife attack when ammo is empty
+- bosses
 

@@ -3,9 +3,9 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define ENEMY_SIGHT_RANGE    12.0f
-#define ENEMY_ATTACK_RANGE    2.0f
-#define ENEMY_SPEED           1.8f
+#define ENEMY_SIGHT_RANGE 12.0f
+#define ENEMY_ATTACK_RANGE 2.0f
+#define ENEMY_SPEED 1.8f
 #define ENEMY_ATTACK_COOLDOWN 2.0f
 
 static int enemy_has_los(const Enemy *e, const Player *p, const Map *m) {
@@ -85,8 +85,8 @@ static void place(EnemyList *el, float x, float y) {
         return;
     }
     Enemy *e = &el->enemies[el->count++];
-    e->x      = x;
-    e->y      = y;
+    e->x = x;
+    e->y = y;
     e->angle  = (float)(rand() % 8) * ((float)M_PI / 4.0f);
     e->health = 100;
     e->active = 1;

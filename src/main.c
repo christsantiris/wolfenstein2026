@@ -215,11 +215,15 @@ int main(void) {
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
                         if (game_shoot(&game, &player)) {
                             sound_play(&gun_sounds[game.current_weapon.type]);
+                        } else if (game.ammo == 0) {
+                            game_pistol_whip(&game, &player);
                         }
                     }
                     if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
                         if (game_shoot(&game, &player)) {
                             sound_play(&gun_sounds[game.current_weapon.type]);
+                        } else if (game.ammo == 0) {
+                            game_pistol_whip(&game, &player);
                         }
                     }
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_r) {
@@ -303,7 +307,7 @@ int main(void) {
             raycaster_render(renderer, &map, &player, &wall_tex, &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT);
             sprite_render_all(renderer, &player, &game.enemies, zbuf, guard_tex, w, h - HUD_HEIGHT);
             item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, w, h - HUD_HEIGHT);
-            weapon_render(renderer, &pistol_tex, game.shot_timer, w, h - HUD_HEIGHT);
+            weapon_render(renderer, &pistol_tex, game.shot_timer, game.pistol_whip_timer, w, h - HUD_HEIGHT);
             minimap_render(renderer, &map, &player);
             hud_render(renderer, w, h, game.health, game.ammo, game.reserve_ammo, game.score);
             if (game.level_clear_timer > 0.0f) {

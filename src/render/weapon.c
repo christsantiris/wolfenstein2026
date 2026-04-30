@@ -1,12 +1,23 @@
 #include "render/weapon.h"
+#include <math.h>
 
-#define WEAPON_SCALE 3
+#define WEAPON_SCALE  3
+#define WHIP_DURATION 0.4f
+#define WHIP_SWING_X  90
+#define WHIP_SWING_Y  40
 
-void weapon_render(SDL_Renderer *renderer, const Texture *tex, float shot_timer, int screen_w, int screen_h) {
+void weapon_render(SDL_Renderer *renderer, const Texture *tex, float shot_timer, float whip_timer, int screen_w, int screen_h) {
     int w = tex->width  * WEAPON_SCALE;
     int h = tex->height * WEAPON_SCALE;
     int x0 = (screen_w - w) / 2;
     int y0 = screen_h - h;
+
+    if (whip_timer > 0.0f) {
+        float t = 1.0f - (whip_timer / WHIP_DURATION);
+        float swing = sinf(t * 3.14159f);
+        x0 += (int)(swing * WHIP_SWING_X);
+        y0 += (int)(swing * WHIP_SWING_Y);
+    }
 
     for (int sy = 0; sy < h; sy++) {
         int ty = sy / WEAPON_SCALE;

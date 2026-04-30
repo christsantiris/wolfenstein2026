@@ -15,7 +15,7 @@ linux:
 	bash package/linux/build_linux.sh
 
 debug:
-	cmake -B build -DCMAKE_BUILD_TYPE=Debug
+	cmake -B build -DCMAKE_BUILD_TYPE=Debug -DDEBUG_NO_AMMO=ON
 	cmake --build build
 	./build/wolf
 

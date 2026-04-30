@@ -6,8 +6,14 @@ set(CMAKE_C_STANDARD 11)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 
+option(DEBUG_NO_AMMO "Start with zero ammo for pistol whip testing" OFF)
+
 file(GLOB_RECURSE SOURCES src/*.c)
 add_executable(wolf ${SOURCES})
+
+if(DEBUG_NO_AMMO)
+    target_compile_definitions(wolf PRIVATE DEBUG_NO_AMMO)
+endif()
 
 target_include_directories(wolf PRIVATE ${SDL2_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/src)
 target_link_libraries(wolf PRIVATE ${SDL2_LIBRARIES} SDL2_mixer::SDL2_mixer m)
