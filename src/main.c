@@ -161,6 +161,11 @@ int main(void) {
     Sound whip_sound = { 0 };
     sound_load(&whip_sound, "assets/sounds/punch.mp3");
 
+    Music level_music[3] = { 0 };
+    music_load(&level_music[0], "assets/music/level1theme.mp3");
+    music_load(&level_music[1], "assets/music/level2theme.mp3");
+    music_load(&level_music[2], "assets/music/level3theme.mp3");
+
     HighScoreTable hs_table;
     highscore_load(&hs_table);
     int hs_rank = 0;
@@ -203,6 +208,7 @@ int main(void) {
                     current_level = 1;
                     game.score = 0;
                     start_game(&map, &player, &game, current_level);
+                    music_play(&level_music[current_level - 1]);
                     game_over = 0;
                     menu.is_open = 0;
                     app_state = APP_PLAYING;
@@ -249,6 +255,7 @@ int main(void) {
                     if (result == GAME_OVER_QUIT) {
                         running = 0;
                     } else if (result == GAME_OVER_NEW_GAME) {
+                        music_stop();
                         landing_reset();
                         app_state = APP_LANDING;
                         game_over = 0;
@@ -291,8 +298,14 @@ int main(void) {
                 current_level++;
                 if (start_game(&map, &player, &game, current_level) != 0) {
                     current_level = 1;
+                    music_stop();
                     landing_reset();
                     app_state = APP_LANDING;
+                } else {
+                    int idx = current_level - 1;
+                    if (idx >= 0 && idx < 3) {
+                        music_play(&level_music[idx]);
+                    }
                 }
             }
         }
@@ -338,6 +351,8 @@ int main(void) {
     }
 
     free(zbuf);
+    music_stop();
+    for (int m = 0; m < 3; m++) { music_free(&level_music[m]); }
     sound_free(&whip_sound);
     for (int g = 0; g < GUN_COUNT; g++) { sound_free(&gun_sounds[g]); sound_free(&reload_sounds[g]); }
     Mix_CloseAudio();

@@ -22,3 +22,29 @@ void sound_free(Sound *s) {
         s->chunk = NULL;
     }
 }
+
+int music_load(Music *m, const char *path) {
+    m->music = Mix_LoadMUS(path);
+    if (!m->music) {
+        fprintf(stderr, "music_load: %s: %s\n", path, Mix_GetError());
+        return -1;
+    }
+    return 0;
+}
+
+void music_play(const Music *m) {
+    if (m->music) {
+        Mix_PlayMusic(m->music, -1);
+    }
+}
+
+void music_stop(void) {
+    Mix_HaltMusic();
+}
+
+void music_free(Music *m) {
+    if (m->music) {
+        Mix_FreeMusic(m->music);
+        m->music = NULL;
+    }
+}

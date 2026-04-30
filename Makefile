@@ -1,7 +1,7 @@
 .PHONY: all run clean debug test linux sprites
 
 all:
-	cmake -B build -DCMAKE_BUILD_TYPE=Release
+	cmake -B build -DCMAKE_BUILD_TYPE=Release -DDEBUG_NO_AMMO=OFF
 	cmake --build build
 
 run: all
