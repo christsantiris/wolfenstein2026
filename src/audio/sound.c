@@ -1,6 +1,12 @@
 #include "audio/sound.h"
 #include <stdio.h>
 
+static int g_sound_enabled = 1;
+
+void sound_set_enabled(int enabled) {
+    g_sound_enabled = enabled;
+}
+
 int sound_load(Sound *s, const char *path) {
     s->chunk = Mix_LoadWAV(path);
     if (!s->chunk) {
@@ -11,7 +17,7 @@ int sound_load(Sound *s, const char *path) {
 }
 
 void sound_play(const Sound *s) {
-    if (s->chunk) {
+    if (g_sound_enabled && s->chunk) {
         Mix_PlayChannel(-1, s->chunk, 0);
     }
 }

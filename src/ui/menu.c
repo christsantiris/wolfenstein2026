@@ -127,28 +127,78 @@ static void draw_button(SDL_Renderer *r, const char *label, int x, int y) {
     draw_string(r, label, x + 8, y, col);
 }
 
-void menu_handle_event(Menu *m, const SDL_Event *e, int *running) {
-    if (e->type == SDL_MOUSEBUTTONDOWN && e->button.button == SDL_BUTTON_LEFT) {
-        int mx = e->button.x;
-        int my = e->button.y;
+static int button_hit(int mx, int my, int bx, int by, const char *label) {
+    int pw = str_px_w(label) + 16;
+    return mx >= bx && mx < bx + pw && my >= by - 4 && my < by - 4 + CH + 8;
+}
 
-        int bw = 440;
-        int bh = 420;
-        int bx = (800 - bw) / 2;
-        int by = (600 - bh) / 2;
-        int quit_y = by + bh - 50;
-        int quit_x = bx + (bw - str_px_w("QUIT") - 16) / 2;
-        int quit_pw = str_px_w("QUIT") + 16;
+typedef struct {
+    int bx, by, bw, bh;
+    int music_y, sound_y;
+    int save_x, load_x, row1_y;
+    int new_game_x, quit_x, row2_y;
+} MenuLayout;
 
-        if (mx >= quit_x && mx <= quit_x + quit_pw &&
-            my >= quit_y - 4 && my <= quit_y - 4 + CH + 8) {
-            *running = 0;
-        }
+static void menu_compute_layout(int sw, int sh, MenuLayout *l) {
+    l->bw = 440;
+    l->bh = 452;
+    l->bx = (sw - l->bw) / 2;
+    l->by = (sh - l->bh) / 2;
+
+    int y = l->by + 18 + LHEIGHT + 4 + 10;
+    y += LHEIGHT;
+    y += LHEIGHT * 7 + 4;
+    y += 10;
+    y += LHEIGHT;
+    y += LHEIGHT;
+    l->music_y = y; y += LHEIGHT;
+    l->sound_y = y; y += LHEIGHT + 4 + 14;
+
+    l->save_x = l->bx + l->bw / 2 - str_px_w("SAVE") - 24;
+    l->load_x = l->bx + l->bw / 2 + 8;
+    l->row1_y = y;
+    y += LHEIGHT + 8;
+
+    int ng_pw = str_px_w("NEW GAME") + 16;
+    int qt_pw = str_px_w("QUIT") + 16;
+    int pair_w = ng_pw + 16 + qt_pw;
+    l->new_game_x = l->bx + (l->bw - pair_w) / 2;
+    l->quit_x = l->new_game_x + ng_pw + 16;
+    l->row2_y = y;
+}
+
+MenuAction menu_handle_event(Menu *m, const SDL_Event *e, int sw, int sh) {
+    if (e->type != SDL_MOUSEBUTTONDOWN || e->button.button != SDL_BUTTON_LEFT) {
+        return MENU_ACTION_NONE;
     }
+    int mx = e->button.x;
+    int my = e->button.y;
+
+    MenuLayout l;
+    menu_compute_layout(sw, sh, &l);
+
+    if (my >= l.music_y && my < l.music_y + CH &&
+        mx >= l.bx && mx < l.bx + l.bw) {
+        m->music_on = !m->music_on;
+        return MENU_ACTION_MUSIC_TOGGLE;
+    }
+    if (my >= l.sound_y && my < l.sound_y + CH &&
+        mx >= l.bx && mx < l.bx + l.bw) {
+        m->sound_on = !m->sound_on;
+        return MENU_ACTION_SOUND_TOGGLE;
+    }
+    if (button_hit(mx, my, l.new_game_x, l.row2_y, "NEW GAME")) {
+        return MENU_ACTION_NEW_GAME;
+    }
+    if (button_hit(mx, my, l.quit_x, l.row2_y, "QUIT")) {
+        return MENU_ACTION_QUIT;
+    }
+    return MENU_ACTION_NONE;
 }
 
 void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
-    (void)m;
+    MenuLayout l;
+    menu_compute_layout(screen_w, screen_h, &l);
 
     SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(r, 0, 0, 0, 180);
@@ -156,60 +206,53 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
     SDL_RenderFillRect(r, &overlay);
     SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_NONE);
 
-    int bw = 440;
-    int bh = 420;
-    int bx = (screen_w - bw) / 2;
-    int by = (screen_h - bh) / 2;
-
     SDL_SetRenderDrawColor(r, 30, 30, 30, 255);
-    SDL_Rect box = { bx, by, bw, bh };
+    SDL_Rect box = { l.bx, l.by, l.bw, l.bh };
     SDL_RenderFillRect(r, &box);
     SDL_SetRenderDrawColor(r, 180, 140, 40, 255);
     SDL_RenderDrawRect(r, &box);
 
-    SDL_Color gold   = { 220, 180, 50,  255 };
-    SDL_Color dim    = { 100, 100, 100, 255 };
+    SDL_Color gold = { 220, 180, 50,  255 };
+    SDL_Color dim  = { 100, 100, 100, 255 };
 
-    int y = by + 18;
-    draw_centered(r, "OPTIONS", bx, y, bw, gold);
+    int y = l.by + 18;
+    draw_centered(r, "OPTIONS", l.bx, y, l.bw, gold);
     y += LHEIGHT + 4;
 
     SDL_SetRenderDrawColor(r, 80, 60, 20, 255);
-    SDL_RenderDrawLine(r, bx + 10, y, bx + bw - 10, y);
+    SDL_RenderDrawLine(r, l.bx + 10, y, l.bx + l.bw - 10, y);
     y += 10;
 
-    draw_centered(r, "CONTROLS", bx, y, bw, dim);
+    draw_centered(r, "CONTROLS", l.bx, y, l.bw, dim);
     y += LHEIGHT;
-    draw_row(r, "FORWARD",     "W",     bx, y, bw); y += LHEIGHT;
-    draw_row(r, "BACK",        "S",     bx, y, bw); y += LHEIGHT;
-    draw_row(r, "STRAFE LEFT", "A",     bx, y, bw); y += LHEIGHT;
-    draw_row(r, "STRAFE RIGHT","D",     bx, y, bw); y += LHEIGHT;
-    draw_row(r, "SHOOT",       "SPACE", bx, y, bw); y += LHEIGHT;
-    draw_row(r, "RELOAD",      "R",     bx, y, bw); y += LHEIGHT;
-    draw_row(r, "OPEN DOOR",   "O",     bx, y, bw); y += LHEIGHT + 4;
+    draw_row(r, "FORWARD",      "W",     l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "BACK",         "S",     l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "STRAFE LEFT",  "A",     l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "STRAFE RIGHT", "D",     l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "SHOOT",        "SPACE", l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "RELOAD",       "R",     l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "OPEN DOOR",    "O",     l.bx, y, l.bw); y += LHEIGHT + 4;
 
     SDL_SetRenderDrawColor(r, 80, 60, 20, 255);
-    SDL_RenderDrawLine(r, bx + 10, y, bx + bw - 10, y);
+    SDL_RenderDrawLine(r, l.bx + 10, y, l.bx + l.bw - 10, y);
     y += 10;
 
-    draw_centered(r, "SETTINGS", bx, y, bw, dim);
+    draw_centered(r, "SETTINGS", l.bx, y, l.bw, dim);
     y += LHEIGHT;
-    draw_row(r, "AUTO RELOAD", "OFF", bx, y, bw); y += LHEIGHT;
-    draw_row(r, "MUSIC",       "ON",  bx, y, bw); y += LHEIGHT;
-    draw_row(r, "SOUND",       "ON",  bx, y, bw); y += LHEIGHT + 4;
+    draw_row(r, "AUTO RELOAD", "OFF",                    l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "MUSIC",       m->music_on ? "ON" : "OFF", l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "SOUND",       m->sound_on ? "ON" : "OFF", l.bx, y, l.bw); y += LHEIGHT + 4;
 
     SDL_SetRenderDrawColor(r, 80, 60, 20, 255);
-    SDL_RenderDrawLine(r, bx + 10, y, bx + bw - 10, y);
+    SDL_RenderDrawLine(r, l.bx + 10, y, l.bx + l.bw - 10, y);
     y += 14;
 
-    int save_x = bx + bw / 2 - str_px_w("SAVE") - 24;
-    int load_x = bx + bw / 2 + 8;
-    draw_button(r, "SAVE", save_x, y);
-    draw_button(r, "LOAD", load_x, y);
+    draw_button(r, "SAVE", l.save_x, y);
+    draw_button(r, "LOAD", l.load_x, y);
     y += LHEIGHT + 8;
 
-    int quit_x = bx + (bw - str_px_w("QUIT") - 16) / 2;
-    draw_button(r, "QUIT", quit_x, y);
+    draw_button(r, "NEW GAME", l.new_game_x, y);
+    draw_button(r, "QUIT",     l.quit_x,     y);
 }
 
 static void game_over_button_rects(int sw, int sh, SDL_Rect *rn, SDL_Rect *rl, SDL_Rect *rq) {

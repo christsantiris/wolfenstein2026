@@ -6,9 +6,19 @@
 
 typedef struct {
     int is_open;
+    int music_on;
+    int sound_on;
 } Menu;
 
-void menu_handle_event(Menu *m, const SDL_Event *e, int *running);
+typedef enum {
+    MENU_ACTION_NONE = 0,
+    MENU_ACTION_QUIT,
+    MENU_ACTION_NEW_GAME,
+    MENU_ACTION_MUSIC_TOGGLE,
+    MENU_ACTION_SOUND_TOGGLE,
+} MenuAction;
+
+MenuAction menu_handle_event(Menu *m, const SDL_Event *e, int sw, int sh);
 void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h);
 
 typedef enum {

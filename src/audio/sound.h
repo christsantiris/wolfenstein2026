@@ -10,6 +10,7 @@ typedef struct {
 int  sound_load(Sound *s, const char *path);
 void sound_play(const Sound *s);
 void sound_free(Sound *s);
+void sound_set_enabled(int enabled);
 
 typedef struct {
     Mix_Music *music;

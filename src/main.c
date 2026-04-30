@@ -176,6 +176,8 @@ int main(void) {
 
     AppState app_state = APP_LANDING;
     Menu menu = { 0 };
+    menu.music_on = 1;
+    menu.sound_on = 1;
     int current_level = 1;
     int game_over = 0;
     int show_minimap = 1;
@@ -223,7 +225,19 @@ int main(void) {
                     menu.is_open = !menu.is_open;
                 }
                 if (menu.is_open) {
-                    menu_handle_event(&menu, &e, &running);
+                    MenuAction action = menu_handle_event(&menu, &e, w, h);
+                    if (action == MENU_ACTION_QUIT) {
+                        running = 0;
+                    } else if (action == MENU_ACTION_NEW_GAME) {
+                        menu.is_open = 0;
+                        music_stop();
+                        landing_reset();
+                        app_state = APP_LANDING;
+                    } else if (action == MENU_ACTION_MUSIC_TOGGLE) {
+                        if (menu.music_on) { Mix_ResumeMusic(); } else { Mix_PauseMusic(); }
+                    } else if (action == MENU_ACTION_SOUND_TOGGLE) {
+                        sound_set_enabled(menu.sound_on);
+                    }
                 } else if (!game_over) {
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
                         if (game_shoot(&game, &player)) {
