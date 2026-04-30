@@ -12,6 +12,8 @@ int texture_load_ppm(Texture *t, const char *path);
 void texture_free(Texture *t);
 unsigned int texture_sample(const Texture *t, float u, float v);
 void texture_generate_brick(Texture *t);
+void texture_generate_stone(Texture *t);
+void texture_generate_sandstone(Texture *t);
 void texture_generate_door(Texture *t);
 void texture_generate_exit_door(Texture *t);
 void texture_generate_guard_dir(Texture *t, int dir);

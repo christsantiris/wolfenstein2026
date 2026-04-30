@@ -88,19 +88,23 @@ int main(void) {
     GameState game;
     game_init(&game);
 
-    Texture wall_tex;
-    if (texture_create(&wall_tex, 64, 64) != 0) {
+    Texture wall_tex[3];
+    if (texture_create(&wall_tex[0], 64, 64) != 0 ||
+        texture_create(&wall_tex[1], 64, 64) != 0 ||
+        texture_create(&wall_tex[2], 64, 64) != 0) {
         map_free(&map);
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
         SDL_Quit();
         return 1;
     }
-    texture_generate_brick(&wall_tex);
+    texture_generate_brick(&wall_tex[0]);
+    texture_generate_stone(&wall_tex[1]);
+    texture_generate_sandstone(&wall_tex[2]);
 
     Texture door_tex;
     if (texture_create(&door_tex, 64, 64) != 0) {
-        texture_free(&wall_tex);
+        for (int wl = 2; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
         map_free(&map);
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -112,7 +116,7 @@ int main(void) {
     Texture exit_tex;
     if (texture_create(&exit_tex, 64, 64) != 0) {
         texture_free(&door_tex);
-        texture_free(&wall_tex);
+        for (int wl = 2; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
         map_free(&map);
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -327,7 +331,8 @@ int main(void) {
         } else if (app_state == APP_DIFFICULTY) {
             difficulty_screen_render(renderer, w, h);
         } else {
-            raycaster_render(renderer, &map, &player, &wall_tex, &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT);
+            int wall_idx = (current_level - 1 < 3) ? current_level - 1 : 2;
+            raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT);
             sprite_render_all(renderer, &player, &game.enemies, zbuf, guard_tex, w, h - HUD_HEIGHT);
             item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, w, h - HUD_HEIGHT);
             weapon_render(renderer, &pistol_tex, game.shot_timer, game.pistol_whip_timer, w, h - HUD_HEIGHT);
@@ -364,7 +369,7 @@ int main(void) {
     for (int d = 7; d >= 0; d--) { texture_free(&guard_tex[d]); }
     texture_free(&exit_tex);
     texture_free(&door_tex);
-    texture_free(&wall_tex);
+    for (int wl = 2; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
     map_free(&map);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

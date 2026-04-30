@@ -380,7 +380,7 @@ void texture_generate_health_pickup(Texture *t) {
 void texture_generate_brick(Texture *t) {
     int brick_w = 16;
     int brick_h = 8;
-    int mortar  = 2;
+    int mortar = 2;
 
     for (int y = 0; y < t->height; y++) {
         int row = y / brick_h;
@@ -398,12 +398,71 @@ void texture_generate_brick(Texture *t) {
             } else {
                 int vary = ((x * 3 + y * 7) % 20) - 10;
                 r = (unsigned char)(160 + vary);
-                g = (unsigned char)(90  + vary / 2);
-                b = (unsigned char)(70  + vary / 2);
+                g = (unsigned char)(90 + vary / 2);
+                b = (unsigned char)(70 + vary / 2);
             }
 
             int idx = (y * t->width + x) * 3;
-            t->pixels[idx]     = r;
+            t->pixels[idx] = r;
+            t->pixels[idx + 1] = g;
+            t->pixels[idx + 2] = b;
+        }
+    }
+}
+
+void texture_generate_stone(Texture *t) {
+    int brick_w = 20;
+    int brick_h = 14;
+    int mortar = 2;
+
+    for (int y = 0; y < t->height; y++) {
+        int row = y / brick_h;
+        int offset = (row % 2) * (brick_w / 2);
+        int mortar_y = (y % brick_h) < mortar;
+
+        for (int x = 0; x < t->width; x++) {
+            int col = (x + offset) % brick_w;
+            int mortar_x = col < mortar;
+            int in_mortar = mortar_y || mortar_x;
+
+            unsigned char r, g, b;
+            if (in_mortar) {
+                r = 105; g = 105; b = 110;
+            } else {
+                int vary = ((x * 3 + y * 7) % 24) - 12;
+                r = (unsigned char)(155 + vary);
+                g = (unsigned char)(155 + vary);
+                b = (unsigned char)(163 + vary);
+            }
+
+            int idx = (y * t->width + x) * 3;
+            t->pixels[idx] = r;
+            t->pixels[idx + 1] = g;
+            t->pixels[idx + 2] = b;
+        }
+    }
+}
+
+void texture_generate_sandstone(Texture *t) {
+    int band_h = 8;
+    int mortar = 1;
+
+    for (int y = 0; y < t->height; y++) {
+        int in_mortar = (y % band_h) < mortar;
+
+        for (int x = 0; x < t->width; x++) {
+            unsigned char r, g, b;
+            if (in_mortar) {
+                r = 140; g = 108; b = 62;
+            } else {
+                int vary = ((x * 2 + y * 5) % 20) - 10;
+                r = (unsigned char)(198 + vary);
+                g = (unsigned char)(163 + vary * 2 / 3);
+                b = (unsigned char)(98 + vary / 3);
+            }
+
+            int idx = (y * t->width + x) * 3;
+            t->pixels[idx] = r;
             t->pixels[idx + 1] = g;
             t->pixels[idx + 2] = b;
         }

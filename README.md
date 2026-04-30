@@ -58,8 +58,8 @@ MIT
 - Difficulty settings
 - Enemy variety
 - Sound — unique gunshots, unique reload clicks, enemy alert bark, door open, level clear
-- Wall texture variants — map cells 1-9 already route through, just need different textures per value
 - Save / load
 - bosses
+- More levels
 - menu functionality (music, sound toggles etc)
 
