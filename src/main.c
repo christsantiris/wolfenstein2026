@@ -158,6 +158,8 @@ int main(void) {
             sound_load(&reload_sounds[gi], wd->reload_sound_path);
         }
     }
+    Sound whip_sound = { 0 };
+    sound_load(&whip_sound, "assets/sounds/punch.mp3");
 
     HighScoreTable hs_table;
     highscore_load(&hs_table);
@@ -216,14 +218,18 @@ int main(void) {
                         if (game_shoot(&game, &player)) {
                             sound_play(&gun_sounds[game.current_weapon.type]);
                         } else if (game.ammo == 0) {
-                            game_pistol_whip(&game, &player);
+                            if (game_pistol_whip(&game, &player)) {
+                                sound_play(&whip_sound);
+                            }
                         }
                     }
                     if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
                         if (game_shoot(&game, &player)) {
                             sound_play(&gun_sounds[game.current_weapon.type]);
                         } else if (game.ammo == 0) {
-                            game_pistol_whip(&game, &player);
+                            if (game_pistol_whip(&game, &player)) {
+                                sound_play(&whip_sound);
+                            }
                         }
                     }
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_r) {
@@ -332,6 +338,7 @@ int main(void) {
     }
 
     free(zbuf);
+    sound_free(&whip_sound);
     for (int g = 0; g < GUN_COUNT; g++) { sound_free(&gun_sounds[g]); sound_free(&reload_sounds[g]); }
     Mix_CloseAudio();
     texture_free(&pistol_tex);
