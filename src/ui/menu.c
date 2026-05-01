@@ -239,7 +239,6 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
 
     draw_centered(r, "SETTINGS", l.bx, y, l.bw, dim);
     y += LHEIGHT;
-    draw_row(r, "AUTO RELOAD", "OFF",                    l.bx, y, l.bw); y += LHEIGHT;
     draw_row(r, "MUSIC",       m->music_on ? "ON" : "OFF", l.bx, y, l.bw); y += LHEIGHT;
     draw_row(r, "SOUND",       m->sound_on ? "ON" : "OFF", l.bx, y, l.bw); y += LHEIGHT + 4;
 

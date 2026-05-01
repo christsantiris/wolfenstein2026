@@ -46,18 +46,53 @@ static void draw_item(SDL_Renderer *r, const char *label, int cx, int y, int ena
 }
 
 void landing_render(SDL_Renderer *r, int sw, int sh) {
-    SDL_SetRenderDrawColor(r, 70, 0, 0, 255);
-    SDL_Rect bg = { 0, 0, sw, sh };
-    SDL_RenderFillRect(r, &bg);
+    /* Noisy background: per-row hash gives slight brightness variation */
+    for (int y = 0; y < sh; y++) {
+        int n = (int)(((unsigned int)y * 2654435761u) >> 28) & 7;
+        SDL_SetRenderDrawColor(r, 65 + n, 0, 0, 255);
+        SDL_RenderDrawLine(r, 0, y, sw - 1, y);
+    }
 
-    SDL_Color gold = { 220, 180, 50, 255 };
+    /* Vignette: darken edges inward */
+    SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND);
+    int vig_h = sh * 2 / 5;
+    for (int i = 0; i < vig_h; i++) {
+        int alpha = (vig_h - i) * 110 / vig_h;
+        SDL_SetRenderDrawColor(r, 0, 0, 0, alpha);
+        SDL_RenderDrawLine(r, 0, i, sw - 1, i);
+        SDL_RenderDrawLine(r, 0, sh - 1 - i, sw - 1, sh - 1 - i);
+    }
+    int vig_w = sw / 4;
+    for (int i = 0; i < vig_w; i++) {
+        int alpha = (vig_w - i) * 80 / vig_w;
+        SDL_SetRenderDrawColor(r, 0, 0, 0, alpha);
+        SDL_RenderDrawLine(r, i, 0, i, sh - 1);
+        SDL_RenderDrawLine(r, sw - 1 - i, 0, sw - 1 - i, sh - 1);
+    }
+    SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_NONE);
+
+    /* Title: dark shadow offset, then gold on top */
     const char *title = "WOLFENSTEIN 2026";
-    font_draw_string(r, title, (sw - font_str_px_w(title)) / 2, sh / 4, gold);
+    int tx = (sw - font_str_px_w(title)) / 2;
+    int ty = sh / 4;
+    SDL_Color shadow = { 40, 0, 0, 255 };
+    SDL_Color gold = { 220, 180, 50, 255 };
+    font_draw_string(r, title, tx + 2, ty + 2, shadow);
+    font_draw_string(r, title, tx, ty, gold);
 
+    /* Decorative double rule below title */
+    int rule_y = ty + FONT_CH + 14;
+    int rule_x0 = sw / 4;
+    int rule_x1 = sw * 3 / 4;
+    SDL_SetRenderDrawColor(r, 140, 100, 20, 255);
+    SDL_RenderDrawLine(r, rule_x0, rule_y, rule_x1, rule_y);
+    SDL_SetRenderDrawColor(r, 80, 55, 10, 255);
+    SDL_RenderDrawLine(r, rule_x0, rule_y + 2, rule_x1, rule_y + 2);
+
+    /* Menu buttons */
     int cx = sw / 2;
     int by = sh / 2;
     int gap = FONT_LHEIGHT + 10;
-
     for (int i = 0; i < LANDING_COUNT; i++) {
         draw_item(r, LANDING_LABELS[i], cx, by + i * gap, LANDING_ENABLED[i], landing_selected == i);
     }

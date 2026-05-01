@@ -85,7 +85,6 @@ int game_shoot(GameState *g, const Player *p) {
         return 0;
     }
     g->ammo--;
-    /* if (g->auto_reload && g->ammo == 0) { game_reload(g); } */
     g->shot_cooldown = g->current_weapon.shot_cooldown;
     g->shot_timer = g->current_weapon.shot_timer_duration;
 

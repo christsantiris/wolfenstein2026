@@ -61,4 +61,3 @@ MIT
 - Save / load
 - bosses
 - More levels
-- Improved level exit UI
