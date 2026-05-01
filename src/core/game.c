@@ -3,19 +3,19 @@
 #include <stddef.h>
 #include <string.h>
 
-#define SHOT_DAMAGE 34
 #define SHOT_RANGE 20.0f
-#define SHOT_CONE 0.15f
 #define KILL_SCORE 100
 #define WHIP_DAMAGE 50
 #define WHIP_RANGE 1.5f
 #define WHIP_CONE 0.5f
 #define WHIP_DURATION 0.4f
 
-static const WeaponDef WEAPON_PISTOL = { GUN_9MM_HANDGUN, "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3", 8, 0.5f, 0.12f, 1.5f };
+static const WeaponDef WEAPON_PISTOL = { GUN_9MM_HANDGUN, "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3", 8, 34, 0.15f, 0.5f, 0.12f, 1.5f };
+static const WeaponDef WEAPON_SHOTGUN = { GUN_SHOTGUN, "assets/sounds/shotgun.mp3", "assets/sounds/handgunreload.mp3", 2, 80, 0.30f, 0.8f, 0.15f, 2.0f };
 
 static const WeaponDef *ALL_WEAPONS[GUN_COUNT] = {
     [GUN_9MM_HANDGUN] = &WEAPON_PISTOL,
+    [GUN_SHOTGUN] = &WEAPON_SHOTGUN,
 };
 
 const WeaponDef *weapon_def(GunType type) {
@@ -26,9 +26,13 @@ const WeaponDef *weapon_def(GunType type) {
 }
 
 void game_init(GameState *g) {
+    memset(g->has_weapon, 0, sizeof(g->has_weapon));
+    memset(g->ammo_per_gun, 0, sizeof(g->ammo_per_gun));
+    g->has_weapon[GUN_9MM_HANDGUN] = 1;
     g->current_weapon = WEAPON_PISTOL;
     g->health = 100;
     g->ammo = g->current_weapon.max_ammo;
+    g->ammo_per_gun[GUN_9MM_HANDGUN] = g->ammo;
     g->reserve_ammo = AMMO_RESERVE_MAX;
     g->score = 0;
     g->shot_timer = 0.0f;
@@ -52,6 +56,22 @@ int game_reload(GameState *g) {
     g->is_reloading = 1;
     g->reload_timer = g->current_weapon.reload_time;
     return 1;
+}
+
+void game_cycle_weapon(GameState *g) {
+    g->ammo_per_gun[g->current_weapon.type] = g->ammo;
+    int start = (int)g->current_weapon.type;
+    for (int i = 1; i < GUN_COUNT; i++) {
+        int next = (start + i) % GUN_COUNT;
+        if (g->has_weapon[next]) {
+            g->current_weapon = *ALL_WEAPONS[next];
+            g->ammo = g->ammo_per_gun[next];
+            g->is_reloading = 0;
+            g->reload_timer = 0.0f;
+            g->shot_cooldown = 0.0f;
+            return;
+        }
+    }
 }
 
 int game_shoot(GameState *g, const Player *p) {
@@ -81,14 +101,14 @@ int game_shoot(GameState *g, const Player *p) {
         float diff = angle - p->angle;
         while (diff >  M_PI) { diff -= 2.0f * (float)M_PI; }
         while (diff < -M_PI) { diff += 2.0f * (float)M_PI; }
-        if (fabsf(diff) < SHOT_CONE) {
+        if (fabsf(diff) < g->current_weapon.cone) {
             best_dist = dist;
             target = e;
         }
     }
 
     if (target) {
-        target->health -= SHOT_DAMAGE;
+        target->health -= g->current_weapon.damage;
         if (target->health <= 0) {
             target->active = 0;
             g->score += KILL_SCORE;

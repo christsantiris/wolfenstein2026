@@ -494,3 +494,97 @@ void texture_generate_sandstone(Texture *t) {
         }
     }
 }
+
+void texture_generate_shotgun(Texture *t) {
+    int W = t->width;
+    int H = t->height;
+    for (int i = 0; i < W * H * 3; i += 3) {
+        t->pixels[i] = 255; t->pixels[i + 1] = 0; t->pixels[i + 2] = 255;
+    }
+    /* stock: dark brown rectangle on left */
+    int stock_x0 = W * 2 / 64;
+    int stock_x1 = W * 24 / 64;
+    int stock_y0 = H * 34 / 64;
+    int stock_y1 = H * 46 / 64;
+    for (int y = stock_y0; y < stock_y1; y++) {
+        for (int x = stock_x0; x < stock_x1; x++) {
+            int vary = ((x + y) % 6) - 3;
+            set_px(t, x, y, (unsigned char)(90 + vary), (unsigned char)(55 + vary), (unsigned char)(20 + vary));
+        }
+    }
+    /* receiver: dark metal body */
+    int rec_x0 = W * 20 / 64;
+    int rec_x1 = W * 46 / 64;
+    int rec_y0 = H * 30 / 64;
+    int rec_y1 = H * 44 / 64;
+    for (int y = rec_y0; y < rec_y1; y++) {
+        for (int x = rec_x0; x < rec_x1; x++) {
+            set_px(t, x, y, 55, 55, 58);
+        }
+    }
+    /* double barrel: two side-by-side dark tubes */
+    int barrel_x0 = W * 42 / 64;
+    int barrel_x1 = W * 62 / 64;
+    int barrel_sep = (barrel_x1 - barrel_x0) / 2;
+    int bTop = H * 32 / 64;
+    int bBot = H * 42 / 64;
+    for (int y = bTop; y < bBot; y++) {
+        for (int x = barrel_x0; x < barrel_x1; x++) {
+            int in_gap = (x == barrel_x0 + barrel_sep);
+            unsigned char metal = in_gap ? 20 : 45;
+            set_px(t, x, y, metal, metal, metal + 5);
+        }
+        set_px(t, barrel_x0, y, 70, 70, 75);
+        set_px(t, barrel_x1 - 1, y, 70, 70, 75);
+    }
+    /* muzzle end */
+    for (int x = barrel_x0; x < barrel_x1; x++) {
+        set_px(t, x, bTop, 25, 25, 28);
+    }
+    /* trigger guard */
+    int tg_cx = (rec_x0 + rec_x1) / 2;
+    int tg_y = rec_y1 + 3;
+    for (int x = tg_cx - 4; x <= tg_cx + 4; x++) {
+        if (x >= 0 && x < W && tg_y < H) {
+            set_px(t, x, tg_y, 60, 60, 65);
+        }
+    }
+}
+
+void texture_generate_weapon_kit(Texture *t) {
+    int W = t->width;
+    int H = t->height;
+    for (int i = 0; i < W * H * 3; i += 3) {
+        t->pixels[i] = 255; t->pixels[i + 1] = 0; t->pixels[i + 2] = 255;
+    }
+    /* green ammo crate body */
+    int bx0 = W * 10 / 64;
+    int bx1 = W * 54 / 64;
+    int by0 = H * 22 / 64;
+    int by1 = H * 50 / 64;
+    for (int y = by0; y < by1; y++) {
+        for (int x = bx0; x < bx1; x++) {
+            int vary = ((x * 2 + y * 3) % 8) - 4;
+            set_px(t, x, y, (unsigned char)(60 + vary), (unsigned char)(90 + vary), (unsigned char)(40 + vary));
+        }
+    }
+    for (int x = bx0; x < bx1; x++) {
+        set_px(t, x, by0, 35, 55, 20);
+        set_px(t, x, by1 - 1, 35, 55, 20);
+    }
+    for (int y = by0; y < by1; y++) {
+        set_px(t, bx0, y, 35, 55, 20);
+        set_px(t, bx1 - 1, y, 35, 55, 20);
+    }
+    /* white cross in center */
+    int cx = W / 2;
+    int cy = (by0 + by1) / 2;
+    for (int d = -3; d <= 3; d++) {
+        if (cx + d >= 0 && cx + d < W) {
+            set_px(t, cx + d, cy, 220, 220, 220);
+        }
+        if (cy + d >= 0 && cy + d < H) {
+            set_px(t, cx, cy + d, 220, 220, 220);
+        }
+    }
+}

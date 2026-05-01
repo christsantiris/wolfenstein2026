@@ -36,10 +36,23 @@ static int start_game(Map *map, Player *player, GameState *game, int level) {
     }
     player_init(player, 14.5f, 10.5f, 0.0f);
     int saved_score = game->score;
+    int saved_has_weapon[GUN_COUNT];
+    int saved_ammo_per_gun[GUN_COUNT];
+    WeaponDef saved_weapon = game->current_weapon;
+    for (int i = 0; i < GUN_COUNT; i++) {
+        saved_has_weapon[i] = game->has_weapon[i];
+        saved_ammo_per_gun[i] = game->ammo_per_gun[i];
+    }
     game_init(game);
     game->score = saved_score;
+    for (int i = 0; i < GUN_COUNT; i++) {
+        game->has_weapon[i] = saved_has_weapon[i];
+        game->ammo_per_gun[i] = saved_ammo_per_gun[i];
+    }
+    game->current_weapon = saved_weapon;
+    game->ammo = game->ammo_per_gun[saved_weapon.type];
     enemy_list_init(&game->enemies, map, level, player->x, player->y);
-    item_list_init(&game->items, map, player->x, player->y);
+    item_list_init(&game->items, map, level, player->x, player->y);
     return 0;
 }
 
@@ -132,6 +145,14 @@ int main(void) {
     Texture health_pickup_tex;
     texture_create(&health_pickup_tex, 64, 64);
     texture_generate_health_pickup(&health_pickup_tex);
+
+    Texture weapon_kit_tex;
+    texture_create(&weapon_kit_tex, 64, 64);
+    texture_generate_weapon_kit(&weapon_kit_tex);
+
+    Texture shotgun_tex;
+    texture_create(&shotgun_tex, 64, 64);
+    texture_generate_shotgun(&shotgun_tex);
 
     Texture pistol_tex;
     if (texture_load_ppm(&pistol_tex, "assets/sprites/pistol.ppm") != 0) {
@@ -286,6 +307,9 @@ int main(void) {
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_m) {
                         show_minimap = !show_minimap;
                     }
+                    if (e.type == SDL_KEYDOWN && (e.key.keysym.sym == SDLK_c || e.key.keysym.sym == SDLK_w)) {
+                        game_cycle_weapon(&game);
+                    }
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_o) {
                         int door_x = (int)(player.x + cosf(player.angle));
                         int door_y = (int)(player.y + sinf(player.angle));
@@ -330,9 +354,15 @@ int main(void) {
                         if (game.reserve_ammo > AMMO_RESERVE_MAX) {
                             game.reserve_ammo = AMMO_RESERVE_MAX;
                         }
-                    } else {
+                    } else if (it->type == ITEM_HEALTH) {
                         game.health += HEALTH_PICKUP_AMOUNT;
                         if (game.health > 100) { game.health = 100; }
+                    } else if (it->type == ITEM_WEAPON_KIT) {
+                        if (!game.has_weapon[GUN_SHOTGUN]) {
+                            game.has_weapon[GUN_SHOTGUN] = 1;
+                            game.ammo_per_gun[GUN_SHOTGUN] = weapon_def(GUN_SHOTGUN)->max_ammo;
+                            game_cycle_weapon(&game);
+                        }
                     }
                     it->active = 0;
                 }
@@ -373,8 +403,9 @@ int main(void) {
             int wall_idx = (current_level - 1 < 3) ? current_level - 1 : 2;
             raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT);
             sprite_render_all(renderer, &player, &game.enemies, zbuf, enemy_tex, w, h - HUD_HEIGHT);
-            item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, w, h - HUD_HEIGHT);
-            weapon_render(renderer, &pistol_tex, game.shot_timer, game.pistol_whip_timer, w, h - HUD_HEIGHT);
+            item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, w, h - HUD_HEIGHT);
+            const Texture *weapon_textures[GUN_COUNT] = { &pistol_tex, &shotgun_tex };
+            weapon_render(renderer, weapon_textures[game.current_weapon.type], game.shot_timer, game.pistol_whip_timer, w, h - HUD_HEIGHT);
             if (show_minimap) { minimap_render(renderer, &map, &player); }
             hud_render(renderer, w, h, game.health, game.ammo, game.reserve_ammo, game.score);
             if (game.level_clear_timer > 0.0f) {
@@ -407,6 +438,8 @@ int main(void) {
     sound_free(&whip_sound);
     for (int g = 0; g < GUN_COUNT; g++) { sound_free(&gun_sounds[g]); sound_free(&reload_sounds[g]); }
     Mix_CloseAudio();
+    texture_free(&shotgun_tex);
+    texture_free(&weapon_kit_tex);
     texture_free(&pistol_tex);
     for (int t = ENEMY_TYPE_COUNT - 1; t >= 0; t--) {
         for (int d = 7; d >= 0; d--) { texture_free(&enemy_tex[t][d]); }

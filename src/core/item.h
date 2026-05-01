@@ -7,7 +7,8 @@
 
 typedef enum {
     ITEM_AMMO,
-    ITEM_HEALTH
+    ITEM_HEALTH,
+    ITEM_WEAPON_KIT
 } ItemType;
 
 typedef struct {
@@ -22,6 +23,6 @@ typedef struct {
     int count;
 } ItemList;
 
-void item_list_init(ItemList *il, const Map *m, float px, float py);
+void item_list_init(ItemList *il, const Map *m, int level, float px, float py);
 
 #endif

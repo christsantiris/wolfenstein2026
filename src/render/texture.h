@@ -21,5 +21,7 @@ void texture_derive_guard_dirs(Texture guard_tex[8]);
 int  texture_recolor_uniform(Texture *dst, const Texture *src, unsigned char ur, unsigned char ug, unsigned char ub);
 void texture_generate_ammo_pickup(Texture *t);
 void texture_generate_health_pickup(Texture *t);
+void texture_generate_shotgun(Texture *t);
+void texture_generate_weapon_kit(Texture *t);
 
 #endif
