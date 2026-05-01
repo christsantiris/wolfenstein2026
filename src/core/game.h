@@ -5,9 +5,8 @@
 #include "core/item.h"
 #include "core/player.h"
 
-#define AMMO_PICKUP_AMOUNT   8
+#define AMMO_PICKUP_AMOUNT  8
 #define AMMO_RESERVE_MAX    99
-#define HEALTH_PICKUP_AMOUNT 25
 
 typedef enum {
     GUN_9MM_HANDGUN = 0,

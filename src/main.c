@@ -360,7 +360,9 @@ int main(void) {
                             game.reserve_ammo = AMMO_RESERVE_MAX;
                         }
                     } else if (it->type == ITEM_HEALTH) {
-                        game.health += HEALTH_PICKUP_AMOUNT;
+                        static const int HEALTH_PICKUP[4] = { 40, 25, 15, 10 };
+                        int heal = HEALTH_PICKUP[game.difficulty < 4 ? game.difficulty : 3];
+                        game.health += heal;
                         if (game.health > 100) { game.health = 100; }
                     } else if (it->type == ITEM_WEAPON_KIT) {
                         if (!game.has_weapon[GUN_SHOTGUN]) {

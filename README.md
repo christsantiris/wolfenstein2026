@@ -54,10 +54,10 @@ Pull requests are welcome. Please keep changes small and focused — one feature
 MIT
 
 ## Roadmap
+- More levels
 - Upgraded guns - more damage, faster firing rate.
-- Difficulty settings
 - Improved Enemy UI (PPM assets ?)
 - Improved Gun UI
 - Save / load
 - bosses
-- More levels
+
