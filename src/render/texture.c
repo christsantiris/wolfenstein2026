@@ -403,6 +403,39 @@ void texture_generate_health_pickup(Texture *t) {
     for (int y = 0; y < H; y++) { set_px(t, y, 0, 180, 180, 180); set_px(t, W-1, y, 180, 180, 180); }
 }
 
+void texture_generate_blue_brick(Texture *t) {
+    int brick_w = 16;
+    int brick_h = 8;
+    int mortar = 2;
+
+    for (int y = 0; y < t->height; y++) {
+        int row = y / brick_h;
+        int offset = (row % 2) * (brick_w / 2);
+        int mortar_y = (y % brick_h) < mortar;
+
+        for (int x = 0; x < t->width; x++) {
+            int col = (x + offset) % brick_w;
+            int mortar_x = col < mortar;
+            int in_mortar = mortar_y || mortar_x;
+
+            unsigned char r, g, b;
+            if (in_mortar) {
+                r = 12; g = 16; b = 42;
+            } else {
+                int vary = ((x * 3 + y * 7) % 20) - 10;
+                r = (unsigned char)(26 + vary / 2);
+                g = (unsigned char)(38 + vary / 2);
+                b = (unsigned char)(105 + vary);
+            }
+
+            int idx = (y * t->width + x) * 3;
+            t->pixels[idx] = r;
+            t->pixels[idx + 1] = g;
+            t->pixels[idx + 2] = b;
+        }
+    }
+}
+
 void texture_generate_brick(Texture *t) {
     int brick_w = 16;
     int brick_h = 8;
