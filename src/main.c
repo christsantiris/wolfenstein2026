@@ -139,16 +139,31 @@ int main(void) {
         for (int i = 0; i < 64 * 64 * 3; i++) { pistol_tex.pixels[i] = 0; }
     }
 
-    Texture guard_tex[8];
-    if (texture_load_ppm(&guard_tex[4], "assets/sprites/guard_front.ppm") != 0) {
-        texture_create(&guard_tex[4], 64, 64);
-        texture_generate_guard_dir(&guard_tex[4], 4);
+    Texture enemy_tex[ENEMY_TYPE_COUNT][8];
+    /* Guard */
+    if (texture_load_ppm(&enemy_tex[ENEMY_TYPE_GUARD][4], "assets/sprites/guard_front.ppm") != 0) {
+        texture_create(&enemy_tex[ENEMY_TYPE_GUARD][4], 64, 64);
+        texture_generate_guard_dir(&enemy_tex[ENEMY_TYPE_GUARD][4], 4);
     }
     for (int d = 0; d < 8; d++) {
         if (d == 4) { continue; }
-        texture_create(&guard_tex[d], guard_tex[4].width, guard_tex[4].height);
+        texture_create(&enemy_tex[ENEMY_TYPE_GUARD][d], enemy_tex[ENEMY_TYPE_GUARD][4].width, enemy_tex[ENEMY_TYPE_GUARD][4].height);
     }
-    texture_derive_guard_dirs(guard_tex);
+    texture_derive_guard_dirs(enemy_tex[ENEMY_TYPE_GUARD]);
+    /* Officer — recolor guard uniform to navy blue */
+    texture_recolor_uniform(&enemy_tex[ENEMY_TYPE_OFFICER][4], &enemy_tex[ENEMY_TYPE_GUARD][4], 60, 80, 160);
+    for (int d = 0; d < 8; d++) {
+        if (d == 4) { continue; }
+        texture_create(&enemy_tex[ENEMY_TYPE_OFFICER][d], enemy_tex[ENEMY_TYPE_OFFICER][4].width, enemy_tex[ENEMY_TYPE_OFFICER][4].height);
+    }
+    texture_derive_guard_dirs(enemy_tex[ENEMY_TYPE_OFFICER]);
+    /* SS — recolor guard uniform to black */
+    texture_recolor_uniform(&enemy_tex[ENEMY_TYPE_SS][4], &enemy_tex[ENEMY_TYPE_GUARD][4], 35, 35, 40);
+    for (int d = 0; d < 8; d++) {
+        if (d == 4) { continue; }
+        texture_create(&enemy_tex[ENEMY_TYPE_SS][d], enemy_tex[ENEMY_TYPE_SS][4].width, enemy_tex[ENEMY_TYPE_SS][4].height);
+    }
+    texture_derive_guard_dirs(enemy_tex[ENEMY_TYPE_SS]);
 
     int zbuf_w = 0;
     float *zbuf = NULL;
@@ -357,7 +372,7 @@ int main(void) {
         } else {
             int wall_idx = (current_level - 1 < 3) ? current_level - 1 : 2;
             raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT);
-            sprite_render_all(renderer, &player, &game.enemies, zbuf, guard_tex, w, h - HUD_HEIGHT);
+            sprite_render_all(renderer, &player, &game.enemies, zbuf, enemy_tex, w, h - HUD_HEIGHT);
             item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, w, h - HUD_HEIGHT);
             weapon_render(renderer, &pistol_tex, game.shot_timer, game.pistol_whip_timer, w, h - HUD_HEIGHT);
             if (show_minimap) { minimap_render(renderer, &map, &player); }
@@ -393,7 +408,9 @@ int main(void) {
     for (int g = 0; g < GUN_COUNT; g++) { sound_free(&gun_sounds[g]); sound_free(&reload_sounds[g]); }
     Mix_CloseAudio();
     texture_free(&pistol_tex);
-    for (int d = 7; d >= 0; d--) { texture_free(&guard_tex[d]); }
+    for (int t = ENEMY_TYPE_COUNT - 1; t >= 0; t--) {
+        for (int d = 7; d >= 0; d--) { texture_free(&enemy_tex[t][d]); }
+    }
     texture_free(&exit_tex);
     texture_free(&door_tex);
     for (int wl = 2; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }

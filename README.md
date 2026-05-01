@@ -56,8 +56,9 @@ MIT
 ## Roadmap
 - Upgraded guns - more damage, faster firing rate.
 - Difficulty settings
-- Enemy variety
+- Improved Enemy UI (PPM assets ?)
+- Improved Gun UI
 - Save / load
 - bosses
 - More levels
-
+- Improved level exit UI

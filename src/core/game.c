@@ -4,7 +4,6 @@
 #include <string.h>
 
 #define SHOT_DAMAGE 34
-#define ENEMY_HIT_DMG 8
 #define SHOT_RANGE 20.0f
 #define SHOT_CONE 0.15f
 #define KILL_SCORE 100
@@ -143,8 +142,9 @@ int game_update_enemies(GameState *g, const Player *p, const Map *m, float dt) {
     for (int i = 0; i < g->enemies.count; i++) {
         Enemy *e = &g->enemies.enemies[i];
         EnemyState prev = e->state;
-        if (enemy_update(e, p, m, dt)) {
-            g->health -= ENEMY_HIT_DMG;
+        int dmg = enemy_update(e, p, m, dt);
+        if (dmg > 0) {
+            g->health -= dmg;
             if (g->health < 0) {
                 g->health = 0;
             }

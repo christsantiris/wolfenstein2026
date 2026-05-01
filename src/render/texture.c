@@ -245,6 +245,32 @@ void texture_generate_guard_dir(Texture *t, int dir) {
     }
 }
 
+int texture_recolor_uniform(Texture *dst, const Texture *src, unsigned char ur, unsigned char ug, unsigned char ub) {
+    if (texture_create(dst, src->width, src->height) != 0) {
+        return -1;
+    }
+    int n = src->width * src->height;
+    for (int i = 0; i < n; i++) {
+        unsigned char r = src->pixels[i * 3];
+        unsigned char g = src->pixels[i * 3 + 1];
+        unsigned char b = src->pixels[i * 3 + 2];
+        if (r >= 150 && g >= 100 && g < r && b < g && b < 110) {
+            float lum = r / 200.0f;
+            int nr = (int)(ur * lum); if (nr > 255) { nr = 255; }
+            int ng = (int)(ug * lum); if (ng > 255) { ng = 255; }
+            int nb = (int)(ub * lum); if (nb > 255) { nb = 255; }
+            dst->pixels[i * 3]     = (unsigned char)nr;
+            dst->pixels[i * 3 + 1] = (unsigned char)ng;
+            dst->pixels[i * 3 + 2] = (unsigned char)nb;
+        } else {
+            dst->pixels[i * 3]     = r;
+            dst->pixels[i * 3 + 1] = g;
+            dst->pixels[i * 3 + 2] = b;
+        }
+    }
+    return 0;
+}
+
 void texture_derive_guard_dirs(Texture guard_tex[8]) {
     const Texture *src = &guard_tex[4];
     int W = src->width;
