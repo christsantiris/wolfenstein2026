@@ -57,9 +57,7 @@ MIT
 - Upgraded guns - more damage, faster firing rate.
 - Difficulty settings
 - Enemy variety
-- Sound — unique gunshots, unique reload clicks, enemy alert bark, door open, level clear
 - Save / load
 - bosses
 - More levels
-- menu functionality (music, sound toggles etc)
 

@@ -47,6 +47,6 @@ int  game_shoot(GameState *g, const Player *p);
 int  game_pistol_whip(GameState *g, const Player *p);
 int  game_reload(GameState *g);
 void game_update_timers(GameState *g, float dt);
-void game_update_enemies(GameState *g, const Player *p, const Map *m, float dt);
+int  game_update_enemies(GameState *g, const Player *p, const Map *m, float dt);
 
 #endif

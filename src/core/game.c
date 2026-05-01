@@ -138,9 +138,11 @@ int game_pistol_whip(GameState *g, const Player *p) {
     return 1;
 }
 
-void game_update_enemies(GameState *g, const Player *p, const Map *m, float dt) {
+int game_update_enemies(GameState *g, const Player *p, const Map *m, float dt) {
+    int bark = 0;
     for (int i = 0; i < g->enemies.count; i++) {
         Enemy *e = &g->enemies.enemies[i];
+        EnemyState prev = e->state;
         if (enemy_update(e, p, m, dt)) {
             g->health -= ENEMY_HIT_DMG;
             if (g->health < 0) {
@@ -148,10 +150,14 @@ void game_update_enemies(GameState *g, const Player *p, const Map *m, float dt) 
             }
             g->hit_flash_timer = 0.3f;
         }
+        if (prev == ENEMY_IDLE && e->state == ENEMY_ALERT) {
+            bark = 1;
+        }
     }
     if (enemy_list_all_dead(&g->enemies) && g->level_clear_timer == 0.0f) {
         g->level_clear_timer = 4.0f;
     }
+    return bark;
 }
 
 void game_update_timers(GameState *g, float dt) {

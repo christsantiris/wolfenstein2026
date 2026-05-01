@@ -164,6 +164,12 @@ int main(void) {
     }
     Sound whip_sound = { 0 };
     sound_load(&whip_sound, "assets/sounds/punch.mp3");
+    Sound door_sound = { 0 };
+    sound_load(&door_sound, "assets/sounds/dooropen.mp3");
+    Sound level_sound = { 0 };
+    sound_load(&level_sound, "assets/sounds/nextlevel.mp3");
+    Sound enemy_sound = { 0 };
+    sound_load(&enemy_sound, "assets/sounds/die.mp3");
 
     Music level_music[3] = { 0 };
     music_load(&level_music[0], "assets/music/level1theme.mp3");
@@ -270,6 +276,7 @@ int main(void) {
                         int door_y = (int)(player.y + sinf(player.angle));
                         if (map_is_door(&map, door_x, door_y)) {
                             map_toggle_door(&map, door_x, door_y);
+                            sound_play(&door_sound);
                         }
                     }
                 } else {
@@ -288,7 +295,9 @@ int main(void) {
 
         if (app_state == APP_PLAYING && !menu.is_open && !game_over) {
             input_update(&player, &map, dt);
-            game_update_enemies(&game, &player, &map, dt);
+            if (game_update_enemies(&game, &player, &map, dt)) {
+                sound_play(&enemy_sound);
+            }
             game_update_timers(&game, dt);
             if (game.health <= 0) {
                 game_over = 1;
@@ -324,6 +333,7 @@ int main(void) {
                     landing_reset();
                     app_state = APP_LANDING;
                 } else {
+                    sound_play(&level_sound);
                     int idx = current_level - 1;
                     if (idx >= 0 && idx < 3) {
                         music_play(&level_music[idx]);
@@ -376,6 +386,9 @@ int main(void) {
     free(zbuf);
     music_stop();
     for (int m = 0; m < 3; m++) { music_free(&level_music[m]); }
+    sound_free(&enemy_sound);
+    sound_free(&level_sound);
+    sound_free(&door_sound);
     sound_free(&whip_sound);
     for (int g = 0; g < GUN_COUNT; g++) { sound_free(&gun_sounds[g]); sound_free(&reload_sounds[g]); }
     Mix_CloseAudio();
