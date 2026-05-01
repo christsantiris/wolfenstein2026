@@ -62,4 +62,3 @@ MIT
 - bosses
 - More levels
 - Improved level exit UI
-- Auto reload toggle

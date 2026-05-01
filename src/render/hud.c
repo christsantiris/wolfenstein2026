@@ -30,6 +30,22 @@ void hud_draw_level_clear(SDL_Renderer *renderer, int screen_w, int screen_h, fl
     font_draw_string(renderer, msg, tx, ty, gold);
 }
 
+void hud_draw_exit_open(SDL_Renderer *renderer, int screen_w, int screen_h) {
+    const char *msg = "EXIT OPEN - FIND THE DOOR";
+    int tw = font_str_px_w(msg);
+    int tx = (screen_w - tw) / 2;
+    int ty = 16;
+
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 150);
+    SDL_Rect bar = { tx - 16, ty - 8, tw + 32, FONT_CH + 16 };
+    SDL_RenderFillRect(renderer, &bar);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+
+    SDL_Color gold = { 220, 180, 50, 255 };
+    font_draw_string(renderer, msg, tx, ty, gold);
+}
+
 void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, int ammo, int reserve_ammo, int score) {
     int bar_y = screen_h - HUD_HEIGHT;
 

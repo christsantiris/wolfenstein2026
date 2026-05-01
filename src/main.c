@@ -224,6 +224,7 @@ int main(void) {
     int game_over = 0;
     int show_minimap = 1;
     int running = 1;
+    float total_time = 0.0f;
     SDL_Event e;
     Uint32 last_ticks = SDL_GetTicks();
 
@@ -231,6 +232,7 @@ int main(void) {
         Uint32 now = SDL_GetTicks();
         float dt = (now - last_ticks) / 1000.0f;
         last_ticks = now;
+        total_time += dt;
 
         int w, h;
         SDL_GetWindowSize(window, &w, &h);
@@ -401,7 +403,7 @@ int main(void) {
             difficulty_screen_render(renderer, w, h);
         } else {
             int wall_idx = (current_level - 1 < 3) ? current_level - 1 : 2;
-            raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT);
+            raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT, total_time);
             sprite_render_all(renderer, &player, &game.enemies, zbuf, enemy_tex, w, h - HUD_HEIGHT);
             item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, w, h - HUD_HEIGHT);
             const Texture *weapon_textures[GUN_COUNT] = { &pistol_tex, &shotgun_tex };
@@ -410,6 +412,8 @@ int main(void) {
             hud_render(renderer, w, h, game.health, game.ammo, game.reserve_ammo, game.score);
             if (game.level_clear_timer > 0.0f) {
                 hud_draw_level_clear(renderer, w, h - HUD_HEIGHT, game.level_clear_timer);
+            } else if (enemy_list_all_dead(&game.enemies)) {
+                hud_draw_exit_open(renderer, w, h - HUD_HEIGHT);
             }
             if (game.hit_flash_timer > 0.0f) {
                 SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);

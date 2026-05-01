@@ -7,5 +7,6 @@
 
 void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, int ammo, int reserve_ammo, int score);
 void hud_draw_level_clear(SDL_Renderer *renderer, int screen_w, int screen_h, float timer);
+void hud_draw_exit_open(SDL_Renderer *renderer, int screen_w, int screen_h);
 
 #endif

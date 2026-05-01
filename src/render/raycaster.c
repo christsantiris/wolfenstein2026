@@ -11,7 +11,8 @@
 #define FLOOR_G     30
 #define FLOOR_B     30
 
-void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, const Texture *wall_tex, const Texture *door_tex, const Texture *exit_tex, float *zbuf, int screen_w, int screen_h) {
+void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, const Texture *wall_tex, const Texture *door_tex, const Texture *exit_tex, float *zbuf, int screen_w, int screen_h, float time) {
+    float pulse = 0.5f + 0.5f * sinf(time * 3.0f);
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
     float plane_x = -dir_y * FOV_FACTOR;
@@ -109,7 +110,9 @@ void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, con
         for (int y = draw_start; y < draw_end; y++) {
             unsigned char r, g, b;
             if (cell_type == MAP_CELL_VOID) {
-                r = 220; g = 180; b = 50;
+                r = (unsigned char)(160 + 60 * pulse);
+                g = (unsigned char)(120 + 60 * pulse);
+                b = (unsigned char)(20 + 30 * pulse);
             } else {
                 float tex_v = (y - (screen_h - wall_h) * 0.5f) / wall_h;
                 const Texture *src;
