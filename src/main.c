@@ -280,7 +280,7 @@ int main(void) {
                         }
                     }
                 } else {
-                    GameOverResult result = game_over_handle_event(&e, w, h);
+                    GameOverResult result = game_over_handle_event(&e, w, h, hs_table.count);
                     if (result == GAME_OVER_QUIT) {
                         running = 0;
                     } else if (result == GAME_OVER_NEW_GAME) {

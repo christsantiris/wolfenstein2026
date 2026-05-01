@@ -255,17 +255,24 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
     draw_button(r, "QUIT",     l.quit_x,     y);
 }
 
-static void game_over_button_rects(int sw, int sh, SDL_Rect *rn, SDL_Rect *rl, SDL_Rect *rq) {
+static void game_over_button_rects(int sw, int sh, int score_count, SDL_Rect *rn, SDL_Rect *rl, SDL_Rect *rq) {
     int nw = str_px_w("NEW GAME") + 16;
     int lw = str_px_w("LOAD") + 16;
     int qw = str_px_w("QUIT") + 16;
     int bh = CH + 8;
     int total = nw + 20 + lw + 20 + qw;
     int bx = sw / 2 - total / 2;
-    int by = sh / 2 + 30;
-    rn->x = bx;              rn->y = by; rn->w = nw; rn->h = bh;
-    rl->x = bx + nw + 20;   rl->y = by; rl->w = lw; rl->h = bh;
-    rq->x = bx + nw + 20 + lw + 20; rq->y = by; rq->w = qw; rq->h = bh;
+    /* match the render layout: start + GAME OVER + SCORE + RANK + title + entries + gap */
+    int by = sh / 2 - 100
+           + (LHEIGHT + 4)
+           + (LHEIGHT + 2)
+           + (LHEIGHT + 12)
+           + (LHEIGHT + 4)
+           + score_count * LHEIGHT
+           + 12;
+    rn->x = bx;                        rn->y = by; rn->w = nw; rn->h = bh;
+    rl->x = bx + nw + 20;             rl->y = by; rl->w = lw; rl->h = bh;
+    rq->x = bx + nw + 20 + lw + 20;  rq->y = by; rq->w = qw; rq->h = bh;
 }
 
 void game_over_render(SDL_Renderer *r, int sw, int sh, int score, int rank, const HighScoreTable *t) {
@@ -310,20 +317,20 @@ void game_over_render(SDL_Renderer *r, int sw, int sh, int score, int rank, cons
     }
 
     SDL_Rect rn, rl, rq;
-    game_over_button_rects(sw, sh, &rn, &rl, &rq);
+    game_over_button_rects(sw, sh, t->count, &rn, &rl, &rq);
     draw_button(r, "NEW GAME", rn.x, rn.y + 4);
     draw_button(r, "LOAD",     rl.x, rl.y + 4);
     draw_button(r, "QUIT",     rq.x, rq.y + 4);
 }
 
-GameOverResult game_over_handle_event(const SDL_Event *e, int sw, int sh) {
+GameOverResult game_over_handle_event(const SDL_Event *e, int sw, int sh, int score_count) {
     if (e->type != SDL_MOUSEBUTTONDOWN || e->button.button != SDL_BUTTON_LEFT) {
         return GAME_OVER_NONE;
     }
     int mx = e->button.x;
     int my = e->button.y;
     SDL_Rect rn, rl, rq;
-    game_over_button_rects(sw, sh, &rn, &rl, &rq);
+    game_over_button_rects(sw, sh, score_count, &rn, &rl, &rq);
     if (mx >= rn.x && mx < rn.x + rn.w && my >= rn.y && my < rn.y + rn.h) {
         return GAME_OVER_NEW_GAME;
     }
