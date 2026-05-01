@@ -560,37 +560,76 @@ void texture_generate_shotgun(Texture *t) {
 void texture_generate_weapon_kit(Texture *t) {
     int W = t->width;
     int H = t->height;
+    /* magenta background */
     for (int i = 0; i < W * H * 3; i += 3) {
         t->pixels[i] = 255; t->pixels[i + 1] = 0; t->pixels[i + 2] = 255;
     }
-    /* green ammo crate body */
-    int bx0 = W * 10 / 64;
-    int bx1 = W * 54 / 64;
-    int by0 = H * 22 / 64;
-    int by1 = H * 50 / 64;
-    for (int y = by0; y < by1; y++) {
-        for (int x = bx0; x < bx1; x++) {
-            int vary = ((x * 2 + y * 3) % 8) - 4;
-            set_px(t, x, y, (unsigned char)(60 + vary), (unsigned char)(90 + vary), (unsigned char)(40 + vary));
+
+    /* side-profile pistol, barrel pointing left */
+
+    /* barrel */
+    int brl_x0 = W * 8 / 64;
+    int brl_x1 = W * 30 / 64;
+    int brl_y0 = H * 26 / 64;
+    int brl_y1 = H * 32 / 64;
+    for (int y = brl_y0; y < brl_y1; y++) {
+        for (int x = brl_x0; x < brl_x1; x++) {
+            set_px(t, x, y, 55, 55, 60);
         }
     }
-    for (int x = bx0; x < bx1; x++) {
-        set_px(t, x, by0, 35, 55, 20);
-        set_px(t, x, by1 - 1, 35, 55, 20);
+    /* muzzle end — darker ring */
+    for (int y = brl_y0 - 1; y < brl_y1 + 1; y++) {
+        set_px(t, brl_x0, y, 30, 30, 34);
+        set_px(t, brl_x0 + 1, y, 30, 30, 34);
     }
-    for (int y = by0; y < by1; y++) {
-        set_px(t, bx0, y, 35, 55, 20);
-        set_px(t, bx1 - 1, y, 35, 55, 20);
-    }
-    /* white cross in center */
-    int cx = W / 2;
-    int cy = (by0 + by1) / 2;
-    for (int d = -3; d <= 3; d++) {
-        if (cx + d >= 0 && cx + d < W) {
-            set_px(t, cx + d, cy, 220, 220, 220);
+
+    /* slide / receiver block */
+    int sx0 = W * 27 / 64;
+    int sx1 = W * 55 / 64;
+    int sy0 = H * 20 / 64;
+    int sy1 = H * 38 / 64;
+    for (int y = sy0; y < sy1; y++) {
+        for (int x = sx0; x < sx1; x++) {
+            unsigned char v = (y < sy0 + 2) ? 75 : 58;
+            set_px(t, x, y, v, v, (unsigned char)(v + 5));
         }
-        if (cy + d >= 0 && cy + d < H) {
-            set_px(t, cx, cy + d, 220, 220, 220);
+    }
+    /* ejection port cutout on slide */
+    for (int y = sy0 + 4; y < sy1 - 5; y++) {
+        for (int x = sx0 + 3; x < sx0 + 12; x++) {
+            set_px(t, x, y, 22, 22, 26);
+        }
+    }
+
+    /* frame below slide */
+    int fy0 = sy1;
+    int fy1 = H * 44 / 64;
+    for (int y = fy0; y < fy1; y++) {
+        for (int x = sx0 + 2; x < sx1; x++) {
+            set_px(t, x, y, 50, 50, 55);
+        }
+    }
+
+    /* trigger guard outline */
+    int tgx0 = sx0 + 2;
+    int tgx1 = W * 42 / 64;
+    int tgy1 = H * 50 / 64;
+    for (int x = tgx0; x <= tgx1; x++) {
+        set_px(t, x, fy0, 44, 44, 48);
+        set_px(t, x, tgy1, 44, 44, 48);
+    }
+    for (int y = fy0; y <= tgy1; y++) {
+        set_px(t, tgx0, y, 44, 44, 48);
+        set_px(t, tgx1, y, 44, 44, 48);
+    }
+
+    /* wood grip */
+    int gx0 = W * 42 / 64;
+    int gy1 = H * 58 / 64;
+    for (int y = fy0; y < gy1; y++) {
+        for (int x = gx0; x < sx1; x++) {
+            int vary = ((x * 3 + y * 5) % 6) - 3;
+            set_px(t, x, y, (unsigned char)(86 + vary), (unsigned char)(50 + vary), (unsigned char)(18 + vary));
         }
     }
 }
