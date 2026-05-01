@@ -11,6 +11,7 @@
 
 typedef enum {
     GUN_9MM_HANDGUN = 0,
+    GUN_SHOTGUN,
     GUN_COUNT
 } GunType;
 
@@ -19,6 +20,8 @@ typedef struct {
     const char *sound_path;
     const char *reload_sound_path;
     int max_ammo;
+    int damage;
+    float cone;
     float shot_cooldown;
     float shot_timer_duration;
     float reload_time;
@@ -37,6 +40,8 @@ typedef struct {
     int is_reloading;
     float level_clear_timer;
     WeaponDef current_weapon;
+    int has_weapon[GUN_COUNT];
+    int ammo_per_gun[GUN_COUNT];
     EnemyList enemies;
     ItemList items;
 } GameState;
@@ -46,6 +51,7 @@ void game_init(GameState *g);
 int  game_shoot(GameState *g, const Player *p);
 int  game_pistol_whip(GameState *g, const Player *p);
 int  game_reload(GameState *g);
+void game_cycle_weapon(GameState *g);
 void game_update_timers(GameState *g, float dt);
 int  game_update_enemies(GameState *g, const Player *p, const Map *m, float dt);
 

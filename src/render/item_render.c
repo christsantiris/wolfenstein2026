@@ -3,7 +3,7 @@
 
 #define FOV_FACTOR 0.66f
 
-void item_render_all(SDL_Renderer *renderer, const Player *p, const ItemList *il, const float *zbuf, const Texture *ammo_tex, const Texture *health_tex, int screen_w, int screen_h) {
+void item_render_all(SDL_Renderer *renderer, const Player *p, const ItemList *il, const float *zbuf, const Texture *ammo_tex, const Texture *health_tex, const Texture *weapon_kit_tex, int screen_w, int screen_h) {
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
     float plane_x = -dir_y * FOV_FACTOR;
@@ -37,7 +37,7 @@ void item_render_all(SDL_Renderer *renderer, const Player *p, const ItemList *il
         if (draw_x1 > screen_w) { draw_x1 = screen_w; }
 
         int tex_y_base = screen_h / 2 - sprite_h / 2;
-        const Texture *tex = (it->type == ITEM_AMMO) ? ammo_tex : health_tex;
+        const Texture *tex = (it->type == ITEM_AMMO) ? ammo_tex : (it->type == ITEM_HEALTH) ? health_tex : weapon_kit_tex;
 
         for (int x = draw_x0; x < draw_x1; x++) {
             if (transform_y >= zbuf[x]) { continue; }

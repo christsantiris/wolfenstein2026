@@ -5,7 +5,7 @@
 #define ITEMS_PER_LEVEL 3
 #define MIN_SPAWN_DIST2 16.0f
 
-void item_list_init(ItemList *il, const Map *m, float px, float py) {
+void item_list_init(ItemList *il, const Map *m, int level, float px, float py) {
     memset(il, 0, sizeof(*il));
 
     typedef struct { float x; float y; } Pos;
@@ -41,6 +41,15 @@ void item_list_init(ItemList *il, const Map *m, float px, float py) {
         it->x = candidates[i].x;
         it->y = candidates[i].y;
         it->type = (i % 2 == 0) ? ITEM_AMMO : ITEM_HEALTH;
+        it->active = 1;
+    }
+
+    if (level == 2 && il->count < MAX_ITEMS && nc > count) {
+        int j = count + rand() % (nc - count);
+        Item *it = &il->items[il->count++];
+        it->x = candidates[j].x;
+        it->y = candidates[j].y;
+        it->type = ITEM_WEAPON_KIT;
         it->active = 1;
     }
 }

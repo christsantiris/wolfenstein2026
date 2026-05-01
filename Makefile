@@ -1,7 +1,7 @@
 .PHONY: all run clean debug test linux sprites
 
 all:
-	cmake -B build -DCMAKE_BUILD_TYPE=Release -DDEBUG_NO_AMMO=OFF
+	cmake -B build -DCMAKE_BUILD_TYPE=Release -DDEBUG_NO_AMMO=OFF -DDEBUG_SHOTGUN=OFF
 	cmake --build build
 
 run: all
@@ -15,7 +15,7 @@ linux:
 	bash package/linux/build_linux.sh
 
 debug:
-	cmake -B build -DCMAKE_BUILD_TYPE=Debug -DDEBUG_NO_AMMO=ON
+	cmake -B build -DCMAKE_BUILD_TYPE=Debug -DDEBUG_NO_AMMO=OFF -DDEBUG_SHOTGUN=ON
 	cmake --build build
 	./build/wolf
 

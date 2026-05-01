@@ -494,3 +494,103 @@ void texture_generate_sandstone(Texture *t) {
         }
     }
 }
+
+void texture_generate_shotgun(Texture *t) {
+    int W = t->width;
+    int H = t->height;
+    for (int i = 0; i < W * H * 3; i += 3) {
+        t->pixels[i] = 255; t->pixels[i + 1] = 0; t->pixels[i + 2] = 255;
+    }
+    /* Two barrel tubes pointing outward: run top-to-bottom, slightly inward taper */
+    int lcx = W * 26 / 64;
+    int rcx = W * 38 / 64;
+    int br = 4;
+    int barrel_top = H * 4 / 64;
+    int barrel_bot = H * 38 / 64;
+    for (int y = barrel_top; y < barrel_bot; y++) {
+        int taper = (barrel_bot - y) * br / (barrel_bot - barrel_top + 1);
+        int lr = br - taper / 6;
+        if (lr < 2) { lr = 2; }
+        for (int x = lcx - lr; x <= lcx + lr; x++) {
+            unsigned char edge = (abs(x - lcx) >= lr) ? 40 : 58;
+            set_px(t, x, y, edge, edge, edge + 6);
+        }
+        for (int x = rcx - lr; x <= rcx + lr; x++) {
+            unsigned char edge = (abs(x - rcx) >= lr) ? 40 : 58;
+            set_px(t, x, y, edge, edge, edge + 6);
+        }
+    }
+    /* dark muzzle openings at top of each barrel */
+    for (int y = barrel_top; y < barrel_top + 5; y++) {
+        for (int dx = -3; dx <= 3; dx++) {
+            set_px(t, lcx + dx, y, 18, 18, 20);
+            set_px(t, rcx + dx, y, 18, 18, 20);
+        }
+    }
+    /* receiver block joining both barrels */
+    int rec_x0 = lcx - br - 3;
+    int rec_x1 = rcx + br + 3;
+    int rec_y0 = barrel_bot;
+    int rec_y1 = H * 52 / 64;
+    for (int y = rec_y0; y < rec_y1; y++) {
+        for (int x = rec_x0; x <= rec_x1; x++) {
+            int top_shade = (y == rec_y0) ? 70 : 52;
+            set_px(t, x, y, (unsigned char)top_shade, (unsigned char)top_shade, (unsigned char)(top_shade + 5));
+        }
+    }
+    /* grip: wood below receiver, narrower */
+    int grip_x0 = W * 28 / 64;
+    int grip_x1 = W * 36 / 64;
+    for (int y = rec_y1; y < H - 2; y++) {
+        for (int x = grip_x0; x <= grip_x1; x++) {
+            int vary = ((x + y) % 6) - 3;
+            set_px(t, x, y, (unsigned char)(88 + vary), (unsigned char)(52 + vary), (unsigned char)(18 + vary));
+        }
+    }
+    /* trigger guard: small arc below receiver */
+    int tg_y = rec_y1 + 3;
+    int tg_cx = W / 2;
+    for (int dx = -5; dx <= 5; dx++) {
+        if (tg_cx + dx >= 0 && tg_cx + dx < W && tg_y < H) {
+            set_px(t, tg_cx + dx, tg_y, 62, 62, 66);
+        }
+    }
+}
+
+void texture_generate_weapon_kit(Texture *t) {
+    int W = t->width;
+    int H = t->height;
+    for (int i = 0; i < W * H * 3; i += 3) {
+        t->pixels[i] = 255; t->pixels[i + 1] = 0; t->pixels[i + 2] = 255;
+    }
+    /* green ammo crate body */
+    int bx0 = W * 10 / 64;
+    int bx1 = W * 54 / 64;
+    int by0 = H * 22 / 64;
+    int by1 = H * 50 / 64;
+    for (int y = by0; y < by1; y++) {
+        for (int x = bx0; x < bx1; x++) {
+            int vary = ((x * 2 + y * 3) % 8) - 4;
+            set_px(t, x, y, (unsigned char)(60 + vary), (unsigned char)(90 + vary), (unsigned char)(40 + vary));
+        }
+    }
+    for (int x = bx0; x < bx1; x++) {
+        set_px(t, x, by0, 35, 55, 20);
+        set_px(t, x, by1 - 1, 35, 55, 20);
+    }
+    for (int y = by0; y < by1; y++) {
+        set_px(t, bx0, y, 35, 55, 20);
+        set_px(t, bx1 - 1, y, 35, 55, 20);
+    }
+    /* white cross in center */
+    int cx = W / 2;
+    int cy = (by0 + by1) / 2;
+    for (int d = -3; d <= 3; d++) {
+        if (cx + d >= 0 && cx + d < W) {
+            set_px(t, cx + d, cy, 220, 220, 220);
+        }
+        if (cy + d >= 0 && cy + d < H) {
+            set_px(t, cx, cy + d, 220, 220, 220);
+        }
+    }
+}
