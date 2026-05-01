@@ -501,52 +501,58 @@ void texture_generate_shotgun(Texture *t) {
     for (int i = 0; i < W * H * 3; i += 3) {
         t->pixels[i] = 255; t->pixels[i + 1] = 0; t->pixels[i + 2] = 255;
     }
-    /* stock: dark brown rectangle on left */
-    int stock_x0 = W * 2 / 64;
-    int stock_x1 = W * 24 / 64;
-    int stock_y0 = H * 34 / 64;
-    int stock_y1 = H * 46 / 64;
-    for (int y = stock_y0; y < stock_y1; y++) {
-        for (int x = stock_x0; x < stock_x1; x++) {
-            int vary = ((x + y) % 6) - 3;
-            set_px(t, x, y, (unsigned char)(90 + vary), (unsigned char)(55 + vary), (unsigned char)(20 + vary));
+    /* Two barrel tubes pointing outward: run top-to-bottom, slightly inward taper */
+    int lcx = W * 26 / 64;
+    int rcx = W * 38 / 64;
+    int br = 4;
+    int barrel_top = H * 4 / 64;
+    int barrel_bot = H * 38 / 64;
+    for (int y = barrel_top; y < barrel_bot; y++) {
+        int taper = (barrel_bot - y) * br / (barrel_bot - barrel_top + 1);
+        int lr = br - taper / 6;
+        if (lr < 2) { lr = 2; }
+        for (int x = lcx - lr; x <= lcx + lr; x++) {
+            unsigned char edge = (abs(x - lcx) >= lr) ? 40 : 58;
+            set_px(t, x, y, edge, edge, edge + 6);
+        }
+        for (int x = rcx - lr; x <= rcx + lr; x++) {
+            unsigned char edge = (abs(x - rcx) >= lr) ? 40 : 58;
+            set_px(t, x, y, edge, edge, edge + 6);
         }
     }
-    /* receiver: dark metal body */
-    int rec_x0 = W * 20 / 64;
-    int rec_x1 = W * 46 / 64;
-    int rec_y0 = H * 30 / 64;
-    int rec_y1 = H * 44 / 64;
+    /* dark muzzle openings at top of each barrel */
+    for (int y = barrel_top; y < barrel_top + 5; y++) {
+        for (int dx = -3; dx <= 3; dx++) {
+            set_px(t, lcx + dx, y, 18, 18, 20);
+            set_px(t, rcx + dx, y, 18, 18, 20);
+        }
+    }
+    /* receiver block joining both barrels */
+    int rec_x0 = lcx - br - 3;
+    int rec_x1 = rcx + br + 3;
+    int rec_y0 = barrel_bot;
+    int rec_y1 = H * 52 / 64;
     for (int y = rec_y0; y < rec_y1; y++) {
-        for (int x = rec_x0; x < rec_x1; x++) {
-            set_px(t, x, y, 55, 55, 58);
+        for (int x = rec_x0; x <= rec_x1; x++) {
+            int top_shade = (y == rec_y0) ? 70 : 52;
+            set_px(t, x, y, (unsigned char)top_shade, (unsigned char)top_shade, (unsigned char)(top_shade + 5));
         }
     }
-    /* double barrel: two side-by-side dark tubes */
-    int barrel_x0 = W * 42 / 64;
-    int barrel_x1 = W * 62 / 64;
-    int barrel_sep = (barrel_x1 - barrel_x0) / 2;
-    int bTop = H * 32 / 64;
-    int bBot = H * 42 / 64;
-    for (int y = bTop; y < bBot; y++) {
-        for (int x = barrel_x0; x < barrel_x1; x++) {
-            int in_gap = (x == barrel_x0 + barrel_sep);
-            unsigned char metal = in_gap ? 20 : 45;
-            set_px(t, x, y, metal, metal, metal + 5);
+    /* grip: wood below receiver, narrower */
+    int grip_x0 = W * 28 / 64;
+    int grip_x1 = W * 36 / 64;
+    for (int y = rec_y1; y < H - 2; y++) {
+        for (int x = grip_x0; x <= grip_x1; x++) {
+            int vary = ((x + y) % 6) - 3;
+            set_px(t, x, y, (unsigned char)(88 + vary), (unsigned char)(52 + vary), (unsigned char)(18 + vary));
         }
-        set_px(t, barrel_x0, y, 70, 70, 75);
-        set_px(t, barrel_x1 - 1, y, 70, 70, 75);
     }
-    /* muzzle end */
-    for (int x = barrel_x0; x < barrel_x1; x++) {
-        set_px(t, x, bTop, 25, 25, 28);
-    }
-    /* trigger guard */
-    int tg_cx = (rec_x0 + rec_x1) / 2;
+    /* trigger guard: small arc below receiver */
     int tg_y = rec_y1 + 3;
-    for (int x = tg_cx - 4; x <= tg_cx + 4; x++) {
-        if (x >= 0 && x < W && tg_y < H) {
-            set_px(t, x, tg_y, 60, 60, 65);
+    int tg_cx = W / 2;
+    for (int dx = -5; dx <= 5; dx++) {
+        if (tg_cx + dx >= 0 && tg_cx + dx < W && tg_y < H) {
+            set_px(t, tg_cx + dx, tg_y, 62, 62, 66);
         }
     }
 }

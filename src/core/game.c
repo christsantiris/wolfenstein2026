@@ -47,6 +47,12 @@ void game_init(GameState *g) {
     g->ammo = 0;
     g->reserve_ammo = 0;
 #endif
+#ifdef DEBUG_SHOTGUN
+    g->has_weapon[GUN_SHOTGUN] = 1;
+    g->ammo_per_gun[GUN_SHOTGUN] = WEAPON_SHOTGUN.max_ammo;
+    g->current_weapon = WEAPON_SHOTGUN;
+    g->ammo = WEAPON_SHOTGUN.max_ammo;
+#endif
 }
 
 int game_reload(GameState *g) {

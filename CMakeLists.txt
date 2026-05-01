@@ -7,12 +7,16 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 
 option(DEBUG_NO_AMMO "Start with zero ammo for pistol whip testing" OFF)
+option(DEBUG_SHOTGUN "Start with shotgun unlocked for testing" OFF)
 
 file(GLOB_RECURSE SOURCES src/*.c)
 add_executable(wolf ${SOURCES})
 
 if(DEBUG_NO_AMMO)
     target_compile_definitions(wolf PRIVATE DEBUG_NO_AMMO)
+endif()
+if(DEBUG_SHOTGUN)
+    target_compile_definitions(wolf PRIVATE DEBUG_SHOTGUN)
 endif()
 
 target_include_directories(wolf PRIVATE ${SDL2_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/src)
