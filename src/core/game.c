@@ -4,7 +4,7 @@
 #include <string.h>
 
 #define SHOT_RANGE 20.0f
-#define KILL_SCORE 100
+static const int KILL_SCORE[4] = { 75, 100, 150, 200 };
 #define WHIP_DAMAGE 50
 #define WHIP_RANGE 1.5f
 #define WHIP_CONE 0.5f
@@ -116,7 +116,7 @@ int game_shoot(GameState *g, const Player *p) {
         target->health -= g->current_weapon.damage;
         if (target->health <= 0) {
             target->active = 0;
-            g->score += KILL_SCORE;
+            g->score += KILL_SCORE[g->difficulty < 4 ? g->difficulty : 3];
         }
     }
     return 1;
@@ -156,7 +156,7 @@ int game_pistol_whip(GameState *g, const Player *p) {
         target->health -= WHIP_DAMAGE;
         if (target->health <= 0) {
             target->active = 0;
-            g->score += KILL_SCORE;
+            g->score += KILL_SCORE[g->difficulty < 4 ? g->difficulty : 3];
         }
     }
     return 1;
@@ -167,8 +167,12 @@ int game_update_enemies(GameState *g, const Player *p, const Map *m, float dt) {
     for (int i = 0; i < g->enemies.count; i++) {
         Enemy *e = &g->enemies.enemies[i];
         EnemyState prev = e->state;
-        int dmg = enemy_update(e, p, m, dt);
+        static const float DAMAGE_MULT[4] = { 0.5f, 1.0f, 1.3f, 2.5f };
+        int dmg = enemy_update(e, p, m, dt, g->difficulty);
         if (dmg > 0) {
+            int d = g->difficulty < 4 ? g->difficulty : 3;
+            dmg = (int)(dmg * DAMAGE_MULT[d]);
+            if (dmg < 1) { dmg = 1; }
             g->health -= dmg;
             if (g->health < 0) {
                 g->health = 0;

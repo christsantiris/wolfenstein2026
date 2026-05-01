@@ -34,11 +34,18 @@ static int enemy_has_los(const Enemy *e, const Player *p, const Map *m) {
     return 1;
 }
 
-int enemy_update(Enemy *e, const Player *p, const Map *m, float dt) {
+static const float SPEED_MULT[4]  = { 0.70f, 1.0f, 1.20f, 1.50f };
+static const float SIGHT_MULT[4]  = { 0.70f, 1.0f, 1.30f, 1.60f };
+
+int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficulty) {
     if (!e->active) {
         return 0;
     }
     const EnemyDef *def = enemy_def(e->type);
+    int d = difficulty < 4 ? difficulty : 3;
+    float speed = def->speed * SPEED_MULT[d];
+    float sight = def->sight_range * SIGHT_MULT[d];
+
     float dx = p->x - e->x;
     float dy = p->y - e->y;
     float dist = sqrtf(dx * dx + dy * dy);
@@ -48,7 +55,7 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt) {
     }
 
     if (e->state == ENEMY_IDLE) {
-        if (dist < def->sight_range && enemy_has_los(e, p, m)) {
+        if (dist < sight && enemy_has_los(e, p, m)) {
             e->state = ENEMY_ALERT;
         }
     } else if (e->state == ENEMY_ALERT) {
@@ -56,8 +63,8 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt) {
             e->state = ENEMY_ATTACK;
         } else {
             e->angle = atan2f(dy, dx);
-            float nx = e->x + (dx / dist) * def->speed * dt;
-            float ny = e->y + (dy / dist) * def->speed * dt;
+            float nx = e->x + (dx / dist) * speed * dt;
+            float ny = e->y + (dy / dist) * speed * dt;
             if (!map_is_wall(m, (int)nx, (int)e->y)) {
                 e->x = nx;
             }
@@ -89,7 +96,10 @@ int enemy_list_all_dead(const EnemyList *el) {
     return 1;
 }
 
-static void place(EnemyList *el, float x, float y, EnemyType type) {
+static const float HEALTH_MULT[4] = { 0.6f, 1.0f, 1.2f, 1.3f };
+static const int   COUNT_BONUS[4] = { -1,   0,    2,    5   };
+
+static void place(EnemyList *el, float x, float y, EnemyType type, int difficulty) {
     if (el->count >= MAX_ENEMIES) {
         return;
     }
@@ -97,17 +107,20 @@ static void place(EnemyList *el, float x, float y, EnemyType type) {
     e->x = x;
     e->y = y;
     e->angle = (float)(rand() % 8) * ((float)M_PI / 4.0f);
-    e->health = enemy_def(type)->max_health;
+    int base_hp = enemy_def(type)->max_health;
+    float mult = HEALTH_MULT[difficulty < 4 ? difficulty : 3];
+    e->health = (int)(base_hp * mult);
+    if (e->health < 1) { e->health = 1; }
     e->active = 1;
     e->type = type;
     e->state = ENEMY_IDLE;
     e->attack_timer = 0.0f;
 }
 
-void enemy_list_init(EnemyList *el, const Map *m, int level, float px, float py) {
+void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, float px, float py) {
     memset(el, 0, sizeof(EnemyList));
 
-    int count = 4 + level;
+    int count = 4 + level + COUNT_BONUS[difficulty < 4 ? difficulty : 3];
     if (count > MAX_ENEMIES) { count = MAX_ENEMIES; }
 
     typedef struct { float x; float y; } Pos;
@@ -150,6 +163,6 @@ void enemy_list_init(EnemyList *el, const Map *m, int level, float px, float py)
                 type = ENEMY_TYPE_SS;
             }
         }
-        place(el, candidates[i].x, candidates[i].y, type);
+        place(el, candidates[i].x, candidates[i].y, type, difficulty);
     }
 }

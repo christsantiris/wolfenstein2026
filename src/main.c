@@ -36,6 +36,7 @@ static int start_game(Map *map, Player *player, GameState *game, int level) {
     }
     player_init(player, 14.5f, 10.5f, 0.0f);
     int saved_score = game->score;
+    int saved_difficulty = game->difficulty;
     int saved_has_weapon[GUN_COUNT];
     int saved_ammo_per_gun[GUN_COUNT];
     WeaponDef saved_weapon = game->current_weapon;
@@ -45,13 +46,14 @@ static int start_game(Map *map, Player *player, GameState *game, int level) {
     }
     game_init(game);
     game->score = saved_score;
+    game->difficulty = saved_difficulty;
     for (int i = 0; i < GUN_COUNT; i++) {
         game->has_weapon[i] = saved_has_weapon[i];
         game->ammo_per_gun[i] = saved_ammo_per_gun[i];
     }
     game->current_weapon = saved_weapon;
     game->ammo = game->ammo_per_gun[saved_weapon.type];
-    enemy_list_init(&game->enemies, map, level, player->x, player->y);
+    enemy_list_init(&game->enemies, map, level, game->difficulty, player->x, player->y);
     item_list_init(&game->items, map, level, player->x, player->y);
     return 0;
 }
@@ -258,6 +260,7 @@ int main(void) {
                 if (d != DIFF_COUNT) {
                     current_level = 1;
                     game.score = 0;
+                    game.difficulty = (int)d;
                     start_game(&map, &player, &game, current_level);
                     music_play(&level_music[current_level - 1]);
                     game_over = 0;

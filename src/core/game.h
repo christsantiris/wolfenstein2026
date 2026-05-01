@@ -28,6 +28,7 @@ typedef struct {
 } WeaponDef;
 
 typedef struct {
+    int difficulty;
     int health;
     int ammo;
     int reserve_ammo;

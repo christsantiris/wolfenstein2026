@@ -45,15 +45,12 @@ static void draw_item(SDL_Renderer *r, const char *label, int cx, int y, int ena
     font_draw_string(r, label, cx - font_str_px_w(label) / 2, y, col);
 }
 
-void landing_render(SDL_Renderer *r, int sw, int sh) {
-    /* Noisy background: per-row hash gives slight brightness variation */
+static void draw_background(SDL_Renderer *r, int sw, int sh) {
     for (int y = 0; y < sh; y++) {
         int n = (int)(((unsigned int)y * 2654435761u) >> 28) & 7;
         SDL_SetRenderDrawColor(r, 65 + n, 0, 0, 255);
         SDL_RenderDrawLine(r, 0, y, sw - 1, y);
     }
-
-    /* Vignette: darken edges inward */
     SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND);
     int vig_h = sh * 2 / 5;
     for (int i = 0; i < vig_h; i++) {
@@ -70,6 +67,10 @@ void landing_render(SDL_Renderer *r, int sw, int sh) {
         SDL_RenderDrawLine(r, sw - 1 - i, 0, sw - 1 - i, sh - 1);
     }
     SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_NONE);
+}
+
+void landing_render(SDL_Renderer *r, int sw, int sh) {
+    draw_background(r, sw, sh);
 
     /* Title: dark shadow offset, then gold on top */
     const char *title = "WOLFENSTEIN 2026";
@@ -141,9 +142,10 @@ static const char *DIFF_NAMES[DIFF_COUNT] = {
     "BRING EM ON!",
     "I AM DEATH INCARNATE!"
 };
-static const int DIFF_ENABLED[DIFF_COUNT] = { 1, 0, 0, 0 };
+static const int DIFF_ENABLED[DIFF_COUNT] = { 1, 1, 1, 1 };
 
 static int diff_selected = 0;
+static int diff_hover = -1;
 
 static int diff_next(int cur, int dir) {
     int n = (cur + dir + DIFF_COUNT) % DIFF_COUNT;
@@ -155,27 +157,42 @@ static int diff_next(int cur, int dir) {
 
 void difficulty_screen_reset(void) {
     diff_selected = 0;
+    diff_hover = -1;
 }
 
 void difficulty_screen_render(SDL_Renderer *r, int sw, int sh) {
-    SDL_SetRenderDrawColor(r, 70, 0, 0, 255);
-    SDL_Rect bg = { 0, 0, sw, sh };
-    SDL_RenderFillRect(r, &bg);
+    draw_background(r, sw, sh);
 
-    SDL_Color gold = { 220, 180, 50, 255 };
     const char *title = "HOW TOUGH ARE YOU?";
-    font_draw_string(r, title, (sw - font_str_px_w(title)) / 2, sh / 4, gold);
+    int tx = (sw - font_str_px_w(title)) / 2;
+    int ty = sh / 4;
+    SDL_Color shadow = { 40, 0, 0, 255 };
+    SDL_Color gold = { 220, 180, 50, 255 };
+    font_draw_string(r, title, tx + 2, ty + 2, shadow);
+    font_draw_string(r, title, tx, ty, gold);
+
+    int rule_y = ty + FONT_CH + 14;
+    int rule_x0 = sw / 4;
+    int rule_x1 = sw * 3 / 4;
+    SDL_SetRenderDrawColor(r, 140, 100, 20, 255);
+    SDL_RenderDrawLine(r, rule_x0, rule_y, rule_x1, rule_y);
+    SDL_SetRenderDrawColor(r, 80, 55, 10, 255);
+    SDL_RenderDrawLine(r, rule_x0, rule_y + 2, rule_x1, rule_y + 2);
 
     int cx = sw / 2;
     int by = sh / 2 - (DIFF_COUNT * (FONT_LHEIGHT + 10)) / 2;
-
     for (int i = 0; i < DIFF_COUNT; i++) {
-        draw_item(r, DIFF_NAMES[i], cx, by + i * (FONT_LHEIGHT + 10), DIFF_ENABLED[i], diff_selected == i);
+        int highlight = (diff_selected == i) || (diff_hover == i && DIFF_ENABLED[i]);
+        draw_item(r, DIFF_NAMES[i], cx, by + i * (FONT_LHEIGHT + 10), DIFF_ENABLED[i], highlight);
     }
 }
 
 Difficulty difficulty_screen_handle_event(const SDL_Event *e, int sw, int sh) {
+    int cx = sw / 2;
+    int by = sh / 2 - (DIFF_COUNT * (FONT_LHEIGHT + 10)) / 2;
+
     if (e->type == SDL_KEYDOWN) {
+        diff_hover = -1;
         SDL_Keycode k = e->key.keysym.sym;
         if (k == SDLK_DOWN) {
             diff_selected = diff_next(diff_selected, 1);
@@ -191,15 +208,26 @@ Difficulty difficulty_screen_handle_event(const SDL_Event *e, int sw, int sh) {
             }
         }
     }
+    if (e->type == SDL_MOUSEMOTION) {
+        int mx = e->motion.x;
+        int my = e->motion.y;
+        diff_hover = -1;
+        for (int i = 0; i < DIFF_COUNT; i++) {
+            SDL_Rect rect = item_rect(DIFF_NAMES[i], cx, by + i * (FONT_LHEIGHT + 10));
+            if (mx >= rect.x && mx < rect.x + rect.w && my >= rect.y && my < rect.y + rect.h) {
+                diff_hover = i;
+                break;
+            }
+        }
+    }
     if (e->type == SDL_MOUSEBUTTONDOWN && e->button.button == SDL_BUTTON_LEFT) {
         int mx = e->button.x;
         int my = e->button.y;
-        int cx = sw / 2;
-        int by = sh / 2 - (DIFF_COUNT * (FONT_LHEIGHT + 10)) / 2;
         for (int i = 0; i < DIFF_COUNT; i++) {
             if (!DIFF_ENABLED[i]) { continue; }
             SDL_Rect rect = item_rect(DIFF_NAMES[i], cx, by + i * (FONT_LHEIGHT + 10));
             if (mx >= rect.x && mx < rect.x + rect.w && my >= rect.y && my < rect.y + rect.h) {
+                diff_selected = i;
                 return (Difficulty)i;
             }
         }

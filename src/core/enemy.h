@@ -46,8 +46,8 @@ typedef struct {
 } EnemyList;
 
 const EnemyDef *enemy_def(EnemyType type);
-void enemy_list_init(EnemyList *el, const Map *m, int level, float px, float py);
-int  enemy_update(Enemy *e, const Player *p, const Map *m, float dt);
+void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, float px, float py);
+int  enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficulty);
 int  enemy_list_all_dead(const EnemyList *el);
 
 #endif
