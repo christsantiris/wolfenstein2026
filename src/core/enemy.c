@@ -3,10 +3,18 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define ENEMY_SIGHT_RANGE 12.0f
-#define ENEMY_ATTACK_RANGE 2.0f
-#define ENEMY_SPEED 1.8f
-#define ENEMY_ATTACK_COOLDOWN 2.0f
+static const EnemyDef ENEMY_DEFS[ENEMY_TYPE_COUNT] = {
+    { ENEMY_TYPE_GUARD,   100, 1.8f, 12.0f, 2.0f, 2.0f,  8 },
+    { ENEMY_TYPE_OFFICER,  75, 2.4f, 14.0f, 2.0f, 1.5f, 12 },
+    { ENEMY_TYPE_SS,      200, 1.4f, 10.0f, 2.0f, 2.5f, 15 },
+};
+
+const EnemyDef *enemy_def(EnemyType type) {
+    if (type < 0 || type >= ENEMY_TYPE_COUNT) {
+        return &ENEMY_DEFS[ENEMY_TYPE_GUARD];
+    }
+    return &ENEMY_DEFS[type];
+}
 
 static int enemy_has_los(const Enemy *e, const Player *p, const Map *m) {
     float dx = p->x - e->x;
@@ -30,6 +38,7 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt) {
     if (!e->active) {
         return 0;
     }
+    const EnemyDef *def = enemy_def(e->type);
     float dx = p->x - e->x;
     float dy = p->y - e->y;
     float dist = sqrtf(dx * dx + dy * dy);
@@ -39,16 +48,16 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt) {
     }
 
     if (e->state == ENEMY_IDLE) {
-        if (dist < ENEMY_SIGHT_RANGE && enemy_has_los(e, p, m)) {
+        if (dist < def->sight_range && enemy_has_los(e, p, m)) {
             e->state = ENEMY_ALERT;
         }
     } else if (e->state == ENEMY_ALERT) {
-        if (dist <= ENEMY_ATTACK_RANGE) {
+        if (dist <= def->attack_range) {
             e->state = ENEMY_ATTACK;
         } else {
             e->angle = atan2f(dy, dx);
-            float nx = e->x + (dx / dist) * ENEMY_SPEED * dt;
-            float ny = e->y + (dy / dist) * ENEMY_SPEED * dt;
+            float nx = e->x + (dx / dist) * def->speed * dt;
+            float ny = e->y + (dy / dist) * def->speed * dt;
             if (!map_is_wall(m, (int)nx, (int)e->y)) {
                 e->x = nx;
             }
@@ -57,11 +66,11 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt) {
             }
         }
     } else if (e->state == ENEMY_ATTACK) {
-        if (dist > ENEMY_ATTACK_RANGE) {
+        if (dist > def->attack_range) {
             e->state = ENEMY_ALERT;
         } else if (e->attack_timer <= 0.0f && enemy_has_los(e, p, m)) {
-            e->attack_timer = ENEMY_ATTACK_COOLDOWN;
-            return 1;
+            e->attack_timer = def->attack_cooldown;
+            return def->attack_damage;
         }
     }
 
@@ -80,16 +89,19 @@ int enemy_list_all_dead(const EnemyList *el) {
     return 1;
 }
 
-static void place(EnemyList *el, float x, float y) {
+static void place(EnemyList *el, float x, float y, EnemyType type) {
     if (el->count >= MAX_ENEMIES) {
         return;
     }
     Enemy *e = &el->enemies[el->count++];
     e->x = x;
     e->y = y;
-    e->angle  = (float)(rand() % 8) * ((float)M_PI / 4.0f);
-    e->health = 100;
+    e->angle = (float)(rand() % 8) * ((float)M_PI / 4.0f);
+    e->health = enemy_def(type)->max_health;
     e->active = 1;
+    e->type = type;
+    e->state = ENEMY_IDLE;
+    e->attack_timer = 0.0f;
 }
 
 void enemy_list_init(EnemyList *el, const Map *m, int level, float px, float py) {
@@ -123,6 +135,21 @@ void enemy_list_init(EnemyList *el, const Map *m, int level, float px, float py)
         Pos tmp = candidates[i];
         candidates[i] = candidates[j];
         candidates[j] = tmp;
-        place(el, candidates[i].x, candidates[i].y);
+
+        EnemyType type;
+        if (level == 1) {
+            type = ENEMY_TYPE_GUARD;
+        } else if (level == 2) {
+            type = (i < count * 6 / 10) ? ENEMY_TYPE_GUARD : ENEMY_TYPE_OFFICER;
+        } else {
+            if (i < count / 2) {
+                type = ENEMY_TYPE_GUARD;
+            } else if (i < count * 3 / 4) {
+                type = ENEMY_TYPE_OFFICER;
+            } else {
+                type = ENEMY_TYPE_SS;
+            }
+        }
+        place(el, candidates[i].x, candidates[i].y, type);
     }
 }
