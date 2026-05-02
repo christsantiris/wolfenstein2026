@@ -19,6 +19,21 @@ debug:
 	cmake --build build
 	./build/wolf
 
+debug-level2:
+	cmake -B build -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=2
+	cmake --build build
+	./build/wolf
+
+debug-level3:
+	cmake -B build -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=3
+	cmake --build build
+	./build/wolf
+
+debug-level4:
+	cmake -B build -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=4
+	cmake --build build
+	./build/wolf
+
 test:
 	cmake -B build -DCMAKE_BUILD_TYPE=Debug
 	cmake --build build --target test_runner

@@ -8,6 +8,7 @@ typedef struct {
     int is_open;
     int music_on;
     int sound_on;
+    int difficulty;
 } Menu;
 
 typedef enum {

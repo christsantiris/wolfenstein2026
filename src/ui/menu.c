@@ -141,7 +141,7 @@ typedef struct {
 
 static void menu_compute_layout(int sw, int sh, MenuLayout *l) {
     l->bw = 440;
-    l->bh = 452;
+    l->bh = 474;
     l->bx = (sw - l->bw) / 2;
     l->by = (sh - l->bh) / 2;
 
@@ -237,9 +237,17 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
     SDL_RenderDrawLine(r, l.bx + 10, y, l.bx + l.bw - 10, y);
     y += 10;
 
+    static const char *DIFF_LABELS[4] = {
+        "CAN I PLAY, DADDY?",
+        "DONT HURT ME.",
+        "BRING EM ON",
+        "I AM DEATH INCARNATE"
+    };
+    int di = (m->difficulty >= 0 && m->difficulty < 4) ? m->difficulty : 0;
     draw_centered(r, "SETTINGS", l.bx, y, l.bw, dim);
     y += LHEIGHT;
-    draw_row(r, "MUSIC",       m->music_on ? "ON" : "OFF", l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "DIFFICULTY",  DIFF_LABELS[di],             l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "MUSIC",       m->music_on ? "ON" : "OFF",  l.bx, y, l.bw); y += LHEIGHT;
     draw_row(r, "SOUND",       m->sound_on ? "ON" : "OFF", l.bx, y, l.bw); y += LHEIGHT + 4;
 
     SDL_SetRenderDrawColor(r, 80, 60, 20, 255);

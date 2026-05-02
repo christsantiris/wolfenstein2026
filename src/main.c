@@ -226,6 +226,12 @@ int main(void) {
     menu.music_on = 1;
     menu.sound_on = 1;
     int current_level = 1;
+#ifdef DEBUG_START_LEVEL
+    current_level = DEBUG_START_LEVEL;
+    start_game(&map, &player, &game, current_level);
+    if (current_level - 1 < 4) { music_play(&level_music[current_level - 1]); }
+    app_state = APP_PLAYING;
+#endif
     int game_over = 0;
     int show_minimap = 1;
     int running = 1;
@@ -264,6 +270,7 @@ int main(void) {
                     current_level = 1;
                     game.score = 0;
                     game.difficulty = (int)d;
+                    menu.difficulty = (int)d;
                     start_game(&map, &player, &game, current_level);
                     music_play(&level_music[current_level - 1]);
                     game_over = 0;
