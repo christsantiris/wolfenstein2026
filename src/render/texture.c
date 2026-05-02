@@ -437,6 +437,45 @@ void texture_generate_wood(Texture *t) {
     }
 }
 
+void texture_generate_moss_stone(Texture *t) {
+    int W = t->width;
+    int H = t->height;
+    int brick_w = 16;
+    int brick_h = 8;
+
+    for (int y = 0; y < H; y++) {
+        for (int x = 0; x < W; x++) {
+            int row = y / brick_h;
+            int col_offset = (row % 2) ? brick_w / 2 : 0;
+            int bx = (x + col_offset) % brick_w;
+            int by = y % brick_h;
+            int is_mortar = (bx == 0 || by == 0);
+            int brick_col = (x + col_offset) / brick_w;
+            int is_moss = ((row * 3 + brick_col * 7) % 5 < 2);
+
+            unsigned char r, g, b;
+            if (is_mortar) {
+                r = 48; g = 44; b = 30;
+            } else if (is_moss) {
+                int vary = ((bx * 5 + by * 11) % 18) - 9;
+                r = (unsigned char)(62 + vary / 2);
+                g = (unsigned char)(108 + vary);
+                b = (unsigned char)(38 + vary / 2);
+            } else {
+                int vary = ((bx * 3 + by * 7 + row * 13) % 24) - 12;
+                r = (unsigned char)(192 + vary);
+                g = (unsigned char)(172 + vary * 3 / 4);
+                b = (unsigned char)(98 + vary / 2);
+            }
+
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = r;
+            t->pixels[idx + 1] = g;
+            t->pixels[idx + 2] = b;
+        }
+    }
+}
+
 void texture_generate_blue_brick(Texture *t) {
     int brick_w = 16;
     int brick_h = 8;

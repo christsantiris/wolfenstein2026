@@ -103,12 +103,13 @@ int main(void) {
     GameState game;
     game_init(&game);
 
-    Texture wall_tex[5];
+    Texture wall_tex[6];
     if (texture_create(&wall_tex[0], 64, 64) != 0 ||
         texture_create(&wall_tex[1], 64, 64) != 0 ||
         texture_create(&wall_tex[2], 64, 64) != 0 ||
         texture_create(&wall_tex[3], 64, 64) != 0 ||
-        texture_create(&wall_tex[4], 64, 64) != 0) {
+        texture_create(&wall_tex[4], 64, 64) != 0 ||
+        texture_create(&wall_tex[5], 64, 64) != 0) {
         map_free(&map);
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -120,10 +121,11 @@ int main(void) {
     texture_generate_sandstone(&wall_tex[2]);
     texture_generate_blue_brick(&wall_tex[3]);
     texture_generate_wood(&wall_tex[4]);
+    texture_generate_moss_stone(&wall_tex[5]);
 
     Texture door_tex;
     if (texture_create(&door_tex, 64, 64) != 0) {
-        for (int wl = 4; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
+        for (int wl = 5; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
         map_free(&map);
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -135,7 +137,7 @@ int main(void) {
     Texture exit_tex;
     if (texture_create(&exit_tex, 64, 64) != 0) {
         texture_free(&door_tex);
-        for (int wl = 4; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
+        for (int wl = 5; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
         map_free(&map);
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -225,12 +227,13 @@ int main(void) {
     Sound enemy_sound = { 0 };
     sound_load(&enemy_sound, "assets/sounds/die.mp3");
 
-    Music level_music[5] = { 0 };
+    Music level_music[6] = { 0 };
     music_load(&level_music[0], "assets/music/level1theme.mp3");
     music_load(&level_music[1], "assets/music/level2theme.mp3");
     music_load(&level_music[2], "assets/music/level3theme.mp3");
     music_load(&level_music[3], "assets/music/level4theme.mp3");
     music_load(&level_music[4], "assets/music/level5theme.mp3");
+    music_load(&level_music[5], "assets/music/level6theme.mp3");
 
     HighScoreTable hs_table;
     highscore_load(&hs_table);
@@ -245,7 +248,7 @@ int main(void) {
     current_level = DEBUG_START_LEVEL;
     game.difficulty = 0;
     start_game(&map, &player, &game, current_level);
-    if (current_level - 1 < 5) { music_play(&level_music[current_level - 1]); }
+    if (current_level - 1 < 6) { music_play(&level_music[current_level - 1]); }
     app_state = APP_PLAYING;
 #endif
     int game_over = 0;
@@ -419,7 +422,7 @@ int main(void) {
                 } else {
                     sound_play(&level_sound);
                     int idx = current_level - 1;
-                    if (idx >= 0 && idx < 5) {
+                    if (idx >= 0 && idx < 6) {
                         music_play(&level_music[idx]);
                     }
                 }
@@ -439,7 +442,7 @@ int main(void) {
         } else if (app_state == APP_DIFFICULTY) {
             difficulty_screen_render(renderer, w, h);
         } else {
-            int wall_idx = (current_level - 1 < 5) ? current_level - 1 : 4;
+            int wall_idx = (current_level - 1 < 6) ? current_level - 1 : 5;
             raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT, total_time);
             sprite_render_all(renderer, &player, &game.enemies, zbuf, enemy_tex, w, h - HUD_HEIGHT);
             item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, w, h - HUD_HEIGHT);
@@ -472,7 +475,7 @@ int main(void) {
 
     free(zbuf);
     music_stop();
-    for (int m = 0; m < 5; m++) { music_free(&level_music[m]); }
+    for (int m = 0; m < 6; m++) { music_free(&level_music[m]); }
     sound_free(&enemy_sound);
     sound_free(&level_sound);
     sound_free(&door_sound);
@@ -489,7 +492,7 @@ int main(void) {
     }
     texture_free(&exit_tex);
     texture_free(&door_tex);
-    for (int wl = 4; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
+    for (int wl = 5; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
     map_free(&map);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
