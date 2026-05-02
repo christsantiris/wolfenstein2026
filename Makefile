@@ -1,7 +1,7 @@
 .PHONY: all run clean debug test linux sprites
 
 all:
-	cmake -B build -DCMAKE_BUILD_TYPE=Release -DDEBUG_NO_AMMO=OFF -DDEBUG_SHOTGUN=OFF
+	cmake -B build -DCMAKE_BUILD_TYPE=Release
 	cmake --build build
 
 run: all
@@ -15,29 +15,34 @@ linux:
 	bash package/linux/build_linux.sh
 
 debug:
-	cmake -B build -DCMAKE_BUILD_TYPE=Debug -DDEBUG_NO_AMMO=OFF -DDEBUG_SHOTGUN=ON
-	cmake --build build
-	./build/wolf
+	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_NO_AMMO=OFF -DDEBUG_SHOTGUN=ON
+	cmake --build build-debug
+	./build-debug/wolf
 
 debug-level2:
-	cmake -B build -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=2
-	cmake --build build
-	./build/wolf
+	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=2
+	cmake --build build-debug
+	./build-debug/wolf
 
 debug-level3:
-	cmake -B build -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=3
-	cmake --build build
-	./build/wolf
+	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=3
+	cmake --build build-debug
+	./build-debug/wolf
 
 debug-level4:
-	cmake -B build -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=4
-	cmake --build build
-	./build/wolf
+	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=4
+	cmake --build build-debug
+	./build-debug/wolf
+
+debug-level5:
+	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=5
+	cmake --build build-debug
+	./build-debug/wolf
 
 test:
-	cmake -B build -DCMAKE_BUILD_TYPE=Debug
-	cmake --build build --target test_runner
-	./build/test_runner
+	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug
+	cmake --build build-debug --target test_runner
+	./build-debug/test_runner
 
 sprites:
 	mkdir -p assets/sprites
@@ -45,4 +50,4 @@ sprites:
 	cc tools/gen_pistol.c -o /tmp/wolf_gen_pistol && /tmp/wolf_gen_pistol && rm /tmp/wolf_gen_pistol
 
 clean:
-	rm -rf build
+	rm -rf build build-debug

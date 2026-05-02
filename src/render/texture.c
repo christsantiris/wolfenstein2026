@@ -403,6 +403,40 @@ void texture_generate_health_pickup(Texture *t) {
     for (int y = 0; y < H; y++) { set_px(t, y, 0, 180, 180, 180); set_px(t, W-1, y, 180, 180, 180); }
 }
 
+void texture_generate_wood(Texture *t) {
+    int W = t->width;
+    int H = t->height;
+    int plank_w = 16;
+
+    for (int y = 0; y < H; y++) {
+        for (int x = 0; x < W; x++) {
+            int px = x % plank_w;
+            int is_seam = (px == 0 || px == plank_w - 1);
+            int grain = (x * 7 + x * x / 8) % 16;
+            int is_grain = (grain < 2);
+            int vary = ((x * 3 + y * 11) % 18) - 9;
+
+            unsigned char r, g, b;
+            if (is_seam) {
+                r = 82; g = 46; b = 16;
+            } else if (is_grain) {
+                r = (unsigned char)(108 + vary / 2);
+                g = (unsigned char)(62 + vary / 3);
+                b = (unsigned char)(22 + vary / 4);
+            } else {
+                r = (unsigned char)(150 + vary);
+                g = (unsigned char)(88 + vary * 2 / 3);
+                b = (unsigned char)(36 + vary / 3);
+            }
+
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = r;
+            t->pixels[idx + 1] = g;
+            t->pixels[idx + 2] = b;
+        }
+    }
+}
+
 void texture_generate_blue_brick(Texture *t) {
     int brick_w = 16;
     int brick_h = 8;
