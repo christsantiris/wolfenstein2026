@@ -12,10 +12,12 @@ static const int KILL_SCORE[4] = { 75, 100, 150, 200 };
 
 static const WeaponDef WEAPON_PISTOL = { GUN_9MM_HANDGUN, "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3", 8, 34, 0.15f, 0.5f, 0.12f, 1.5f };
 static const WeaponDef WEAPON_SHOTGUN = { GUN_SHOTGUN, "assets/sounds/shotgun.mp3", "assets/sounds/handgunreload.mp3", 2, 80, 0.30f, 0.8f, 0.15f, 2.0f };
+static const WeaponDef WEAPON_AK47 = { GUN_AK47, "assets/sounds/ak47.mp3", "assets/sounds/handgunreload.mp3", 30, 30, 0.25f, 0.12f, 0.08f, 2.0f };
 
 static const WeaponDef *ALL_WEAPONS[GUN_COUNT] = {
     [GUN_9MM_HANDGUN] = &WEAPON_PISTOL,
     [GUN_SHOTGUN] = &WEAPON_SHOTGUN,
+    [GUN_AK47] = &WEAPON_AK47,
 };
 
 const WeaponDef *weapon_def(GunType type) {

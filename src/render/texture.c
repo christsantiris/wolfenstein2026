@@ -562,64 +562,92 @@ void texture_generate_sandstone(Texture *t) {
     }
 }
 
-void texture_generate_shotgun(Texture *t) {
+void texture_generate_weapon_kit_ak47(Texture *t) {
     int W = t->width;
     int H = t->height;
     for (int i = 0; i < W * H * 3; i += 3) {
         t->pixels[i] = 255; t->pixels[i + 1] = 0; t->pixels[i + 2] = 255;
     }
-    /* Two barrel tubes pointing outward: run top-to-bottom, slightly inward taper */
-    int lcx = W * 26 / 64;
-    int rcx = W * 38 / 64;
-    int br = 4;
-    int barrel_top = H * 4 / 64;
-    int barrel_bot = H * 38 / 64;
-    for (int y = barrel_top; y < barrel_bot; y++) {
-        int taper = (barrel_bot - y) * br / (barrel_bot - barrel_top + 1);
-        int lr = br - taper / 6;
-        if (lr < 2) { lr = 2; }
-        for (int x = lcx - lr; x <= lcx + lr; x++) {
-            unsigned char edge = (abs(x - lcx) >= lr) ? 40 : 58;
-            set_px(t, x, y, edge, edge, edge + 6);
-        }
-        for (int x = rcx - lr; x <= rcx + lr; x++) {
-            unsigned char edge = (abs(x - rcx) >= lr) ? 40 : 58;
-            set_px(t, x, y, edge, edge, edge + 6);
+
+    /* wooden stock (left) */
+    for (int y = H * 24 / 64; y < H * 38 / 64; y++) {
+        for (int x = W * 4 / 64; x < W * 18 / 64; x++) {
+            int vary = ((x * 3 + y * 5) % 6) - 3;
+            set_px(t, x, y, (unsigned char)(90 + vary), (unsigned char)(52 + vary), (unsigned char)(18 + vary));
         }
     }
-    /* dark muzzle openings at top of each barrel */
-    for (int y = barrel_top; y < barrel_top + 5; y++) {
-        for (int dx = -3; dx <= 3; dx++) {
-            set_px(t, lcx + dx, y, 18, 18, 20);
-            set_px(t, rcx + dx, y, 18, 18, 20);
+    /* stock end plate */
+    for (int y = H * 24 / 64; y < H * 38 / 64; y++) {
+        set_px(t, W * 4 / 64, y, 38, 22, 8);
+        set_px(t, W * 5 / 64, y, 38, 22, 8);
+    }
+
+    /* receiver body */
+    for (int y = H * 22 / 64; y < H * 36 / 64; y++) {
+        for (int x = W * 16 / 64; x < W * 46 / 64; x++) {
+            unsigned char v = (y < H * 24 / 64) ? 68 : 46;
+            set_px(t, x, y, v, v, (unsigned char)(v + 4));
         }
     }
-    /* receiver block joining both barrels */
-    int rec_x0 = lcx - br - 3;
-    int rec_x1 = rcx + br + 3;
-    int rec_y0 = barrel_bot;
-    int rec_y1 = H * 52 / 64;
-    for (int y = rec_y0; y < rec_y1; y++) {
-        for (int x = rec_x0; x <= rec_x1; x++) {
-            int top_shade = (y == rec_y0) ? 70 : 52;
-            set_px(t, x, y, (unsigned char)top_shade, (unsigned char)top_shade, (unsigned char)(top_shade + 5));
+    /* charging handle nub on top */
+    for (int y = H * 19 / 64; y < H * 23 / 64; y++) {
+        for (int x = W * 20 / 64; x < W * 26 / 64; x++) {
+            set_px(t, x, y, 58, 58, 62);
         }
     }
-    /* grip: wood below receiver, narrower */
-    int grip_x0 = W * 28 / 64;
-    int grip_x1 = W * 36 / 64;
-    for (int y = rec_y1; y < H - 2; y++) {
-        for (int x = grip_x0; x <= grip_x1; x++) {
-            int vary = ((x + y) % 6) - 3;
-            set_px(t, x, y, (unsigned char)(88 + vary), (unsigned char)(52 + vary), (unsigned char)(18 + vary));
+    /* ejection port */
+    for (int y = H * 25 / 64; y < H * 33 / 64; y++) {
+        for (int x = W * 18 / 64; x < W * 28 / 64; x++) {
+            set_px(t, x, y, 24, 24, 28);
         }
     }
-    /* trigger guard: small arc below receiver */
-    int tg_y = rec_y1 + 3;
-    int tg_cx = W / 2;
-    for (int dx = -5; dx <= 5; dx++) {
-        if (tg_cx + dx >= 0 && tg_cx + dx < W && tg_y < H) {
-            set_px(t, tg_cx + dx, tg_y, 62, 62, 66);
+
+    /* barrel (pointing right) */
+    for (int y = H * 26 / 64; y < H * 31 / 64; y++) {
+        for (int x = W * 44 / 64; x < W * 62 / 64; x++) {
+            set_px(t, x, y, 55, 55, 60);
+        }
+    }
+    /* gas tube above barrel */
+    for (int y = H * 23 / 64; y < H * 27 / 64; y++) {
+        for (int x = W * 44 / 64; x < W * 58 / 64; x++) {
+            set_px(t, x, y, 66, 66, 70);
+        }
+    }
+    /* muzzle end */
+    for (int y = H * 25 / 64; y < H * 32 / 64; y++) {
+        set_px(t, W * 61 / 64, y, 30, 30, 34);
+        set_px(t, W * 62 / 64, y, 30, 30, 34);
+    }
+
+    /* pistol grip (wood) */
+    for (int y = H * 35 / 64; y < H * 50 / 64; y++) {
+        for (int x = W * 36 / 64; x < W * 46 / 64; x++) {
+            int vary = ((x * 3 + y * 5) % 6) - 3;
+            set_px(t, x, y, (unsigned char)(88 + vary), (unsigned char)(50 + vary), (unsigned char)(16 + vary));
+        }
+    }
+
+    /* banana magazine — curves forward (rightward) as it descends */
+    for (int y = H * 35 / 64; y < H * 43 / 64; y++) {
+        for (int x = W * 20 / 64; x < W * 37 / 64; x++) {
+            set_px(t, x, y, 48, 48, 52);
+        }
+    }
+    for (int y = H * 43 / 64; y < H * 50 / 64; y++) {
+        for (int x = W * 22 / 64; x < W * 39 / 64; x++) {
+            set_px(t, x, y, 46, 46, 50);
+        }
+    }
+    for (int y = H * 50 / 64; y < H * 56 / 64; y++) {
+        for (int x = W * 26 / 64; x < W * 40 / 64; x++) {
+            set_px(t, x, y, 42, 42, 46);
+        }
+    }
+    /* magazine tip */
+    for (int y = H * 56 / 64; y < H * 59 / 64; y++) {
+        for (int x = W * 30 / 64; x < W * 39 / 64; x++) {
+            set_px(t, x, y, 38, 38, 42);
         }
     }
 }

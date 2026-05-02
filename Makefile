@@ -48,6 +48,8 @@ sprites:
 	mkdir -p assets/sprites
 	cc tools/gen_guard.c -o /tmp/wolf_gen_guard && /tmp/wolf_gen_guard && rm /tmp/wolf_gen_guard
 	cc tools/gen_pistol.c -o /tmp/wolf_gen_pistol && /tmp/wolf_gen_pistol && rm /tmp/wolf_gen_pistol
+	cc tools/gen_shotgun.c -o /tmp/wolf_gen_shotgun && /tmp/wolf_gen_shotgun && rm /tmp/wolf_gen_shotgun
+	cc tools/gen_ak47.c -o /tmp/wolf_gen_ak47 && /tmp/wolf_gen_ak47 && rm /tmp/wolf_gen_ak47
 
 clean:
 	rm -rf build build-debug

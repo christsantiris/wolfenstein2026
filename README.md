@@ -55,7 +55,6 @@ MIT
 
 ## Roadmap
 - More levels
-- Upgraded guns - more damage, faster firing rate.
 - Improved Enemy UI (PPM assets ?)
 - Improved Gun UI
 - Save / load
