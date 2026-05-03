@@ -19,28 +19,8 @@ debug:
 	cmake --build build-debug
 	./build-debug/wolf
 
-debug-level2:
+debug-level:
 	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=2
-	cmake --build build-debug
-	./build-debug/wolf
-
-debug-level3:
-	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=3
-	cmake --build build-debug
-	./build-debug/wolf
-
-debug-level4:
-	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=4
-	cmake --build build-debug
-	./build-debug/wolf
-
-debug-level5:
-	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=5
-	cmake --build build-debug
-	./build-debug/wolf
-
-debug-level6:
-	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=6
 	cmake --build build-debug
 	./build-debug/wolf
 
