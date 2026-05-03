@@ -81,13 +81,14 @@ int main(void) {
         return 1;
     }
 
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!renderer) {
         fprintf(stderr, "SDL_CreateRenderer: %s\n", SDL_GetError());
         SDL_DestroyWindow(window);
         SDL_Quit();
         return 1;
     }
+    SDL_RenderSetLogicalSize(renderer, SCREEN_W, SCREEN_H);
 
     Map map;
     if (map_load(&map, "assets/maps/level1.map") != 0) {
@@ -264,12 +265,30 @@ int main(void) {
         last_ticks = now;
         total_time += dt;
 
-        int w, h;
-        SDL_GetWindowSize(window, &w, &h);
+        int w = SCREEN_W, h = SCREEN_H;
 
         while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEBUTTONUP) {
+                float lx, ly;
+                SDL_RenderWindowToLogical(renderer, e.button.x, e.button.y, &lx, &ly);
+                e.button.x = (int)lx;
+                e.button.y = (int)ly;
+            } else if (e.type == SDL_MOUSEMOTION) {
+                float lx, ly;
+                SDL_RenderWindowToLogical(renderer, e.motion.x, e.motion.y, &lx, &ly);
+                e.motion.x = (int)lx;
+                e.motion.y = (int)ly;
+            }
             if (e.type == SDL_QUIT) {
                 running = 0;
+            }
+            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_f) {
+                Uint32 flags = SDL_GetWindowFlags(window);
+                if (flags & SDL_WINDOW_FULLSCREEN_DESKTOP) {
+                    SDL_SetWindowFullscreen(window, 0);
+                } else {
+                    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                }
             }
 
             if (app_state == APP_LANDING) {

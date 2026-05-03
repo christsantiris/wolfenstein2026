@@ -9,6 +9,7 @@ typedef struct {
     int music_on;
     int sound_on;
     int difficulty;
+    int selected;
 } Menu;
 
 typedef enum {
