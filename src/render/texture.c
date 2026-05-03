@@ -699,71 +699,100 @@ void texture_generate_weapon_kit(Texture *t) {
         t->pixels[i] = 255; t->pixels[i + 1] = 0; t->pixels[i + 2] = 255;
     }
 
-    /* side-profile pistol, barrel pointing left */
+    /* side-profile double-barrel shotgun, barrels pointing left */
 
-    /* barrel */
-    int brl_x0 = W * 8 / 64;
-    int brl_x1 = W * 30 / 64;
-    int brl_y0 = H * 26 / 64;
-    int brl_y1 = H * 32 / 64;
-    for (int y = brl_y0; y < brl_y1; y++) {
-        for (int x = brl_x0; x < brl_x1; x++) {
-            set_px(t, x, y, 55, 55, 60);
-        }
-    }
-    /* muzzle end — darker ring */
-    for (int y = brl_y0 - 1; y < brl_y1 + 1; y++) {
-        set_px(t, brl_x0, y, 30, 30, 34);
-        set_px(t, brl_x0 + 1, y, 30, 30, 34);
-    }
-
-    /* slide / receiver block */
-    int sx0 = W * 27 / 64;
-    int sx1 = W * 55 / 64;
-    int sy0 = H * 20 / 64;
-    int sy1 = H * 38 / 64;
-    for (int y = sy0; y < sy1; y++) {
-        for (int x = sx0; x < sx1; x++) {
-            unsigned char v = (y < sy0 + 2) ? 75 : 58;
+    /* upper barrel */
+    int bar_x0 = W * 6 / 64;
+    int bar_x1 = W * 30 / 64;
+    int ub_y0 = H * 21 / 64;
+    int ub_y1 = H * 29 / 64;
+    for (int y = ub_y0; y < ub_y1; y++) {
+        for (int x = bar_x0; x < bar_x1; x++) {
+            unsigned char v = (y == ub_y0 || y == ub_y1 - 1) ? 42 : 55;
             set_px(t, x, y, v, v, (unsigned char)(v + 5));
         }
     }
-    /* ejection port cutout on slide */
-    for (int y = sy0 + 4; y < sy1 - 5; y++) {
-        for (int x = sx0 + 3; x < sx0 + 12; x++) {
-            set_px(t, x, y, 22, 22, 26);
+
+    /* lower barrel */
+    int lb_y0 = H * 31 / 64;
+    int lb_y1 = H * 39 / 64;
+    for (int y = lb_y0; y < lb_y1; y++) {
+        for (int x = bar_x0; x < bar_x1; x++) {
+            unsigned char v = (y == lb_y0 || y == lb_y1 - 1) ? 42 : 55;
+            set_px(t, x, y, v, v, (unsigned char)(v + 5));
         }
     }
 
-    /* frame below slide */
-    int fy0 = sy1;
-    int fy1 = H * 44 / 64;
-    for (int y = fy0; y < fy1; y++) {
-        for (int x = sx0 + 2; x < sx1; x++) {
-            set_px(t, x, y, 50, 50, 55);
+    /* rib between barrels */
+    for (int x = bar_x0; x < bar_x1; x++) {
+        set_px(t, x, ub_y1,     68, 68, 74);
+        set_px(t, x, lb_y0 - 1, 68, 68, 74);
+    }
+
+    /* muzzle caps — thick dark ring covering both barrels */
+    for (int y = ub_y0 - 1; y < lb_y1 + 1; y++) {
+        for (int x = bar_x0; x < bar_x0 + 4; x++) {
+            set_px(t, x, y, 28, 28, 32);
+        }
+    }
+
+    /* receiver block */
+    int rx0 = W * 27 / 64;
+    int rx1 = W * 44 / 64;
+    int ry0 = H * 17 / 64;
+    int ry1 = H * 42 / 64;
+    for (int y = ry0; y < ry1; y++) {
+        for (int x = rx0; x < rx1; x++) {
+            unsigned char v = (y < ry0 + 2 || x > rx1 - 3) ? 72 : 62;
+            set_px(t, x, y, v, v, (unsigned char)(v + 5));
+        }
+    }
+
+    /* wood stock — tapers slightly toward butt plate */
+    int wx0 = W * 42 / 64;
+    int wx1 = W * 60 / 64;
+    int wy0 = H * 17 / 64;
+    int wy1 = H * 42 / 64;
+    for (int y = wy0; y < wy1; y++) {
+        for (int x = wx0; x < wx1; x++) {
+            float prog = (float)(x - wx0) / (float)(wx1 - wx0);
+            int top_off = (int)(prog * 2);
+            int bot_off = (int)(prog * 2);
+            if (y < wy0 + top_off || y >= wy1 - bot_off) { continue; }
+            int grain = ((x * 7 + y * 13) % 9) - 4;
+            set_px(t, x, y,
+                (unsigned char)(86 + grain),
+                (unsigned char)(50 + grain),
+                (unsigned char)(18 + grain));
         }
     }
 
     /* trigger guard outline */
-    int tgx0 = sx0 + 2;
-    int tgx1 = W * 42 / 64;
-    int tgy1 = H * 50 / 64;
+    int tgx0 = W * 34 / 64;
+    int tgx1 = W * 45 / 64;
+    int tgy0 = H * 42 / 64;
+    int tgy1 = H * 52 / 64;
     for (int x = tgx0; x <= tgx1; x++) {
-        set_px(t, x, fy0, 44, 44, 48);
+        set_px(t, x, tgy0, 44, 44, 48);
         set_px(t, x, tgy1, 44, 44, 48);
     }
-    for (int y = fy0; y <= tgy1; y++) {
+    for (int y = tgy0; y <= tgy1; y++) {
         set_px(t, tgx0, y, 44, 44, 48);
         set_px(t, tgx1, y, 44, 44, 48);
     }
 
-    /* wood grip */
+    /* pistol grip (wrist of stock) */
     int gx0 = W * 42 / 64;
-    int gy1 = H * 58 / 64;
-    for (int y = fy0; y < gy1; y++) {
-        for (int x = gx0; x < sx1; x++) {
-            int vary = ((x * 3 + y * 5) % 6) - 3;
-            set_px(t, x, y, (unsigned char)(86 + vary), (unsigned char)(50 + vary), (unsigned char)(18 + vary));
+    int gx1 = W * 49 / 64;
+    int gy0 = H * 42 / 64;
+    int gy1 = H * 57 / 64;
+    for (int y = gy0; y < gy1; y++) {
+        for (int x = gx0; x < gx1; x++) {
+            int grain = ((x * 7 + y * 13) % 9) - 4;
+            set_px(t, x, y,
+                (unsigned char)(86 + grain),
+                (unsigned char)(50 + grain),
+                (unsigned char)(18 + grain));
         }
     }
 }
