@@ -9,6 +9,12 @@
 #define CSTRIDE   (CW + SCALE)
 #define LHEIGHT   (CH + SCALE * 4)
 
+#define MENU_ITEM_COUNT    4
+#define MENU_ITEM_MUSIC    0
+#define MENU_ITEM_SOUND    1
+#define MENU_ITEM_NEW_GAME 2
+#define MENU_ITEM_QUIT     3
+
 static const uint8_t GLYPHS[96][7] = {
     { 0x00,0x00,0x00,0x00,0x00,0x00,0x00 }, /* ' '  32 */
     { 0x00,0x00,0x00,0x00,0x00,0x00,0x00 }, /* !    33 */
@@ -141,13 +147,13 @@ typedef struct {
 
 static void menu_compute_layout(int sw, int sh, MenuLayout *l) {
     l->bw = 440;
-    l->bh = 474;
+    l->bh = 474 + LHEIGHT;
     l->bx = (sw - l->bw) / 2;
     l->by = (sh - l->bh) / 2;
 
     int y = l->by + 18 + LHEIGHT + 4 + 10;
     y += LHEIGHT;
-    y += LHEIGHT * 7 + 4;
+    y += LHEIGHT * 8 + 4;
     y += 10;
     y += LHEIGHT;
     y += LHEIGHT;
@@ -167,7 +173,39 @@ static void menu_compute_layout(int sw, int sh, MenuLayout *l) {
     l->row2_y = y;
 }
 
+static MenuAction activate_item(Menu *m, int item) {
+    if (item == MENU_ITEM_MUSIC) {
+        m->music_on = !m->music_on;
+        return MENU_ACTION_MUSIC_TOGGLE;
+    }
+    if (item == MENU_ITEM_SOUND) {
+        m->sound_on = !m->sound_on;
+        return MENU_ACTION_SOUND_TOGGLE;
+    }
+    if (item == MENU_ITEM_NEW_GAME) {
+        return MENU_ACTION_NEW_GAME;
+    }
+    if (item == MENU_ITEM_QUIT) {
+        return MENU_ACTION_QUIT;
+    }
+    return MENU_ACTION_NONE;
+}
+
 MenuAction menu_handle_event(Menu *m, const SDL_Event *e, int sw, int sh) {
+    if (e->type == SDL_KEYDOWN) {
+        if (e->key.keysym.sym == SDLK_UP || e->key.keysym.sym == SDLK_KP_8) {
+            m->selected = (m->selected - 1 + MENU_ITEM_COUNT) % MENU_ITEM_COUNT;
+            return MENU_ACTION_NONE;
+        }
+        if (e->key.keysym.sym == SDLK_DOWN || e->key.keysym.sym == SDLK_KP_2) {
+            m->selected = (m->selected + 1) % MENU_ITEM_COUNT;
+            return MENU_ACTION_NONE;
+        }
+        if (e->key.keysym.sym == SDLK_RETURN || e->key.keysym.sym == SDLK_KP_ENTER || e->key.keysym.sym == SDLK_SPACE) {
+            return activate_item(m, m->selected);
+        }
+    }
+
     if (e->type != SDL_MOUSEBUTTONDOWN || e->button.button != SDL_BUTTON_LEFT) {
         return MENU_ACTION_NONE;
     }
@@ -179,19 +217,21 @@ MenuAction menu_handle_event(Menu *m, const SDL_Event *e, int sw, int sh) {
 
     if (my >= l.music_y && my < l.music_y + CH &&
         mx >= l.bx && mx < l.bx + l.bw) {
-        m->music_on = !m->music_on;
-        return MENU_ACTION_MUSIC_TOGGLE;
+        m->selected = MENU_ITEM_MUSIC;
+        return activate_item(m, MENU_ITEM_MUSIC);
     }
     if (my >= l.sound_y && my < l.sound_y + CH &&
         mx >= l.bx && mx < l.bx + l.bw) {
-        m->sound_on = !m->sound_on;
-        return MENU_ACTION_SOUND_TOGGLE;
+        m->selected = MENU_ITEM_SOUND;
+        return activate_item(m, MENU_ITEM_SOUND);
     }
     if (button_hit(mx, my, l.new_game_x, l.row2_y, "NEW GAME")) {
-        return MENU_ACTION_NEW_GAME;
+        m->selected = MENU_ITEM_NEW_GAME;
+        return activate_item(m, MENU_ITEM_NEW_GAME);
     }
     if (button_hit(mx, my, l.quit_x, l.row2_y, "QUIT")) {
-        return MENU_ACTION_QUIT;
+        m->selected = MENU_ITEM_QUIT;
+        return activate_item(m, MENU_ITEM_QUIT);
     }
     return MENU_ACTION_NONE;
 }
@@ -231,7 +271,8 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
     draw_row(r, "STRAFE RIGHT", "D",     l.bx, y, l.bw); y += LHEIGHT;
     draw_row(r, "SHOOT",        "SPACE", l.bx, y, l.bw); y += LHEIGHT;
     draw_row(r, "RELOAD",       "R",     l.bx, y, l.bw); y += LHEIGHT;
-    draw_row(r, "OPEN DOOR",    "O",     l.bx, y, l.bw); y += LHEIGHT + 4;
+    draw_row(r, "OPEN DOOR",    "O",     l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "FULLSCREEN",   "F",     l.bx, y, l.bw); y += LHEIGHT + 4;
 
     SDL_SetRenderDrawColor(r, 80, 60, 20, 255);
     SDL_RenderDrawLine(r, l.bx + 10, y, l.bx + l.bw - 10, y);
@@ -247,8 +288,20 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
     draw_centered(r, "SETTINGS", l.bx, y, l.bw, dim);
     y += LHEIGHT;
     draw_row(r, "DIFFICULTY",  DIFF_LABELS[di],             l.bx, y, l.bw); y += LHEIGHT;
-    draw_row(r, "MUSIC",       m->music_on ? "ON" : "OFF",  l.bx, y, l.bw); y += LHEIGHT;
-    draw_row(r, "SOUND",       m->sound_on ? "ON" : "OFF", l.bx, y, l.bw); y += LHEIGHT + 4;
+    if (m->selected == MENU_ITEM_MUSIC) {
+        SDL_SetRenderDrawColor(r, 70, 52, 12, 255);
+        SDL_Rect hl = { l.bx + 4, y - 2, l.bw - 8, CH + 4 };
+        SDL_RenderFillRect(r, &hl);
+    }
+    draw_row(r, "MUSIC",       m->music_on ? "ON" : "OFF",  l.bx, y, l.bw);
+    y += LHEIGHT;
+    if (m->selected == MENU_ITEM_SOUND) {
+        SDL_SetRenderDrawColor(r, 70, 52, 12, 255);
+        SDL_Rect hl = { l.bx + 4, y - 2, l.bw - 8, CH + 4 };
+        SDL_RenderFillRect(r, &hl);
+    }
+    draw_row(r, "SOUND",       m->sound_on ? "ON" : "OFF", l.bx, y, l.bw);
+    y += LHEIGHT + 4;
 
     SDL_SetRenderDrawColor(r, 80, 60, 20, 255);
     SDL_RenderDrawLine(r, l.bx + 10, y, l.bx + l.bw - 10, y);
@@ -260,6 +313,18 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
 
     draw_button(r, "NEW GAME", l.new_game_x, y);
     draw_button(r, "QUIT",     l.quit_x,     y);
+    if (m->selected == MENU_ITEM_NEW_GAME) {
+        int pw = str_px_w("NEW GAME") + 16;
+        SDL_SetRenderDrawColor(r, 220, 180, 50, 255);
+        SDL_Rect border = { l.new_game_x - 1, y - 5, pw + 2, CH + 10 };
+        SDL_RenderDrawRect(r, &border);
+    }
+    if (m->selected == MENU_ITEM_QUIT) {
+        int pw = str_px_w("QUIT") + 16;
+        SDL_SetRenderDrawColor(r, 220, 180, 50, 255);
+        SDL_Rect border = { l.quit_x - 1, y - 5, pw + 2, CH + 10 };
+        SDL_RenderDrawRect(r, &border);
+    }
 }
 
 static void game_over_button_rects(int sw, int sh, int score_count, SDL_Rect *rn, SDL_Rect *rl, SDL_Rect *rq) {
