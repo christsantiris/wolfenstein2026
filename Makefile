@@ -20,7 +20,7 @@ debug:
 	./build-debug/wolf
 
 debug-level:
-	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=3
+	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=5
 	cmake --build build-debug
 	./build-debug/wolf
 
