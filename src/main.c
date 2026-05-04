@@ -470,7 +470,7 @@ int main(void) {
                     } else {
                         sound_play(&level_sound);
                         int idx = current_level - 1;
-                        if (idx >= 0 && idx < LEVEL_COUNT) {
+                        if (menu.music_on && idx >= 0 && idx < LEVEL_COUNT) {
                             music_play(&level_music[idx]);
                         }
                     }
