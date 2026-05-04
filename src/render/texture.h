@@ -15,6 +15,7 @@ void texture_generate_brick(Texture *t);
 void texture_generate_stone(Texture *t);
 void texture_generate_sandstone(Texture *t);
 void texture_generate_blue_brick(Texture *t);
+void texture_generate_red_blue_brick(Texture *t);
 void texture_generate_wood(Texture *t);
 void texture_generate_moss_stone(Texture *t);
 void texture_generate_door(Texture *t);
