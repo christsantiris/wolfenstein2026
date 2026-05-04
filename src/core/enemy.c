@@ -7,6 +7,7 @@ static const EnemyDef ENEMY_DEFS[ENEMY_TYPE_COUNT] = {
     { ENEMY_TYPE_GUARD,   100, 1.8f, 12.0f, 2.0f, 2.0f,  8 },
     { ENEMY_TYPE_OFFICER,  75, 2.4f, 14.0f, 2.0f, 1.5f, 12 },
     { ENEMY_TYPE_SS,      200, 1.4f, 10.0f, 2.0f, 2.5f, 15 },
+    { ENEMY_TYPE_BOSS,    850, 1.5f, 18.0f, 2.5f, 1.2f, 26 },
 };
 
 const EnemyDef *enemy_def(EnemyType type) {
@@ -36,6 +37,7 @@ static int enemy_has_los(const Enemy *e, const Player *p, const Map *m) {
 
 static const float SPEED_MULT[4]  = { 0.70f, 1.0f, 1.20f, 1.50f };
 static const float SIGHT_MULT[4]  = { 0.70f, 1.0f, 1.30f, 1.60f };
+static const float HEALTH_MULT[4] = { 0.6f, 1.0f, 1.2f, 1.3f };
 
 int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficulty) {
     if (!e->active) {
@@ -45,6 +47,15 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficul
     int d = difficulty < 4 ? difficulty : 3;
     float speed = def->speed * SPEED_MULT[d];
     float sight = def->sight_range * SIGHT_MULT[d];
+    float attack_cooldown = def->attack_cooldown;
+
+    if (e->type == ENEMY_TYPE_BOSS) {
+        int phase_health = (int)(def->max_health * HEALTH_MULT[d] * 0.5f);
+        if (e->health <= phase_health) {
+            speed *= 1.35f;
+            attack_cooldown *= 0.65f;
+        }
+    }
 
     float dx = p->x - e->x;
     float dy = p->y - e->y;
@@ -76,7 +87,7 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficul
         if (dist > def->attack_range) {
             e->state = ENEMY_ALERT;
         } else if (e->attack_timer <= 0.0f && enemy_has_los(e, p, m)) {
-            e->attack_timer = def->attack_cooldown;
+            e->attack_timer = attack_cooldown;
             return def->attack_damage;
         }
     }
@@ -96,7 +107,6 @@ int enemy_list_all_dead(const EnemyList *el) {
     return 1;
 }
 
-static const float HEALTH_MULT[4] = { 0.6f, 1.0f, 1.2f, 1.3f };
 static const int   COUNT_BONUS[4] = { -1,   0,    2,    5   };
 
 static void place(EnemyList *el, float x, float y, EnemyType type, int difficulty) {
@@ -119,6 +129,14 @@ static void place(EnemyList *el, float x, float y, EnemyType type, int difficult
 
 void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, float px, float py) {
     memset(el, 0, sizeof(EnemyList));
+
+    if (level == 10) {
+        place(el, 14.5f, 4.5f, ENEMY_TYPE_BOSS, difficulty);
+        place(el, 5.5f, 14.5f, ENEMY_TYPE_GUARD, difficulty);
+        place(el, 22.5f, 14.5f, ENEMY_TYPE_GUARD, difficulty);
+        place(el, 22.5f, 12.5f, ENEMY_TYPE_OFFICER, difficulty);
+        return;
+    }
 
     int count = 4 + level + COUNT_BONUS[difficulty < 4 ? difficulty : 3];
     if (count > MAX_ENEMIES) { count = MAX_ENEMIES; }

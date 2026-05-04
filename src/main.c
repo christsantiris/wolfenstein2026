@@ -20,7 +20,7 @@
 
 #define SCREEN_W 800
 #define SCREEN_H 600
-#define LEVEL_COUNT 9
+#define LEVEL_COUNT 10
 
 typedef enum {
     APP_LANDING,
@@ -130,6 +130,7 @@ int main(void) {
     texture_generate_red_blue_brick(&wall_tex[6]);
     texture_generate_metal_panels(&wall_tex[7]);
     texture_generate_command_bunker(&wall_tex[8]);
+    texture_generate_obsidian_command(&wall_tex[9]);
 
     Texture door_tex;
     if (texture_create(&door_tex, 64, 64) != 0) {
@@ -213,6 +214,11 @@ int main(void) {
         texture_create(&enemy_tex[ENEMY_TYPE_SS][d], enemy_tex[ENEMY_TYPE_SS][4].width, enemy_tex[ENEMY_TYPE_SS][4].height);
     }
     texture_derive_guard_dirs(enemy_tex[ENEMY_TYPE_SS]);
+    /* Boss — large black commander with red command accents */
+    for (int d = 0; d < 8; d++) {
+        texture_create(&enemy_tex[ENEMY_TYPE_BOSS][d], enemy_tex[ENEMY_TYPE_GUARD][4].width, enemy_tex[ENEMY_TYPE_GUARD][4].height);
+        texture_generate_boss_dir(&enemy_tex[ENEMY_TYPE_BOSS][d], d);
+    }
 
     int zbuf_w = 0;
     float *zbuf = NULL;
@@ -245,6 +251,7 @@ int main(void) {
     music_load(&level_music[6], "assets/music/level7theme.mp3");
     music_load(&level_music[7], "assets/music/level8theme.mp3");
     music_load(&level_music[8], "assets/music/level9theme.mp3");
+    music_load(&level_music[9], "assets/music/level10theme.mp3");
 
     HighScoreTable hs_table;
     highscore_load(&hs_table);
@@ -263,6 +270,7 @@ int main(void) {
     app_state = APP_PLAYING;
 #endif
     int game_over = 0;
+    int game_won = 0;
     int show_minimap = 1;
     int running = 1;
     float total_time = 0.0f;
@@ -322,6 +330,7 @@ int main(void) {
                     start_game(&map, &player, &game, current_level);
                     music_play(&level_music[current_level - 1]);
                     game_over = 0;
+                    game_won = 0;
                     menu.is_open = 0;
                     app_state = APP_PLAYING;
                 }
@@ -338,12 +347,14 @@ int main(void) {
                         music_stop();
                         landing_reset();
                         app_state = APP_LANDING;
+                        game_over = 0;
+                        game_won = 0;
                     } else if (action == MENU_ACTION_MUSIC_TOGGLE) {
                         if (menu.music_on) { Mix_ResumeMusic(); } else { Mix_PauseMusic(); }
                     } else if (action == MENU_ACTION_SOUND_TOGGLE) {
                         sound_set_enabled(menu.sound_on);
                     }
-                } else if (!game_over) {
+                } else if (!game_over && !game_won) {
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
                         if (game_shoot(&game, &player)) {
                             sound_play(&gun_sounds[game.current_weapon.type]);
@@ -381,7 +392,7 @@ int main(void) {
                             sound_play(&door_sound);
                         }
                     }
-                } else {
+                } else if (game_over || game_won) {
                     GameOverResult result = game_over_handle_event(&e, w, h, hs_table.count);
                     if (result == GAME_OVER_QUIT) {
                         running = 0;
@@ -390,12 +401,13 @@ int main(void) {
                         landing_reset();
                         app_state = APP_LANDING;
                         game_over = 0;
+                        game_won = 0;
                     }
                 }
             }
         }
 
-        if (app_state == APP_PLAYING && !menu.is_open && !game_over) {
+        if (app_state == APP_PLAYING && !menu.is_open && !game_over && !game_won) {
             input_update(&player, &map, dt);
             if (game_update_enemies(&game, &player, &map, dt)) {
                 sound_play(&enemy_sound);
@@ -442,17 +454,25 @@ int main(void) {
                 map_unlock_exits(&map);
             }
             if (map_cell(&map, (int)player.x, (int)player.y) == MAP_CELL_EXIT_OPEN) {
-                current_level++;
-                if (start_game(&map, &player, &game, current_level) != 0) {
-                    current_level = 1;
+                if (current_level >= LEVEL_COUNT && enemy_list_all_dead(&game.enemies)) {
+                    game_won = 1;
+                    hs_rank = highscore_insert(&hs_table, game.score);
+                    highscore_save(&hs_table);
                     music_stop();
-                    landing_reset();
-                    app_state = APP_LANDING;
-                } else {
                     sound_play(&level_sound);
-                    int idx = current_level - 1;
-                    if (idx >= 0 && idx < LEVEL_COUNT) {
-                        music_play(&level_music[idx]);
+                } else {
+                    current_level++;
+                    if (start_game(&map, &player, &game, current_level) != 0) {
+                        current_level = 1;
+                        music_stop();
+                        landing_reset();
+                        app_state = APP_LANDING;
+                    } else {
+                        sound_play(&level_sound);
+                        int idx = current_level - 1;
+                        if (idx >= 0 && idx < LEVEL_COUNT) {
+                            music_play(&level_music[idx]);
+                        }
                     }
                 }
             }
@@ -496,6 +516,8 @@ int main(void) {
             }
             if (game_over) {
                 game_over_render(renderer, w, h, game.score, hs_rank, &hs_table);
+            } else if (game_won) {
+                victory_render(renderer, w, h, game.score, hs_rank, &hs_table);
             }
         }
 

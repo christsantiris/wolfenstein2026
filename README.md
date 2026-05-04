@@ -54,9 +54,8 @@ Pull requests are welcome. Please keep changes small and focused — one feature
 MIT
 
 ## Roadmap
-- More levels
-- Improved Enemy UI (PPM assets ?)
+- Improved Enemy UI (Better PPM assets ?)
 - Improved Gun UI
 - Save / load
-- bosses
+- Installers for mac, linux, windows
 
