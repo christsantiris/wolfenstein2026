@@ -10,6 +10,7 @@ typedef enum {
     ENEMY_TYPE_GUARD = 0,
     ENEMY_TYPE_OFFICER,
     ENEMY_TYPE_SS,
+    ENEMY_TYPE_BOSS,
     ENEMY_TYPE_COUNT
 } EnemyType;
 

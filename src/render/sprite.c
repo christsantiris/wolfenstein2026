@@ -36,7 +36,8 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
 
         int screen_x = (int)((screen_w / 2) * (1.0f + transform_x / transform_y));
 
-        int sprite_h = abs((int)(screen_h / transform_y));
+        float sprite_scale = (e->type == ENEMY_TYPE_BOSS) ? 1.35f : 1.0f;
+        int sprite_h = abs((int)(screen_h * sprite_scale / transform_y));
         int draw_y0 = (screen_h - sprite_h) / 2;
         int draw_y1 = (screen_h + sprite_h) / 2;
         if (draw_y0 < 0) { draw_y0 = 0; }
@@ -67,6 +68,35 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
                 SDL_SetRenderDrawColor(renderer, r, g, b, 255);
                 SDL_RenderDrawPoint(renderer, x, y);
             }
+        }
+
+        if (e->type == ENEMY_TYPE_BOSS && screen_x >= 0 && screen_x < screen_w && transform_y < zbuf[screen_x]) {
+            const EnemyDef *def = enemy_def(e->type);
+            int max_health = def->max_health;
+            if (e->health > max_health) {
+                max_health = e->health;
+            }
+
+            int bar_w = sprite_w * 3 / 5;
+            if (bar_w < 36) { bar_w = 36; }
+            if (bar_w > 140) { bar_w = 140; }
+            int bar_h = 6;
+            int bar_x = screen_x - bar_w / 2;
+            int bar_y = draw_y0 - 12;
+            if (bar_y < 2) { bar_y = 2; }
+
+            int fill_w = (max_health > 0) ? (bar_w - 2) * e->health / max_health : 0;
+            if (fill_w < 0) { fill_w = 0; }
+            if (fill_w > bar_w - 2) { fill_w = bar_w - 2; }
+
+            SDL_Rect bg = { bar_x, bar_y, bar_w, bar_h };
+            SDL_Rect fill = { bar_x + 1, bar_y + 1, fill_w, bar_h - 2 };
+            SDL_SetRenderDrawColor(renderer, 20, 10, 12, 255);
+            SDL_RenderFillRect(renderer, &bg);
+            SDL_SetRenderDrawColor(renderer, 190, 24, 28, 255);
+            SDL_RenderFillRect(renderer, &fill);
+            SDL_SetRenderDrawColor(renderer, 230, 210, 160, 255);
+            SDL_RenderDrawRect(renderer, &bg);
         }
     }
 }

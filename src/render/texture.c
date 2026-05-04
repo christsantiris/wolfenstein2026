@@ -245,6 +245,133 @@ void texture_generate_guard_dir(Texture *t, int dir) {
     }
 }
 
+void texture_generate_boss_dir(Texture *t, int dir) {
+    int W = t->width;
+    int H = t->height;
+    static const int BODY_W[8]    = { 46, 38, 28, 38, 48, 38, 28, 38 };
+    static const int SHOW_FACE[8] = {  0,  0,  0,  1,  1,  1,  0,  0 };
+
+    for (int i = 0; i < W * H * 3; i += 3) {
+        t->pixels[i] = 255; t->pixels[i + 1] = 0; t->pixels[i + 2] = 255;
+    }
+
+    int body_w = BODY_W[dir] * W / 64;
+    int show_face = SHOW_FACE[dir];
+    int cx = W / 2;
+    int bx0 = cx - body_w / 2;
+    int bx1 = cx + body_w / 2;
+    int coat_y0 = H * 24 / 64;
+    int boot_y0 = H * 52 / 64;
+
+    for (int y = boot_y0; y < H; y++) {
+        for (int x = bx0 + body_w / 8; x < bx1 - body_w / 8; x++) {
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = 18; t->pixels[idx + 1] = 18; t->pixels[idx + 2] = 22;
+        }
+    }
+
+    for (int y = coat_y0; y < boot_y0; y++) {
+        int taper = (y - coat_y0) * body_w / (H * 80 / 64);
+        int x0 = bx0 + taper / 6;
+        int x1 = bx1 - taper / 6;
+        for (int x = x0; x < x1; x++) {
+            int shade = ((x * 5 + y * 7) % 12) - 6;
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = (unsigned char)(28 + shade / 2);
+            t->pixels[idx + 1] = (unsigned char)(30 + shade / 2);
+            t->pixels[idx + 2] = (unsigned char)(38 + shade);
+        }
+    }
+
+    int sash_x = show_face ? cx - body_w / 5 : cx + body_w / 8;
+    for (int y = coat_y0 + 2; y < boot_y0 - 2; y++) {
+        int x = sash_x + (y - coat_y0) / 5;
+        for (int dx = -2; dx <= 2; dx++) {
+            int px = x + dx;
+            if (px < bx0 || px >= bx1) { continue; }
+            int idx = (y * W + px) * 3;
+            t->pixels[idx] = 170; t->pixels[idx + 1] = 18; t->pixels[idx + 2] = 24;
+        }
+    }
+
+    int belt_y = H * 42 / 64;
+    for (int x = bx0; x < bx1; x++) {
+        int idx = (belt_y * W + x) * 3;
+        t->pixels[idx] = 12; t->pixels[idx + 1] = 12; t->pixels[idx + 2] = 14;
+    }
+
+    int gun_y = H * 36 / 64;
+    int gun_x0 = show_face ? cx - body_w / 5 : cx - body_w / 8;
+    int gun_x1 = show_face ? bx1 + W / 7 : bx1 + W / 10;
+    if (dir == 5 || dir == 6 || dir == 7) {
+        gun_x0 = bx0 - W / 10;
+        gun_x1 = show_face ? cx + body_w / 5 : cx + body_w / 8;
+    }
+    if (gun_x0 < 0) { gun_x0 = 0; }
+    if (gun_x1 > W) { gun_x1 = W; }
+    for (int y = gun_y; y < gun_y + H / 14; y++) {
+        for (int x = gun_x0; x < gun_x1; x++) {
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = 50; t->pixels[idx + 1] = 50; t->pixels[idx + 2] = 56;
+        }
+    }
+    int muzzle_x = (dir == 5 || dir == 6 || dir == 7) ? gun_x0 : gun_x1 - 2;
+    for (int y = gun_y - 1; y < gun_y + H / 14 + 1; y++) {
+        for (int x = muzzle_x; x < muzzle_x + 2 && x < W; x++) {
+            if (x < 0 || y < 0 || y >= H) { continue; }
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = 18; t->pixels[idx + 1] = 18; t->pixels[idx + 2] = 22;
+        }
+    }
+    int grip_x0 = cx - body_w / 10;
+    int grip_x1 = grip_x0 + W / 10;
+    for (int y = gun_y + H / 14; y < gun_y + H / 5; y++) {
+        for (int x = grip_x0; x < grip_x1; x++) {
+            if (x < 0 || x >= W || y < 0 || y >= H) { continue; }
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = 42; t->pixels[idx + 1] = 24; t->pixels[idx + 2] = 18;
+        }
+    }
+
+    int head_w = body_w * 46 / 100;
+    int hx0 = cx - head_w / 2;
+    int hx1 = cx + head_w / 2;
+    int head_y0 = H * 10 / 64;
+    int head_y1 = coat_y0 + 2;
+    unsigned char hr = show_face ? 218 : 115;
+    unsigned char hg = show_face ? 190 : 100;
+    unsigned char hb = show_face ? 160 :  88;
+    for (int y = head_y0; y < head_y1; y++) {
+        for (int x = hx0; x < hx1; x++) {
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = hr; t->pixels[idx + 1] = hg; t->pixels[idx + 2] = hb;
+        }
+    }
+
+    int cap_y0 = H * 5 / 64;
+    for (int y = cap_y0; y < head_y0 + 3; y++) {
+        for (int x = hx0 - W / 12; x < hx1 + W / 12; x++) {
+            if (x < 0 || x >= W) { continue; }
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = 18; t->pixels[idx + 1] = 18; t->pixels[idx + 2] = 22;
+        }
+    }
+
+    if (show_face && head_w >= 8) {
+        int ey = head_y0 + (head_y1 - head_y0) / 2;
+        int ex_l = cx - head_w / 4;
+        int ex_r = cx + head_w / 4;
+        for (int dx = 0; dx < 2; dx++) {
+            for (int dy = 0; dy < 2; dy++) {
+                int il = ((ey + dy) * W + ex_l + dx) * 3;
+                int ir = ((ey + dy) * W + ex_r + dx) * 3;
+                t->pixels[il] = 190; t->pixels[il + 1] = 20; t->pixels[il + 2] = 24;
+                t->pixels[ir] = 190; t->pixels[ir + 1] = 20; t->pixels[ir + 2] = 24;
+            }
+        }
+    }
+}
+
 int texture_recolor_uniform(Texture *dst, const Texture *src, unsigned char ur, unsigned char ug, unsigned char ub) {
     if (texture_create(dst, src->width, src->height) != 0) {
         return -1;
@@ -619,6 +746,51 @@ void texture_generate_command_bunker(Texture *t) {
                 r = (unsigned char)base;
                 g = (unsigned char)base;
                 b = (unsigned char)(base + 5);
+            }
+
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = r;
+            t->pixels[idx + 1] = g;
+            t->pixels[idx + 2] = b;
+        }
+    }
+}
+
+void texture_generate_obsidian_command(Texture *t) {
+    int W = t->width;
+    int H = t->height;
+    int slab_w = 16;
+    int slab_h = 16;
+
+    for (int y = 0; y < H; y++) {
+        for (int x = 0; x < W; x++) {
+            int sx = x % slab_w;
+            int sy = y % slab_h;
+            int is_seam = (sx == 0 || sy == 0);
+            int is_red_channel = (sx == 2 || sx == 3);
+            int crack = ((x * 9 + y * 5 + (x * y) / 7) % 41 == 0);
+            int shine = ((x + y * 2) % 23 == 0);
+            int vary = ((x * 11 + y * 7) % 14) - 7;
+
+            unsigned char r, g, b;
+            if (is_seam) {
+                r = 10; g = 8; b = 14;
+            } else if (is_red_channel) {
+                int glow = ((y * 5 + x * 3) % 20) - 10;
+                r = (unsigned char)(145 + glow);
+                g = (unsigned char)(12 + glow / 4);
+                b = (unsigned char)(18 + glow / 4);
+            } else if (crack) {
+                r = 76; g = 70; b = 86;
+            } else if (shine) {
+                r = 54; g = 48; b = 66;
+            } else {
+                int base = 22 + vary;
+                if (base < 10) { base = 10; }
+                if (base > 38) { base = 38; }
+                r = (unsigned char)base;
+                g = (unsigned char)(base - 2);
+                b = (unsigned char)(base + 10);
             }
 
             int idx = (y * W + x) * 3;
