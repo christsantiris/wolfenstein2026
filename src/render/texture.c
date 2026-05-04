@@ -548,6 +548,87 @@ void texture_generate_red_blue_brick(Texture *t) {
     }
 }
 
+void texture_generate_metal_panels(Texture *t) {
+    int W = t->width;
+    int H = t->height;
+    int panel_w = 16;
+    int panel_h = 16;
+
+    for (int y = 0; y < H; y++) {
+        for (int x = 0; x < W; x++) {
+            int px = x % panel_w;
+            int py = y % panel_h;
+            int is_seam = (px == 0 || py == 0);
+            int is_rivet = ((px == 3 || px == panel_w - 4) &&
+                            (py == 3 || py == panel_h - 4));
+            int shine = (panel_w - px) / 4 + py / 8;
+            int vary = ((x * 5 + y * 9) % 18) - 9;
+
+            unsigned char r, g, b;
+            if (is_seam) {
+                r = 32; g = 36; b = 42;
+            } else if (is_rivet) {
+                r = 112; g = 120; b = 132;
+            } else {
+                int base = 72 + shine + vary;
+                if (base < 45) { base = 45; }
+                if (base > 130) { base = 130; }
+                r = (unsigned char)base;
+                g = (unsigned char)(base + 5);
+                b = (unsigned char)(base + 12);
+            }
+
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = r;
+            t->pixels[idx + 1] = g;
+            t->pixels[idx + 2] = b;
+        }
+    }
+}
+
+void texture_generate_command_bunker(Texture *t) {
+    int W = t->width;
+    int H = t->height;
+    int slab_w = 32;
+    int slab_h = 16;
+
+    for (int y = 0; y < H; y++) {
+        for (int x = 0; x < W; x++) {
+            int sx = x % slab_w;
+            int sy = y % slab_h;
+            int is_seam = (sx == 0 || sy == 0);
+            int is_red_trim = (sy == 2 || sy == 3);
+            int vein = ((x * 7 + y * 11 + (x * y) / 9) % 37 == 0);
+            int vein2 = ((x * 5 - y * 3 + 256) % 29 == 0 && sy > 5);
+            int vary = ((x * 3 + y * 13) % 16) - 8;
+
+            unsigned char r, g, b;
+            if (is_seam) {
+                r = 18; g = 18; b = 22;
+            } else if (is_red_trim) {
+                int glow = ((x * 5 + y * 3) % 18) - 9;
+                r = (unsigned char)(124 + glow);
+                g = (unsigned char)(18 + glow / 3);
+                b = (unsigned char)(22 + glow / 3);
+            } else if (vein || vein2) {
+                r = 82; g = 78; b = 84;
+            } else {
+                int base = 42 + vary;
+                if (base < 24) { base = 24; }
+                if (base > 62) { base = 62; }
+                r = (unsigned char)base;
+                g = (unsigned char)base;
+                b = (unsigned char)(base + 5);
+            }
+
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = r;
+            t->pixels[idx + 1] = g;
+            t->pixels[idx + 2] = b;
+        }
+    }
+}
+
 void texture_generate_brick(Texture *t) {
     int brick_w = 16;
     int brick_h = 8;

@@ -20,7 +20,7 @@
 
 #define SCREEN_W 800
 #define SCREEN_H 600
-#define LEVEL_COUNT 7
+#define LEVEL_COUNT 9
 
 typedef enum {
     APP_LANDING,
@@ -128,6 +128,8 @@ int main(void) {
     texture_generate_wood(&wall_tex[4]);
     texture_generate_moss_stone(&wall_tex[5]);
     texture_generate_red_blue_brick(&wall_tex[6]);
+    texture_generate_metal_panels(&wall_tex[7]);
+    texture_generate_command_bunker(&wall_tex[8]);
 
     Texture door_tex;
     if (texture_create(&door_tex, 64, 64) != 0) {
@@ -241,6 +243,8 @@ int main(void) {
     music_load(&level_music[4], "assets/music/level5theme.mp3");
     music_load(&level_music[5], "assets/music/level6theme.mp3");
     music_load(&level_music[6], "assets/music/level7theme.mp3");
+    music_load(&level_music[7], "assets/music/level8theme.mp3");
+    music_load(&level_music[8], "assets/music/level9theme.mp3");
 
     HighScoreTable hs_table;
     highscore_load(&hs_table);
