@@ -17,6 +17,8 @@
 #include "ui/landing.h"
 #include "ui/highscore.h"
 #include "audio/sound.h"
+#include "systems/save_load.h"
+#include "ui/slot_picker.h"
 
 #define SCREEN_W 800
 #define SCREEN_H 600
@@ -272,6 +274,7 @@ int main(void) {
     int game_over = 0;
     int game_won = 0;
     int show_minimap = 1;
+    SlotPicker slot_picker = { 0 };
     int running = 1;
     float total_time = 0.0f;
     SDL_Event e;
@@ -309,11 +312,36 @@ int main(void) {
                 }
             }
 
+            if (slot_picker.is_open) {
+                int picked_slot = 0;
+                SlotResult sr = slot_picker_handle_event(&slot_picker, &e, w, h, &picked_slot);
+                if (sr == SLOT_RESULT_SELECTED) {
+                    if (slot_picker.is_save) {
+                        save_game(picked_slot, current_level, &player, &game, &map);
+                    } else {
+                        if (load_game(picked_slot, &current_level, &player, &game, &map) == 0) {
+                            game_over = 0;
+                            game_won = 0;
+                            menu.is_open = 0;
+                            app_state = APP_PLAYING;
+                            music_stop();
+                            int idx = current_level - 1;
+                            if (menu.music_on && idx >= 0 && idx < LEVEL_COUNT) {
+                                music_play(&level_music[idx]);
+                            }
+                        }
+                    }
+                }
+                continue;
+            }
+
             if (app_state == APP_LANDING) {
                 LandingResult lr = landing_handle_event(&e, w, h);
                 if (lr == LANDING_NEW_GAME) {
                     difficulty_screen_reset();
                     app_state = APP_DIFFICULTY;
+                } else if (lr == LANDING_LOAD) {
+                    slot_picker_open(&slot_picker, 0);
                 } else if (lr == LANDING_QUIT) {
                     running = 0;
                 }
@@ -353,6 +381,10 @@ int main(void) {
                         if (menu.music_on) { Mix_ResumeMusic(); } else { Mix_PauseMusic(); }
                     } else if (action == MENU_ACTION_SOUND_TOGGLE) {
                         sound_set_enabled(menu.sound_on);
+                    } else if (action == MENU_ACTION_SAVE) {
+                        slot_picker_open(&slot_picker, 1);
+                    } else if (action == MENU_ACTION_LOAD) {
+                        slot_picker_open(&slot_picker, 0);
                     }
                 } else if (!game_over && !game_won) {
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
@@ -402,6 +434,8 @@ int main(void) {
                         app_state = APP_LANDING;
                         game_over = 0;
                         game_won = 0;
+                    } else if (result == GAME_OVER_LOAD) {
+                        slot_picker_open(&slot_picker, 0);
                     }
                 }
             }
@@ -519,6 +553,10 @@ int main(void) {
             } else if (game_won) {
                 victory_render(renderer, w, h, game.score, hs_rank, &hs_table);
             }
+        }
+
+        if (slot_picker.is_open) {
+            slot_picker_render(renderer, &slot_picker, w, h);
         }
 
         SDL_RenderPresent(renderer);

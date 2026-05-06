@@ -129,3 +129,15 @@ Any new game state added or any struct that is part of persistent game state mus
 - Deserialized in `load_game()` in `src/systems/save_load.c`
 
 Omitting this causes data to silently reset to zero on load.
+
+---
+
+## 10. All menus and modals must be fully keyboard-navigable
+
+Every screen that accepts user input must support:
+
+- **Arrow keys** (Up/Down or Left/Right) to move the selection cursor
+- **Enter / KP Enter** to activate the selected item
+- **Escape** to cancel or go back (where applicable)
+
+Mouse-only interaction is never acceptable. Keyboard must be the primary input path and mouse a secondary convenience.

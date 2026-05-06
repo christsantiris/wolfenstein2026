@@ -1,17 +1,27 @@
 #include "ui/landing.h"
 #include "ui/font.h"
+#include "systems/save_load.h"
 
 /* --- landing screen --- */
 
 static const char *LANDING_LABELS[] = { "NEW GAME", "LOAD", "QUIT" };
-static const int   LANDING_ENABLED[] = { 1, 0, 1 };
 #define LANDING_COUNT 3
+
+static int landing_item_enabled(int i) {
+    if (i == 1) {
+        for (int s = 0; s < SAVE_SLOT_COUNT; s++) {
+            if (save_slot_exists(s)) { return 1; }
+        }
+        return 0;
+    }
+    return 1;
+}
 
 static int landing_selected = 0;
 
 static int landing_next(int cur, int dir) {
     int n = (cur + dir + LANDING_COUNT) % LANDING_COUNT;
-    while (!LANDING_ENABLED[n]) {
+    while (!landing_item_enabled(n)) {
         n = (n + dir + LANDING_COUNT) % LANDING_COUNT;
     }
     return n;
@@ -95,7 +105,7 @@ void landing_render(SDL_Renderer *r, int sw, int sh) {
     int by = sh / 2;
     int gap = FONT_LHEIGHT + 10;
     for (int i = 0; i < LANDING_COUNT; i++) {
-        draw_item(r, LANDING_LABELS[i], cx, by + i * gap, LANDING_ENABLED[i], landing_selected == i);
+        draw_item(r, LANDING_LABELS[i], cx, by + i * gap, landing_item_enabled(i), landing_selected == i);
     }
 }
 
@@ -112,6 +122,7 @@ LandingResult landing_handle_event(const SDL_Event *e, int sw, int sh) {
         }
         if (k == SDLK_RETURN || k == SDLK_KP_ENTER) {
             if (landing_selected == 0) { return LANDING_NEW_GAME; }
+            if (landing_selected == 1) { return LANDING_LOAD; }
             if (landing_selected == 2) { return LANDING_QUIT; }
         }
     }
@@ -122,11 +133,12 @@ LandingResult landing_handle_event(const SDL_Event *e, int sw, int sh) {
         int by = sh / 2;
         int gap = FONT_LHEIGHT + 10;
         for (int i = 0; i < LANDING_COUNT; i++) {
-            if (!LANDING_ENABLED[i]) { continue; }
+            if (!landing_item_enabled(i)) { continue; }
             SDL_Rect rect = item_rect(LANDING_LABELS[i], cx, by + i * gap);
             if (mx >= rect.x && mx < rect.x + rect.w && my >= rect.y && my < rect.y + rect.h) {
                 landing_selected = i;
                 if (i == 0) { return LANDING_NEW_GAME; }
+                if (i == 1) { return LANDING_LOAD; }
                 if (i == 2) { return LANDING_QUIT; }
             }
         }

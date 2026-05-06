@@ -9,11 +9,13 @@
 #define CSTRIDE   (CW + SCALE)
 #define LHEIGHT   (CH + SCALE * 4)
 
-#define MENU_ITEM_COUNT    4
+#define MENU_ITEM_COUNT    6
 #define MENU_ITEM_MUSIC    0
 #define MENU_ITEM_SOUND    1
-#define MENU_ITEM_NEW_GAME 2
-#define MENU_ITEM_QUIT     3
+#define MENU_ITEM_SAVE     2
+#define MENU_ITEM_LOAD     3
+#define MENU_ITEM_NEW_GAME 4
+#define MENU_ITEM_QUIT     5
 
 static const uint8_t GLYPHS[96][7] = {
     { 0x00,0x00,0x00,0x00,0x00,0x00,0x00 }, /* ' '  32 */
@@ -182,6 +184,12 @@ static MenuAction activate_item(Menu *m, int item) {
         m->sound_on = !m->sound_on;
         return MENU_ACTION_SOUND_TOGGLE;
     }
+    if (item == MENU_ITEM_SAVE) {
+        return MENU_ACTION_SAVE;
+    }
+    if (item == MENU_ITEM_LOAD) {
+        return MENU_ACTION_LOAD;
+    }
     if (item == MENU_ITEM_NEW_GAME) {
         return MENU_ACTION_NEW_GAME;
     }
@@ -224,6 +232,12 @@ MenuAction menu_handle_event(Menu *m, const SDL_Event *e, int sw, int sh) {
         mx >= l.bx && mx < l.bx + l.bw) {
         m->selected = MENU_ITEM_SOUND;
         return activate_item(m, MENU_ITEM_SOUND);
+    }
+    if (button_hit(mx, my, l.save_x, l.row1_y, "SAVE")) {
+        return MENU_ACTION_SAVE;
+    }
+    if (button_hit(mx, my, l.load_x, l.row1_y, "LOAD")) {
+        return MENU_ACTION_LOAD;
     }
     if (button_hit(mx, my, l.new_game_x, l.row2_y, "NEW GAME")) {
         m->selected = MENU_ITEM_NEW_GAME;
@@ -309,6 +323,18 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
 
     draw_button(r, "SAVE", l.save_x, y);
     draw_button(r, "LOAD", l.load_x, y);
+    if (m->selected == MENU_ITEM_SAVE) {
+        int pw = str_px_w("SAVE") + 16;
+        SDL_SetRenderDrawColor(r, 220, 180, 50, 255);
+        SDL_Rect border = { l.save_x - 1, y - 5, pw + 2, CH + 10 };
+        SDL_RenderDrawRect(r, &border);
+    }
+    if (m->selected == MENU_ITEM_LOAD) {
+        int pw = str_px_w("LOAD") + 16;
+        SDL_SetRenderDrawColor(r, 220, 180, 50, 255);
+        SDL_Rect border = { l.load_x - 1, y - 5, pw + 2, CH + 10 };
+        SDL_RenderDrawRect(r, &border);
+    }
     y += LHEIGHT + 8;
 
     draw_button(r, "NEW GAME", l.new_game_x, y);
@@ -453,6 +479,9 @@ GameOverResult game_over_handle_event(const SDL_Event *e, int sw, int sh, int sc
     game_over_button_rects(sw, sh, score_count, &rn, &rl, &rq);
     if (mx >= rn.x && mx < rn.x + rn.w && my >= rn.y && my < rn.y + rn.h) {
         return GAME_OVER_NEW_GAME;
+    }
+    if (mx >= rl.x && mx < rl.x + rl.w && my >= rl.y && my < rl.y + rl.h) {
+        return GAME_OVER_LOAD;
     }
     if (mx >= rq.x && mx < rq.x + rq.w && my >= rq.y && my < rq.y + rq.h) {
         return GAME_OVER_QUIT;
