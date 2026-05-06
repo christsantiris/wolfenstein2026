@@ -225,6 +225,12 @@ MenuAction menu_handle_event(Menu *m, const SDL_Event *e, int sw, int sh) {
         m->selected = MENU_ITEM_SOUND;
         return activate_item(m, MENU_ITEM_SOUND);
     }
+    if (button_hit(mx, my, l.save_x, l.row1_y, "SAVE")) {
+        return MENU_ACTION_SAVE;
+    }
+    if (button_hit(mx, my, l.load_x, l.row1_y, "LOAD")) {
+        return MENU_ACTION_LOAD;
+    }
     if (button_hit(mx, my, l.new_game_x, l.row2_y, "NEW GAME")) {
         m->selected = MENU_ITEM_NEW_GAME;
         return activate_item(m, MENU_ITEM_NEW_GAME);
@@ -453,6 +459,9 @@ GameOverResult game_over_handle_event(const SDL_Event *e, int sw, int sh, int sc
     game_over_button_rects(sw, sh, score_count, &rn, &rl, &rq);
     if (mx >= rn.x && mx < rn.x + rn.w && my >= rn.y && my < rn.y + rn.h) {
         return GAME_OVER_NEW_GAME;
+    }
+    if (mx >= rl.x && mx < rl.x + rl.w && my >= rl.y && my < rl.y + rl.h) {
+        return GAME_OVER_LOAD;
     }
     if (mx >= rq.x && mx < rq.x + rq.w && my >= rq.y && my < rq.y + rq.h) {
         return GAME_OVER_QUIT;

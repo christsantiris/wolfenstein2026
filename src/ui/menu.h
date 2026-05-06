@@ -18,6 +18,8 @@ typedef enum {
     MENU_ACTION_NEW_GAME,
     MENU_ACTION_MUSIC_TOGGLE,
     MENU_ACTION_SOUND_TOGGLE,
+    MENU_ACTION_SAVE,
+    MENU_ACTION_LOAD,
 } MenuAction;
 
 MenuAction menu_handle_event(Menu *m, const SDL_Event *e, int sw, int sh);
@@ -26,6 +28,7 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h);
 typedef enum {
     GAME_OVER_NONE = 0,
     GAME_OVER_NEW_GAME,
+    GAME_OVER_LOAD,
     GAME_OVER_QUIT
 } GameOverResult;
 
