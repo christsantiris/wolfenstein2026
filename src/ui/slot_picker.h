@@ -12,6 +12,7 @@ typedef enum {
 typedef struct {
     int is_open;
     int is_save;
+    int selected;
 } SlotPicker;
 
 void slot_picker_open(SlotPicker *sp, int is_save);

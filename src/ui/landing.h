@@ -7,6 +7,7 @@
 typedef enum {
     LANDING_NONE = 0,
     LANDING_NEW_GAME,
+    LANDING_LOAD,
     LANDING_QUIT
 } LandingResult;
 

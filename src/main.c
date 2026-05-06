@@ -340,6 +340,8 @@ int main(void) {
                 if (lr == LANDING_NEW_GAME) {
                     difficulty_screen_reset();
                     app_state = APP_DIFFICULTY;
+                } else if (lr == LANDING_LOAD) {
+                    slot_picker_open(&slot_picker, 0);
                 } else if (lr == LANDING_QUIT) {
                     running = 0;
                 }

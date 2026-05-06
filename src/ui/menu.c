@@ -9,11 +9,13 @@
 #define CSTRIDE   (CW + SCALE)
 #define LHEIGHT   (CH + SCALE * 4)
 
-#define MENU_ITEM_COUNT    4
+#define MENU_ITEM_COUNT    6
 #define MENU_ITEM_MUSIC    0
 #define MENU_ITEM_SOUND    1
-#define MENU_ITEM_NEW_GAME 2
-#define MENU_ITEM_QUIT     3
+#define MENU_ITEM_SAVE     2
+#define MENU_ITEM_LOAD     3
+#define MENU_ITEM_NEW_GAME 4
+#define MENU_ITEM_QUIT     5
 
 static const uint8_t GLYPHS[96][7] = {
     { 0x00,0x00,0x00,0x00,0x00,0x00,0x00 }, /* ' '  32 */
@@ -182,6 +184,12 @@ static MenuAction activate_item(Menu *m, int item) {
         m->sound_on = !m->sound_on;
         return MENU_ACTION_SOUND_TOGGLE;
     }
+    if (item == MENU_ITEM_SAVE) {
+        return MENU_ACTION_SAVE;
+    }
+    if (item == MENU_ITEM_LOAD) {
+        return MENU_ACTION_LOAD;
+    }
     if (item == MENU_ITEM_NEW_GAME) {
         return MENU_ACTION_NEW_GAME;
     }
@@ -315,6 +323,18 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
 
     draw_button(r, "SAVE", l.save_x, y);
     draw_button(r, "LOAD", l.load_x, y);
+    if (m->selected == MENU_ITEM_SAVE) {
+        int pw = str_px_w("SAVE") + 16;
+        SDL_SetRenderDrawColor(r, 220, 180, 50, 255);
+        SDL_Rect border = { l.save_x - 1, y - 5, pw + 2, CH + 10 };
+        SDL_RenderDrawRect(r, &border);
+    }
+    if (m->selected == MENU_ITEM_LOAD) {
+        int pw = str_px_w("LOAD") + 16;
+        SDL_SetRenderDrawColor(r, 220, 180, 50, 255);
+        SDL_Rect border = { l.load_x - 1, y - 5, pw + 2, CH + 10 };
+        SDL_RenderDrawRect(r, &border);
+    }
     y += LHEIGHT + 8;
 
     draw_button(r, "NEW GAME", l.new_game_x, y);

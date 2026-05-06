@@ -15,15 +15,53 @@ static void slot_rect(int bx, int by, int slot, SDL_Rect *out) {
     out->h = SLOT_H;
 }
 
+static int picker_slot_enabled(const SlotPicker *sp, int i) {
+    return sp->is_save || save_slot_exists(i);
+}
+
+static int picker_next(const SlotPicker *sp, int cur, int dir) {
+    int n = (cur + dir + SAVE_SLOT_COUNT) % SAVE_SLOT_COUNT;
+    while (!picker_slot_enabled(sp, n)) {
+        n = (n + dir + SAVE_SLOT_COUNT) % SAVE_SLOT_COUNT;
+    }
+    return n;
+}
+
 void slot_picker_open(SlotPicker *sp, int is_save) {
     sp->is_open = 1;
     sp->is_save = is_save;
+    sp->selected = 0;
+    for (int i = 0; i < SAVE_SLOT_COUNT; i++) {
+        if (picker_slot_enabled(sp, i)) {
+            sp->selected = i;
+            break;
+        }
+    }
 }
 
 SlotResult slot_picker_handle_event(SlotPicker *sp, const SDL_Event *e, int sw, int sh, int *out_slot) {
-    if (e->type == SDL_KEYDOWN && e->key.keysym.sym == SDLK_ESCAPE) {
-        sp->is_open = 0;
-        return SLOT_RESULT_CANCEL;
+    if (e->type == SDL_KEYDOWN) {
+        SDL_Keycode k = e->key.keysym.sym;
+        if (k == SDLK_ESCAPE) {
+            sp->is_open = 0;
+            return SLOT_RESULT_CANCEL;
+        }
+        if (k == SDLK_DOWN) {
+            sp->selected = picker_next(sp, sp->selected, 1);
+            return SLOT_RESULT_NONE;
+        }
+        if (k == SDLK_UP) {
+            sp->selected = picker_next(sp, sp->selected, -1);
+            return SLOT_RESULT_NONE;
+        }
+        if (k == SDLK_RETURN || k == SDLK_KP_ENTER) {
+            if (picker_slot_enabled(sp, sp->selected)) {
+                sp->is_open = 0;
+                *out_slot = sp->selected;
+                return SLOT_RESULT_SELECTED;
+            }
+        }
+        return SLOT_RESULT_NONE;
     }
 
     if (e->type != SDL_MOUSEBUTTONDOWN || e->button.button != SDL_BUTTON_LEFT) {
@@ -89,7 +127,11 @@ void slot_picker_render(SDL_Renderer *r, const SlotPicker *sp, int sw, int sh) {
             : (SDL_Color){ 35, 35, 35, 255 };
         SDL_SetRenderDrawColor(r, bg_col.r, bg_col.g, bg_col.b, 255);
         SDL_RenderFillRect(r, &sr);
-        SDL_SetRenderDrawColor(r, 80, 60, 20, 255);
+        if (i == sp->selected && clickable) {
+            SDL_SetRenderDrawColor(r, 220, 180, 50, 255);
+        } else {
+            SDL_SetRenderDrawColor(r, 80, 60, 20, 255);
+        }
         SDL_RenderDrawRect(r, &sr);
 
         char label[16];
