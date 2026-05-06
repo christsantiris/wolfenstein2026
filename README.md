@@ -56,6 +56,5 @@ MIT
 ## Roadmap
 - Improved Enemy UI (Better PPM assets ?)
 - Improved Gun UI
-- Save / load
-- Installers for mac, linux, windows
+- Installers for linux, windows
 
