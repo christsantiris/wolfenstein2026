@@ -8,7 +8,8 @@ run: all
 	./build/wolf
 
 dmg:
-	cmake --build build --config Release
+	cmake -B build -DCMAKE_BUILD_TYPE=Release
+	cmake --build build
 	bash package/macos/build_dmg.sh
 
 linux:
