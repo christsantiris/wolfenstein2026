@@ -35,7 +35,8 @@ void game_init(GameState *g) {
     g->health = 100;
     g->ammo = g->current_weapon.max_ammo;
     g->ammo_per_gun[GUN_9MM_HANDGUN] = g->ammo;
-    g->reserve_ammo = AMMO_RESERVE_MAX;
+    memset(g->reserve_ammo_per_gun, 0, sizeof(g->reserve_ammo_per_gun));
+    g->reserve_ammo_per_gun[GUN_9MM_HANDGUN] = AMMO_RESERVE_MAX;
     g->score = 0;
     g->shot_timer = 0.0f;
     g->shot_cooldown = 0.0f;
@@ -47,7 +48,7 @@ void game_init(GameState *g) {
     memset(&g->enemies, 0, sizeof(g->enemies));
 #ifdef DEBUG_NO_AMMO
     g->ammo = 0;
-    g->reserve_ammo = 0;
+    memset(g->reserve_ammo_per_gun, 0, sizeof(g->reserve_ammo_per_gun));
 #endif
 #ifdef DEBUG_SHOTGUN
     g->has_weapon[GUN_SHOTGUN] = 1;
@@ -58,7 +59,7 @@ void game_init(GameState *g) {
 }
 
 int game_reload(GameState *g) {
-    if (g->is_reloading || g->reserve_ammo == 0 || g->ammo == g->current_weapon.max_ammo) {
+    if (g->is_reloading || g->reserve_ammo_per_gun[g->current_weapon.type] == 0 || g->ammo == g->current_weapon.max_ammo) {
         return 0;
     }
     g->is_reloading = 1;
@@ -201,9 +202,10 @@ void game_update_timers(GameState *g, float dt) {
         g->reload_timer -= dt;
         if (g->reload_timer <= 0.0f) {
             int needed = g->current_weapon.max_ammo - g->ammo;
-            int drawn  = (needed > g->reserve_ammo) ? g->reserve_ammo : needed;
+            int reserve = g->reserve_ammo_per_gun[g->current_weapon.type];
+            int drawn = (needed > reserve) ? reserve : needed;
             g->ammo += drawn;
-            g->reserve_ammo -= drawn;
+            g->reserve_ammo_per_gun[g->current_weapon.type] -= drawn;
             g->reload_timer = 0.0f;
             g->is_reloading = 0;
         }
