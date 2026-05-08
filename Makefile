@@ -16,19 +16,14 @@ linux:
 	bash package/linux/build_linux.sh
 
 debug:
-	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_NO_AMMO=OFF -DDEBUG_SHOTGUN=ON
+	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_NO_AMMO=OFF -DDEBUG_SHOTGUN=ON -DDEBUG_AK47=OFF
 	cmake --build build-debug
 	./build-debug/wolf
 
 debug-level:
-	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=10
+	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=2
 	cmake --build build-debug
 	./build-debug/wolf
-
-test:
-	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug
-	cmake --build build-debug --target test_runner
-	./build-debug/test_runner
 
 sprites:
 	mkdir -p assets/sprites

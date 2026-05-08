@@ -176,6 +176,10 @@ int main(void) {
     texture_create(&weapon_kit_ak47_tex, 64, 64);
     texture_generate_weapon_kit_ak47(&weapon_kit_ak47_tex);
 
+    Texture weapon_kit_dual_tex;
+    texture_create(&weapon_kit_dual_tex, 64, 64);
+    texture_generate_weapon_kit_dual(&weapon_kit_dual_tex);
+
     Texture shotgun_tex;
     if (texture_load_ppm(&shotgun_tex, "assets/sprites/shotgun.ppm") != 0) {
         texture_create(&shotgun_tex, 64, 64);
@@ -186,6 +190,12 @@ int main(void) {
     if (texture_load_ppm(&pistol_tex, "assets/sprites/pistol.ppm") != 0) {
         texture_create(&pistol_tex, 64, 64);
         for (int i = 0; i < 64 * 64 * 3; i++) { pistol_tex.pixels[i] = 0; }
+    }
+
+    Texture dual_handgun_tex;
+    if (texture_load_ppm(&dual_handgun_tex, "assets/sprites/dual_handgun.ppm") != 0) {
+        texture_create(&dual_handgun_tex, 64, 64);
+        for (int i = 0; i < 64 * 64 * 3; i++) { dual_handgun_tex.pixels[i] = 0; }
     }
 
     Texture ak47_tex;
@@ -471,17 +481,41 @@ int main(void) {
                         int heal = HEALTH_PICKUP[game.difficulty < 4 ? game.difficulty : 3];
                         game.health += heal;
                         if (game.health > 100) { game.health = 100; }
+                    } else if (it->type == ITEM_WEAPON_KIT_DUAL) {
+                        if (!game.has_weapon[GUN_DUAL_HANDGUN]) {
+                            game.has_weapon[GUN_DUAL_HANDGUN] = 1;
+                            game.ammo_per_gun[GUN_DUAL_HANDGUN] = weapon_def(GUN_DUAL_HANDGUN)->max_ammo;
+                            game.reserve_ammo_per_gun[GUN_DUAL_HANDGUN] = AMMO_RESERVE_MAX;
+                            game.ammo_per_gun[game.current_weapon.type] = game.ammo;
+                            game.current_weapon = *weapon_def(GUN_DUAL_HANDGUN);
+                            game.ammo = game.ammo_per_gun[GUN_DUAL_HANDGUN];
+                            game.is_reloading = 0;
+                            game.reload_timer = 0.0f;
+                            game.shot_cooldown = 0.0f;
+                        }
                     } else if (it->type == ITEM_WEAPON_KIT) {
                         if (!game.has_weapon[GUN_SHOTGUN]) {
                             game.has_weapon[GUN_SHOTGUN] = 1;
                             game.ammo_per_gun[GUN_SHOTGUN] = weapon_def(GUN_SHOTGUN)->max_ammo;
-                            game_cycle_weapon(&game);
+                            game.reserve_ammo_per_gun[GUN_SHOTGUN] = AMMO_RESERVE_MAX;
+                            game.ammo_per_gun[game.current_weapon.type] = game.ammo;
+                            game.current_weapon = *weapon_def(GUN_SHOTGUN);
+                            game.ammo = game.ammo_per_gun[GUN_SHOTGUN];
+                            game.is_reloading = 0;
+                            game.reload_timer = 0.0f;
+                            game.shot_cooldown = 0.0f;
                         }
                     } else if (it->type == ITEM_WEAPON_KIT_AK47) {
                         if (!game.has_weapon[GUN_AK47]) {
                             game.has_weapon[GUN_AK47] = 1;
                             game.ammo_per_gun[GUN_AK47] = weapon_def(GUN_AK47)->max_ammo;
-                            game_cycle_weapon(&game);
+                            game.reserve_ammo_per_gun[GUN_AK47] = AMMO_RESERVE_MAX;
+                            game.ammo_per_gun[game.current_weapon.type] = game.ammo;
+                            game.current_weapon = *weapon_def(GUN_AK47);
+                            game.ammo = game.ammo_per_gun[GUN_AK47];
+                            game.is_reloading = 0;
+                            game.reload_timer = 0.0f;
+                            game.shot_cooldown = 0.0f;
                         }
                     }
                     it->active = 0;
@@ -529,8 +563,8 @@ int main(void) {
             int wall_idx = (current_level - 1 < LEVEL_COUNT) ? current_level - 1 : LEVEL_COUNT - 1;
             raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT, total_time);
             sprite_render_all(renderer, &player, &game.enemies, zbuf, enemy_tex, w, h - HUD_HEIGHT);
-            item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, w, h - HUD_HEIGHT);
-            const Texture *weapon_textures[GUN_COUNT] = { &pistol_tex, &shotgun_tex, &ak47_tex };
+            item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, &weapon_kit_dual_tex, w, h - HUD_HEIGHT);
+            const Texture *weapon_textures[GUN_COUNT] = { &pistol_tex, &dual_handgun_tex, &shotgun_tex, &ak47_tex };
             weapon_render(renderer, weapon_textures[game.current_weapon.type], game.shot_timer, game.pistol_whip_timer, w, h - HUD_HEIGHT);
             if (show_minimap) { minimap_render(renderer, &map, &player); }
             hud_render(renderer, w, h, game.health, game.ammo, game.reserve_ammo_per_gun[game.current_weapon.type], game.score);
@@ -575,8 +609,10 @@ int main(void) {
     Mix_CloseAudio();
     texture_free(&ak47_tex);
     texture_free(&shotgun_tex);
+    texture_free(&dual_handgun_tex);
     texture_free(&weapon_kit_tex);
     texture_free(&weapon_kit_ak47_tex);
+    texture_free(&weapon_kit_dual_tex);
     texture_free(&pistol_tex);
     for (int t = ENEMY_TYPE_COUNT - 1; t >= 0; t--) {
         for (int d = 7; d >= 0; d--) { texture_free(&enemy_tex[t][d]); }
