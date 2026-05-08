@@ -10,6 +10,7 @@ typedef struct {
     int sound_on;
     int difficulty;
     int selected;
+    int current_level;
 } Menu;
 
 typedef enum {

@@ -31,7 +31,7 @@ typedef struct {
     int difficulty;
     int health;
     int ammo;
-    int reserve_ammo;
+    int reserve_ammo_per_gun[GUN_COUNT];
     int score;
     float shot_timer;
     float shot_cooldown;

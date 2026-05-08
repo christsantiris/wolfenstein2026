@@ -42,10 +42,12 @@ static int start_game(Map *map, Player *player, GameState *game, int level) {
     int saved_difficulty = game->difficulty;
     int saved_has_weapon[GUN_COUNT];
     int saved_ammo_per_gun[GUN_COUNT];
+    int saved_reserve_ammo_per_gun[GUN_COUNT];
     WeaponDef saved_weapon = game->current_weapon;
     for (int i = 0; i < GUN_COUNT; i++) {
         saved_has_weapon[i] = game->has_weapon[i];
         saved_ammo_per_gun[i] = game->ammo_per_gun[i];
+        saved_reserve_ammo_per_gun[i] = game->reserve_ammo_per_gun[i];
     }
     game_init(game);
     game->score = saved_score;
@@ -53,6 +55,7 @@ static int start_game(Map *map, Player *player, GameState *game, int level) {
     for (int i = 0; i < GUN_COUNT; i++) {
         game->has_weapon[i] = saved_has_weapon[i];
         game->ammo_per_gun[i] = saved_ammo_per_gun[i];
+        game->reserve_ammo_per_gun[i] = saved_reserve_ammo_per_gun[i];
     }
     game->current_weapon = saved_weapon;
     game->ammo = game->ammo_per_gun[saved_weapon.type];
@@ -459,9 +462,9 @@ int main(void) {
                 float dy = player.y - it->y;
                 if (dx * dx + dy * dy < 0.5f * 0.5f) {
                     if (it->type == ITEM_AMMO) {
-                        game.reserve_ammo += AMMO_PICKUP_AMOUNT;
-                        if (game.reserve_ammo > AMMO_RESERVE_MAX) {
-                            game.reserve_ammo = AMMO_RESERVE_MAX;
+                        game.reserve_ammo_per_gun[game.current_weapon.type] += AMMO_PICKUP_AMOUNT;
+                        if (game.reserve_ammo_per_gun[game.current_weapon.type] > AMMO_RESERVE_MAX) {
+                            game.reserve_ammo_per_gun[game.current_weapon.type] = AMMO_RESERVE_MAX;
                         }
                     } else if (it->type == ITEM_HEALTH) {
                         static const int HEALTH_PICKUP[4] = { 40, 25, 15, 10 };
@@ -492,8 +495,6 @@ int main(void) {
                     game_won = 1;
                     hs_rank = highscore_insert(&hs_table, game.score);
                     highscore_save(&hs_table);
-                    music_stop();
-                    sound_play(&level_sound);
                 } else {
                     current_level++;
                     if (start_game(&map, &player, &game, current_level) != 0) {
@@ -532,7 +533,7 @@ int main(void) {
             const Texture *weapon_textures[GUN_COUNT] = { &pistol_tex, &shotgun_tex, &ak47_tex };
             weapon_render(renderer, weapon_textures[game.current_weapon.type], game.shot_timer, game.pistol_whip_timer, w, h - HUD_HEIGHT);
             if (show_minimap) { minimap_render(renderer, &map, &player); }
-            hud_render(renderer, w, h, game.health, game.ammo, game.reserve_ammo, game.score);
+            hud_render(renderer, w, h, game.health, game.ammo, game.reserve_ammo_per_gun[game.current_weapon.type], game.score);
             if (game.level_clear_timer > 0.0f) {
                 hud_draw_level_clear(renderer, w, h - HUD_HEIGHT, game.level_clear_timer);
             } else if (enemy_list_all_dead(&game.enemies)) {
@@ -546,6 +547,7 @@ int main(void) {
                 SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
             }
             if (menu.is_open) {
+                menu.current_level = current_level;
                 menu_render(renderer, &menu, w, h);
             }
             if (game_over) {

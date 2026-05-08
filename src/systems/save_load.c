@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 
 #define SAVE_MAGIC   "WOLF2026"
-#define SAVE_VERSION 1
+#define SAVE_VERSION 2
 
 static void save_path(int slot, char *buf, int bufsz) {
     snprintf(buf, bufsz, "saves/slot%d.sav", slot);
@@ -48,7 +48,7 @@ int save_game(int slot, int level, const Player *p, const GameState *g, const Ma
     fwrite(&g->difficulty, sizeof(g->difficulty), 1, f);
     fwrite(&g->health, sizeof(g->health), 1, f);
     fwrite(&g->ammo, sizeof(g->ammo), 1, f);
-    fwrite(&g->reserve_ammo, sizeof(g->reserve_ammo), 1, f);
+    fwrite(g->reserve_ammo_per_gun, sizeof(g->reserve_ammo_per_gun), 1, f);
     fwrite(&g->score, sizeof(g->score), 1, f);
     int wtype = (int)g->current_weapon.type;
     fwrite(&wtype, sizeof(wtype), 1, f);
@@ -131,7 +131,7 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m) {
     if (fread(&g->difficulty, sizeof(g->difficulty), 1, f) != 1) { fclose(f); return -1; }
     if (fread(&g->health, sizeof(g->health), 1, f) != 1) { fclose(f); return -1; }
     if (fread(&g->ammo, sizeof(g->ammo), 1, f) != 1) { fclose(f); return -1; }
-    if (fread(&g->reserve_ammo, sizeof(g->reserve_ammo), 1, f) != 1) { fclose(f); return -1; }
+    if (fread(g->reserve_ammo_per_gun, sizeof(g->reserve_ammo_per_gun), 1, f) != 1) { fclose(f); return -1; }
     if (fread(&g->score, sizeof(g->score), 1, f) != 1) { fclose(f); return -1; }
     int wtype;
     if (fread(&wtype, sizeof(wtype), 1, f) != 1) { fclose(f); return -1; }

@@ -149,7 +149,7 @@ typedef struct {
 
 static void menu_compute_layout(int sw, int sh, MenuLayout *l) {
     l->bw = 440;
-    l->bh = 474 + LHEIGHT;
+    l->bh = 474 + LHEIGHT * 2;
     l->bx = (sw - l->bw) / 2;
     l->by = (sh - l->bh) / 2;
 
@@ -157,6 +157,7 @@ static void menu_compute_layout(int sw, int sh, MenuLayout *l) {
     y += LHEIGHT;
     y += LHEIGHT * 8 + 4;
     y += 10;
+    y += LHEIGHT;
     y += LHEIGHT;
     y += LHEIGHT;
     l->music_y = y; y += LHEIGHT;
@@ -301,6 +302,9 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
     int di = (m->difficulty >= 0 && m->difficulty < 4) ? m->difficulty : 0;
     draw_centered(r, "SETTINGS", l.bx, y, l.bw, dim);
     y += LHEIGHT;
+    char level_buf[8];
+    snprintf(level_buf, sizeof(level_buf), "%d", m->current_level);
+    draw_row(r, "LEVEL",       level_buf,                   l.bx, y, l.bw); y += LHEIGHT;
     draw_row(r, "DIFFICULTY",  DIFF_LABELS[di],             l.bx, y, l.bw); y += LHEIGHT;
     if (m->selected == MENU_ITEM_MUSIC) {
         SDL_SetRenderDrawColor(r, 70, 52, 12, 255);
