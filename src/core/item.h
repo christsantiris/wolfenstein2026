@@ -9,7 +9,8 @@ typedef enum {
     ITEM_AMMO,
     ITEM_HEALTH,
     ITEM_WEAPON_KIT,
-    ITEM_WEAPON_KIT_AK47
+    ITEM_WEAPON_KIT_AK47,
+    ITEM_WEAPON_KIT_DUAL
 } ItemType;
 
 typedef struct {

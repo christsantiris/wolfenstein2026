@@ -10,14 +10,16 @@ static const int KILL_SCORE[4] = { 75, 100, 150, 200 };
 #define WHIP_CONE 0.5f
 #define WHIP_DURATION 0.4f
 
-static const WeaponDef WEAPON_PISTOL = { GUN_9MM_HANDGUN, "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3", 8, 34, 0.15f, 0.5f, 0.12f, 1.5f };
-static const WeaponDef WEAPON_SHOTGUN = { GUN_SHOTGUN, "assets/sounds/shotgun.mp3", "assets/sounds/handgunreload.mp3", 2, 80, 0.30f, 0.8f, 0.15f, 2.0f };
-static const WeaponDef WEAPON_AK47 = { GUN_AK47, "assets/sounds/ak47.mp3", "assets/sounds/handgunreload.mp3", 30, 30, 0.25f, 0.12f, 0.08f, 2.0f };
+static const WeaponDef WEAPON_PISTOL       = { GUN_9MM_HANDGUN,  "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3",  8, 34, 0.15f, 0.50f, 0.12f, 1.5f };
+static const WeaponDef WEAPON_DUAL_HANDGUN = { GUN_DUAL_HANDGUN, "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3", 16, 34, 0.15f, 0.25f, 0.10f, 1.2f };
+static const WeaponDef WEAPON_SHOTGUN      = { GUN_SHOTGUN,      "assets/sounds/shotgun.mp3",     "assets/sounds/handgunreload.mp3",  2, 80, 0.30f, 0.80f, 0.15f, 2.0f };
+static const WeaponDef WEAPON_AK47         = { GUN_AK47,         "assets/sounds/ak47.mp3",        "assets/sounds/handgunreload.mp3", 30, 30, 0.25f, 0.12f, 0.08f, 2.0f };
 
 static const WeaponDef *ALL_WEAPONS[GUN_COUNT] = {
-    [GUN_9MM_HANDGUN] = &WEAPON_PISTOL,
-    [GUN_SHOTGUN] = &WEAPON_SHOTGUN,
-    [GUN_AK47] = &WEAPON_AK47,
+    [GUN_9MM_HANDGUN]  = &WEAPON_PISTOL,
+    [GUN_DUAL_HANDGUN] = &WEAPON_DUAL_HANDGUN,
+    [GUN_SHOTGUN]      = &WEAPON_SHOTGUN,
+    [GUN_AK47]         = &WEAPON_AK47,
 };
 
 const WeaponDef *weapon_def(GunType type) {
@@ -53,8 +55,16 @@ void game_init(GameState *g) {
 #ifdef DEBUG_SHOTGUN
     g->has_weapon[GUN_SHOTGUN] = 1;
     g->ammo_per_gun[GUN_SHOTGUN] = WEAPON_SHOTGUN.max_ammo;
+    g->reserve_ammo_per_gun[GUN_SHOTGUN] = AMMO_RESERVE_MAX;
     g->current_weapon = WEAPON_SHOTGUN;
     g->ammo = WEAPON_SHOTGUN.max_ammo;
+#endif
+#ifdef DEBUG_AK47
+    g->has_weapon[GUN_AK47] = 1;
+    g->ammo_per_gun[GUN_AK47] = WEAPON_AK47.max_ammo;
+    g->reserve_ammo_per_gun[GUN_AK47] = AMMO_RESERVE_MAX;
+    g->current_weapon = WEAPON_AK47;
+    g->ammo = WEAPON_AK47.max_ammo;
 #endif
 }
 

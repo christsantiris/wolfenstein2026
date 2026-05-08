@@ -31,5 +31,6 @@ void texture_generate_ammo_pickup(Texture *t);
 void texture_generate_health_pickup(Texture *t);
 void texture_generate_weapon_kit(Texture *t);
 void texture_generate_weapon_kit_ak47(Texture *t);
+void texture_generate_weapon_kit_dual(Texture *t);
 
 #endif
