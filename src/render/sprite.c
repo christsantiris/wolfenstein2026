@@ -4,7 +4,7 @@
 
 #define FOV_FACTOR 0.66f
 
-void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, const float *zbuf, const Texture enemy_tex[][8], int screen_w, int screen_h) {
+void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, const float *zbuf, const Texture enemy_tex[][ENEMY_SPRITE_FRAMES], int screen_w, int screen_h) {
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
     float plane_x = -dir_y * FOV_FACTOR;
@@ -19,10 +19,16 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
 
         float view_angle = atan2f(e->y - p->y, e->x - p->x);
         float rel = view_angle - e->angle;
-        while (rel <  0.0f)           { rel += 2.0f * (float)M_PI; }
-        while (rel >= 2.0f * (float)M_PI) { rel -= 2.0f * (float)M_PI; }
-        int sprite_idx = (int)(rel / ((float)M_PI / 4.0f) + 0.5f) % 8;
-        const Texture *sprite_tex = &enemy_tex[e->type][sprite_idx];
+        while (rel <  0.0f)                { rel += 2.0f * (float)M_PI; }
+        while (rel >= 2.0f * (float)M_PI)  { rel -= 2.0f * (float)M_PI; }
+        int dir_idx = (int)(rel / ((float)M_PI / 4.0f) + 0.5f) % 8;
+        int frame_idx;
+        if (e->state == ENEMY_ATTACK) {
+            frame_idx = ENEMY_SPRITE_ATTACK;
+        } else {
+            frame_idx = (e->walk_frame ? ENEMY_SPRITE_WALK_B : 0) + dir_idx;
+        }
+        const Texture *sprite_tex = &enemy_tex[e->type][frame_idx];
 
         float ex = e->x - p->x;
         float ey = e->y - p->y;

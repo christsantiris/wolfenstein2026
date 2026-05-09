@@ -204,36 +204,62 @@ int main(void) {
         for (int i = 0; i < 64 * 64 * 3; i++) { ak47_tex.pixels[i] = 0; }
     }
 
-    Texture enemy_tex[ENEMY_TYPE_COUNT][8];
-    /* Guard */
+    Texture enemy_tex[ENEMY_TYPE_COUNT][ENEMY_SPRITE_FRAMES];
+    int etw = 64, eth = 64;
+
+    /* Helper lambda-style macro: build all 17 frames for a humanoid type
+       whose walk-A front sprite is already in enemy_tex[T][4].
+       Walk-B front is generated, then both sets of 8 dirs are derived.
+       Attack frame uses the base guard attack then recolors if needed. */
+#define BUILD_GUARD_FRAMES(T, UR, UG, UB) \
+    do { \
+        /* Walk A — front already set, derive other 7 dirs */ \
+        for (int _d = 0; _d < 8; _d++) { \
+            if (_d == 4) { continue; } \
+            texture_create(&enemy_tex[T][_d], etw, eth); \
+        } \
+        texture_derive_guard_dirs(&enemy_tex[T][0]); \
+        /* Walk B — generate alt-leg front, derive other 7 dirs */ \
+        texture_create(&enemy_tex[T][ENEMY_SPRITE_WALK_B + 4], etw, eth); \
+        memcpy(enemy_tex[T][ENEMY_SPRITE_WALK_B + 4].pixels, enemy_tex[T][4].pixels, (size_t)etw * eth * 3); \
+        texture_generate_guard_walk_b(&enemy_tex[T][ENEMY_SPRITE_WALK_B + 4], 4); \
+        for (int _d = 0; _d < 8; _d++) { \
+            if (_d == 4) { continue; } \
+            texture_create(&enemy_tex[T][ENEMY_SPRITE_WALK_B + _d], etw, eth); \
+        } \
+        texture_derive_guard_dirs(&enemy_tex[T][ENEMY_SPRITE_WALK_B]); \
+        /* Attack frame */ \
+        texture_create(&enemy_tex[T][ENEMY_SPRITE_ATTACK], etw, eth); \
+        texture_generate_guard_attack(&enemy_tex[T][ENEMY_SPRITE_ATTACK]); \
+        texture_recolor_uniform(&enemy_tex[T][ENEMY_SPRITE_ATTACK], &enemy_tex[T][ENEMY_SPRITE_ATTACK], UR, UG, UB); \
+    } while (0)
+
+    /* Guard — khaki uniform (200,160,80 → recolor is identity-ish, just use large values) */
     if (texture_load_ppm(&enemy_tex[ENEMY_TYPE_GUARD][4], "assets/sprites/guard_front.ppm") != 0) {
-        texture_create(&enemy_tex[ENEMY_TYPE_GUARD][4], 64, 64);
+        texture_create(&enemy_tex[ENEMY_TYPE_GUARD][4], etw, eth);
         texture_generate_guard_dir(&enemy_tex[ENEMY_TYPE_GUARD][4], 4);
     }
-    for (int d = 0; d < 8; d++) {
-        if (d == 4) { continue; }
-        texture_create(&enemy_tex[ENEMY_TYPE_GUARD][d], enemy_tex[ENEMY_TYPE_GUARD][4].width, enemy_tex[ENEMY_TYPE_GUARD][4].height);
-    }
-    texture_derive_guard_dirs(enemy_tex[ENEMY_TYPE_GUARD]);
-    /* Officer — recolor guard uniform to navy blue */
+    BUILD_GUARD_FRAMES(ENEMY_TYPE_GUARD, 200, 160, 80);
+
+    /* Officer — navy blue uniform */
     texture_recolor_uniform(&enemy_tex[ENEMY_TYPE_OFFICER][4], &enemy_tex[ENEMY_TYPE_GUARD][4], 60, 80, 160);
-    for (int d = 0; d < 8; d++) {
-        if (d == 4) { continue; }
-        texture_create(&enemy_tex[ENEMY_TYPE_OFFICER][d], enemy_tex[ENEMY_TYPE_OFFICER][4].width, enemy_tex[ENEMY_TYPE_OFFICER][4].height);
-    }
-    texture_derive_guard_dirs(enemy_tex[ENEMY_TYPE_OFFICER]);
-    /* SS — recolor guard uniform to black */
+    BUILD_GUARD_FRAMES(ENEMY_TYPE_OFFICER, 60, 80, 160);
+
+    /* SS — black uniform */
     texture_recolor_uniform(&enemy_tex[ENEMY_TYPE_SS][4], &enemy_tex[ENEMY_TYPE_GUARD][4], 35, 35, 40);
-    for (int d = 0; d < 8; d++) {
-        if (d == 4) { continue; }
-        texture_create(&enemy_tex[ENEMY_TYPE_SS][d], enemy_tex[ENEMY_TYPE_SS][4].width, enemy_tex[ENEMY_TYPE_SS][4].height);
+    BUILD_GUARD_FRAMES(ENEMY_TYPE_SS, 35, 35, 40);
+
+    /* Boss — large black commander (no guard-frame pipeline) */
+    for (int d = 0; d < ENEMY_SPRITE_FRAMES; d++) {
+        texture_create(&enemy_tex[ENEMY_TYPE_BOSS][d], etw, eth);
+        texture_generate_boss_dir(&enemy_tex[ENEMY_TYPE_BOSS][d], d < ENEMY_SPRITE_ATTACK ? d % 8 : 4);
     }
-    texture_derive_guard_dirs(enemy_tex[ENEMY_TYPE_SS]);
-    /* Boss — large black commander with red command accents */
-    for (int d = 0; d < 8; d++) {
-        texture_create(&enemy_tex[ENEMY_TYPE_BOSS][d], enemy_tex[ENEMY_TYPE_GUARD][4].width, enemy_tex[ENEMY_TYPE_GUARD][4].height);
-        texture_generate_boss_dir(&enemy_tex[ENEMY_TYPE_BOSS][d], d);
-    }
+
+    /* Shotgun guard — grey-brown military uniform */
+    texture_recolor_uniform(&enemy_tex[ENEMY_TYPE_GUARD_SHOTGUN][4], &enemy_tex[ENEMY_TYPE_GUARD][4], 120, 112, 96);
+    BUILD_GUARD_FRAMES(ENEMY_TYPE_GUARD_SHOTGUN, 120, 112, 96);
+
+#undef BUILD_GUARD_FRAMES
 
     int zbuf_w = 0;
     float *zbuf = NULL;

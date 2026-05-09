@@ -11,6 +11,7 @@ typedef enum {
     ENEMY_TYPE_OFFICER,
     ENEMY_TYPE_SS,
     ENEMY_TYPE_BOSS,
+    ENEMY_TYPE_GUARD_SHOTGUN,
     ENEMY_TYPE_COUNT
 } EnemyType;
 
@@ -39,6 +40,8 @@ typedef struct {
     EnemyState state;
     float attack_timer;
     EnemyType type;
+    int walk_frame;
+    float walk_timer;
 } Enemy;
 
 typedef struct {
