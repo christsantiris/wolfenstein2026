@@ -243,6 +243,90 @@ void texture_generate_guard_dir(Texture *t, int dir) {
             }
         }
     }
+
+    /* gun arm — held at hip, extends right of body */
+    int arm_y0 = H * 35 / 64;
+    int arm_y1 = H * 43 / 64;
+    int arm_x0 = cx;
+    int arm_x1 = bx1 + W * 10 / 64;
+    if (arm_x1 > W) { arm_x1 = W; }
+    for (int y = arm_y0; y < arm_y1; y++) {
+        for (int x = arm_x0; x < arm_x1; x++) {
+            int idx = (y * W + x) * 3;
+            if (t->pixels[idx] == 255 && t->pixels[idx + 1] == 0 && t->pixels[idx + 2] == 255) {
+                /* arm: uniform colour */
+                t->pixels[idx] = 200; t->pixels[idx + 1] = 160; t->pixels[idx + 2] = 80;
+            }
+        }
+    }
+    /* gun — darker grey block at end of arm */
+    int gun_x0 = bx1;
+    int gun_x1 = arm_x1;
+    int gun_y0 = H * 37 / 64;
+    int gun_y1 = H * 41 / 64;
+    for (int y = gun_y0; y < gun_y1; y++) {
+        for (int x = gun_x0; x < gun_x1; x++) {
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = 54; t->pixels[idx + 1] = 54; t->pixels[idx + 2] = 62;
+        }
+    }
+}
+
+void texture_generate_guard_walk_b(Texture *t, int dir) {
+    (void)dir;
+    int W = t->width;
+    int H = t->height;
+    int bob = 2;
+    for (int y = 0; y < H - bob; y++) {
+        for (int x = 0; x < W; x++) {
+            int di = (y * W + x) * 3;
+            int si = ((y + bob) * W + x) * 3;
+            t->pixels[di] = t->pixels[si];
+            t->pixels[di+1] = t->pixels[si+1];
+            t->pixels[di+2] = t->pixels[si+2];
+        }
+    }
+    for (int y = H - bob; y < H; y++) {
+        for (int x = 0; x < W; x++) {
+            int i = (y * W + x) * 3;
+            t->pixels[i] = 255; t->pixels[i+1] = 0; t->pixels[i+2] = 255;
+        }
+    }
+}
+
+void texture_generate_guard_attack(Texture *t) {
+    texture_generate_guard_dir(t, 4);
+    int W = t->width;
+    int H = t->height;
+    int cx = W / 2;
+
+    /* arm raised — uniform-colored block from torso centre upward */
+    int arm_x0 = cx - W * 3 / 64;
+    int arm_x1 = cx + W * 3 / 64;
+    for (int y = H * 30 / 64; y < H * 42 / 64; y++) {
+        for (int x = arm_x0; x < arm_x1; x++) {
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = 200; t->pixels[idx+1] = 160; t->pixels[idx+2] = 80;
+        }
+    }
+    /* gun slide — grey rectangle at arm end */
+    int gun_x0 = cx - W * 5 / 64;
+    int gun_x1 = cx + W * 5 / 64;
+    for (int y = H * 22 / 64; y < H * 32 / 64; y++) {
+        for (int x = gun_x0; x < gun_x1; x++) {
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = 54; t->pixels[idx+1] = 54; t->pixels[idx+2] = 62;
+        }
+    }
+    /* barrel bore — dark centre square, gun pointing at viewer */
+    int bore_x0 = cx - W * 2 / 64;
+    int bore_x1 = cx + W * 2 / 64;
+    for (int y = H * 18 / 64; y < H * 24 / 64; y++) {
+        for (int x = bore_x0; x < bore_x1; x++) {
+            int idx = (y * W + x) * 3;
+            t->pixels[idx] = 12; t->pixels[idx+1] = 12; t->pixels[idx+2] = 14;
+        }
+    }
 }
 
 void texture_generate_boss_dir(Texture *t, int dir) {
@@ -373,10 +457,12 @@ void texture_generate_boss_dir(Texture *t, int dir) {
 }
 
 int texture_recolor_uniform(Texture *dst, const Texture *src, unsigned char ur, unsigned char ug, unsigned char ub) {
-    if (texture_create(dst, src->width, src->height) != 0) {
-        return -1;
-    }
     int n = src->width * src->height;
+    if (dst != src) {
+        if (texture_create(dst, src->width, src->height) != 0) {
+            return -1;
+        }
+    }
     for (int i = 0; i < n; i++) {
         unsigned char r = src->pixels[i * 3];
         unsigned char g = src->pixels[i * 3 + 1];
@@ -389,7 +475,7 @@ int texture_recolor_uniform(Texture *dst, const Texture *src, unsigned char ur, 
             dst->pixels[i * 3]     = (unsigned char)nr;
             dst->pixels[i * 3 + 1] = (unsigned char)ng;
             dst->pixels[i * 3 + 2] = (unsigned char)nb;
-        } else {
+        } else if (dst != src) {
             dst->pixels[i * 3]     = r;
             dst->pixels[i * 3 + 1] = g;
             dst->pixels[i * 3 + 2] = b;

@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 
 #define SAVE_MAGIC   "WOLF2026"
-#define SAVE_VERSION 3
+#define SAVE_VERSION 4
 
 static void save_path(int slot, char *buf, int bufsz) {
     snprintf(buf, bufsz, "saves/slot%d.sav", slot);
@@ -68,6 +68,8 @@ int save_game(int slot, int level, const Player *p, const GameState *g, const Ma
         fwrite(&e->attack_timer, sizeof(e->attack_timer), 1, f);
         int etype = (int)e->type;
         fwrite(&etype, sizeof(etype), 1, f);
+        fwrite(&e->walk_frame, sizeof(e->walk_frame), 1, f);
+        fwrite(&e->walk_timer, sizeof(e->walk_timer), 1, f);
     }
 
     fwrite(&g->items.count, sizeof(g->items.count), 1, f);
@@ -155,6 +157,8 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m) {
         int etype;
         if (fread(&etype, sizeof(etype), 1, f) != 1) { fclose(f); return -1; }
         e->type = (EnemyType)etype;
+        if (fread(&e->walk_frame, sizeof(e->walk_frame), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&e->walk_timer, sizeof(e->walk_timer), 1, f) != 1) { fclose(f); return -1; }
     }
 
     if (fread(&g->items.count, sizeof(g->items.count), 1, f) != 1) { fclose(f); return -1; }

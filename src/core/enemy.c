@@ -4,10 +4,11 @@
 #include <stdlib.h>
 
 static const EnemyDef ENEMY_DEFS[ENEMY_TYPE_COUNT] = {
-    { ENEMY_TYPE_GUARD,   100, 1.8f, 12.0f, 2.0f, 2.0f,  8 },
-    { ENEMY_TYPE_OFFICER,  75, 2.4f, 14.0f, 2.0f, 1.5f, 12 },
-    { ENEMY_TYPE_SS,      200, 1.4f, 10.0f, 2.0f, 2.5f, 15 },
-    { ENEMY_TYPE_BOSS,    850, 1.5f, 18.0f, 2.5f, 1.2f, 26 },
+    { ENEMY_TYPE_GUARD,          100, 1.8f, 12.0f, 2.0f, 2.0f,  8 },
+    { ENEMY_TYPE_OFFICER,         75, 2.4f, 14.0f, 2.0f, 1.5f, 12 },
+    { ENEMY_TYPE_SS,             200, 1.4f, 10.0f, 2.0f, 2.5f, 15 },
+    { ENEMY_TYPE_BOSS,           850, 1.5f, 18.0f, 2.5f, 1.2f, 26 },
+    { ENEMY_TYPE_GUARD_SHOTGUN,  100, 1.8f, 12.0f, 2.0f, 2.0f,  8 },
 };
 
 const EnemyDef *enemy_def(EnemyType type) {
@@ -66,10 +67,17 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficul
     }
 
     if (e->state == ENEMY_IDLE) {
+        e->walk_frame = 0;
+        e->walk_timer = 0.0f;
         if (dist < sight && enemy_has_los(e, p, m)) {
             e->state = ENEMY_ALERT;
         }
     } else if (e->state == ENEMY_ALERT) {
+        e->walk_timer += dt;
+        if (e->walk_timer >= 0.25f) {
+            e->walk_timer -= 0.25f;
+            e->walk_frame = 1 - e->walk_frame;
+        }
         if (dist <= def->attack_range) {
             e->state = ENEMY_ATTACK;
         } else {
@@ -125,6 +133,8 @@ static void place(EnemyList *el, float x, float y, EnemyType type, int difficult
     e->type = type;
     e->state = ENEMY_IDLE;
     e->attack_timer = 0.0f;
+    e->walk_frame = 0;
+    e->walk_timer = 0.0f;
 }
 
 void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, float px, float py) {
@@ -180,6 +190,9 @@ void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, flo
             } else {
                 type = ENEMY_TYPE_SS;
             }
+        }
+        if (type == ENEMY_TYPE_GUARD && (rand() % 2) == 0) {
+            type = ENEMY_TYPE_GUARD_SHOTGUN;
         }
         place(el, candidates[i].x, candidates[i].y, type, difficulty);
     }

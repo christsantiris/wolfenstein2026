@@ -54,7 +54,5 @@ Pull requests are welcome. Please keep changes small and focused — one feature
 MIT
 
 ## Roadmap
-- Improved Enemy UI (Better PPM assets ?)
-- Improved Gun UI
 - Installers for linux, windows
 
