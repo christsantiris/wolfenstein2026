@@ -53,23 +53,12 @@ If a signature is too long, shorten the parameter names rather than wrapping.
 
 ---
 
-## 9. How to propose and apply changes
-
-For every change, follow this exact sequence:
-
-1. **Describe** the change briefly in text — what file, what it does, why
-2. **Call the tool** — use Edit or Write directly. Do not paste code blocks in chat as a substitute
-3. **The VS Code diff prompt is the approval step** — the extension shows a diff with Yes / No / Tell Claude what to do instead. Wait for that response before proceeding
-4. **Never chain tool calls without a prompt in between** — one tool call, one approval, then stop and wait
-
----
-
 ## 4. Minimal code per change set
 
-- Provide the smallest possible change per step
-- Wait for an explicit "next step" prompt before providing the next change
-- Never combine multiple features into one code block
-- Never add unrequested changes alongside a requested change
+- Provide the smallest possible change per step.
+- Wait for an explicit "next step" prompt before providing the next change.
+- Never combine multiple features into one code block.
+- Never add unrequested changes alongside a requested change.
 
 ---
 
@@ -106,6 +95,17 @@ Never:
 
 ---
 
+## 7. All game state changes must be reflected in save/load
+
+Any new game state added, or any struct that is part of persistent game state, must also be:
+
+- Serialized in `save_game()` in `src/systems/save_load.c`
+- Deserialized in `load_game()` in `src/systems/save_load.c`
+
+Omitting this causes data to silently reset to zero on load.
+
+---
+
 ## 8. Use GLOB_RECURSE for CMake source collection
 
 Never list source files individually in `add_executable`. Always use:
@@ -119,14 +119,14 @@ This scales as new `.c` files are added without requiring CMakeLists.txt edits.
 
 ---
 
-## 7. All game state changes must be reflected in save/load
+## 9. How to propose and apply changes
 
-Any new game state added or any struct that is part of persistent game state must also be:
+For every change, follow this exact sequence:
 
-- Serialized in `save_game()` in `src/systems/save_load.c`
-- Deserialized in `load_game()` in `src/systems/save_load.c`
-
-Omitting this causes data to silently reset to zero on load.
+1. **Describe** the change briefly in text — what file, what it does, why.
+2. **Apply the change** using the patch/file-edit mechanism directly. Do not paste code blocks in chat as a substitute for actually editing the file.
+3. **Treat the approval prompt as the gate** — when running in an approval-required mode (e.g. `suggest` or `auto-edit`), wait for the user's approval of the proposed patch/command before proceeding. Do not bypass or pre-approve on the user's behalf.
+4. **Never chain edits without a checkpoint in between** — one change, one approval/review, then stop and wait for the next instruction.
 
 ---
 
