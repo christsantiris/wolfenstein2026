@@ -46,7 +46,7 @@ void hud_draw_exit_open(SDL_Renderer *renderer, int screen_w, int screen_h) {
     font_draw_string(renderer, msg, tx, ty, gold);
 }
 
-void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, int ammo, int reserve_ammo, int score) {
+void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, int ammo, int reserve_ammo, int score, int enemies_remaining) {
     int bar_y = screen_h - HUD_HEIGHT;
 
     SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
@@ -106,4 +106,9 @@ void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, 
     snprintf(score_buf, sizeof(score_buf), "%d", score);
     SDL_Color white = { 220, 220, 220, 255 };
     font_draw_string(renderer, score_buf, bar_x, bar_top + BAR_H + 4, white);
+
+    char enemies_buf[32];
+    snprintf(enemies_buf, sizeof(enemies_buf), "ENEMIES %d", enemies_remaining);
+    int enemies_x = bar_x + bar_w - font_str_px_w(enemies_buf);
+    font_draw_string(renderer, enemies_buf, enemies_x, bar_top + BAR_H + 4, white);
 }

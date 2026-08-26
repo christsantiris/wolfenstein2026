@@ -604,7 +604,13 @@ int main(void) {
             const Texture *weapon_textures[GUN_COUNT] = { [GUN_9MM_HANDGUN] = &pistol_tex, [GUN_DUAL_HANDGUN] = &dual_handgun_tex, [GUN_SHOTGUN] = &shotgun_tex, [GUN_AK47] = &ak47_tex, [GUN_BATTLE_RIFLE] = &battle_rifle_tex };
             weapon_render(renderer, weapon_textures[game.current_weapon.type], game.shot_timer, game.pistol_whip_timer, w, h - HUD_HEIGHT);
             if (show_minimap) { minimap_render(renderer, &map, &player); }
-            hud_render(renderer, w, h, game.health, game.ammo, game.reserve_ammo_per_gun[game.current_weapon.type], game.score);
+            int enemies_remaining = 0;
+            for (int i = 0; i < game.enemies.count; i++) {
+                if (game.enemies.enemies[i].active) {
+                    enemies_remaining++;
+                }
+            }
+            hud_render(renderer, w, h, game.health, game.ammo, game.reserve_ammo_per_gun[game.current_weapon.type], game.score, enemies_remaining);
             if (game.level_clear_timer > 0.0f) {
                 hud_draw_level_clear(renderer, w, h - HUD_HEIGHT, game.level_clear_timer);
             } else if (enemy_list_all_dead(&game.enemies)) {
