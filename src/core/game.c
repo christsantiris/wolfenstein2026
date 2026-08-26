@@ -9,10 +9,12 @@ static const int KILL_SCORE[4] = { 75, 100, 150, 200 };
 #define WHIP_RANGE 1.5f
 #define WHIP_CONE 0.5f
 #define WHIP_DURATION 0.4f
+#define SHOTGUN_PELLET_COUNT 6
+#define SHOTGUN_TARGET_RADIUS 0.35f
 
 static const WeaponDef WEAPON_PISTOL       = { GUN_9MM_HANDGUN,  "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3",  8, 34, 0.15f, 0.50f, 0.12f, 1.5f };
 static const WeaponDef WEAPON_DUAL_HANDGUN = { GUN_DUAL_HANDGUN, "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3", 16, 34, 0.15f, 0.25f, 0.10f, 1.2f };
-static const WeaponDef WEAPON_SHOTGUN      = { GUN_SHOTGUN,      "assets/sounds/shotgun.mp3",     "assets/sounds/handgunreload.mp3",  2, 80, 0.30f, 0.80f, 0.15f, 2.0f };
+static const WeaponDef WEAPON_SHOTGUN      = { GUN_SHOTGUN,      "assets/sounds/shotgun.mp3",     "assets/sounds/handgunreload.mp3",  2, 20, 0.30f, 0.80f, 0.15f, 2.0f };
 static const WeaponDef WEAPON_AK47         = { GUN_AK47,         "assets/sounds/ak47.mp3",        "assets/sounds/handgunreload.mp3", 30, 30, 0.25f, 0.12f, 0.08f, 2.0f };
 static const WeaponDef WEAPON_BATTLE_RIFLE = { GUN_BATTLE_RIFLE, "assets/sounds/ak47.mp3", "assets/sounds/handgunreload.mp3", 10, 55, 0.08f, 0.35f, 0.10f, 1.8f };
 
@@ -95,6 +97,49 @@ void game_cycle_weapon(GameState *g) {
     }
 }
 
+static void game_shoot_shotgun(GameState *g, const Player *p) {
+    for (int pellet = 0; pellet < SHOTGUN_PELLET_COUNT; pellet++) {
+        float spread = (float)pellet / (float)(SHOTGUN_PELLET_COUNT - 1);
+        float pellet_angle = p->angle - g->current_weapon.cone + spread * g->current_weapon.cone * 2.0f;
+        float best_dist = SHOT_RANGE;
+        Enemy *target = NULL;
+
+        for (int i = 0; i < g->enemies.count; i++) {
+            Enemy *e = &g->enemies.enemies[i];
+            if (!e->active) {
+                continue;
+            }
+            float dx = e->x - p->x;
+            float dy = e->y - p->y;
+            float dist = sqrtf(dx * dx + dy * dy);
+            if (dist >= best_dist) {
+                continue;
+            }
+            float angle = atan2f(dy, dx);
+            float diff = angle - pellet_angle;
+            while (diff > M_PI) {
+                diff -= 2.0f * (float)M_PI;
+            }
+            while (diff < -M_PI) {
+                diff += 2.0f * (float)M_PI;
+            }
+            float target_radius = atan2f(SHOTGUN_TARGET_RADIUS, dist);
+            if (fabsf(diff) < target_radius) {
+                best_dist = dist;
+                target = e;
+            }
+        }
+
+        if (target) {
+            target->health -= g->current_weapon.damage;
+            if (target->health <= 0) {
+                target->active = 0;
+                g->score += KILL_SCORE[g->difficulty < 4 ? g->difficulty : 3];
+            }
+        }
+    }
+}
+
 int game_shoot(GameState *g, const Player *p) {
     if (g->ammo <= 0 || g->shot_cooldown > 0.0f || g->is_reloading) {
         return 0;
@@ -102,6 +147,11 @@ int game_shoot(GameState *g, const Player *p) {
     g->ammo--;
     g->shot_cooldown = g->current_weapon.shot_cooldown;
     g->shot_timer = g->current_weapon.shot_timer_duration;
+
+    if (g->current_weapon.type == GUN_SHOTGUN) {
+        game_shoot_shotgun(g, p);
+        return 1;
+    }
 
     float best_dist = SHOT_RANGE;
     Enemy *target = NULL;

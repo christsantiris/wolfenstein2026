@@ -139,3 +139,11 @@ Every screen that accepts user input must support:
 - **Escape** to cancel or go back (where applicable)
 
 Mouse-only interaction is never acceptable. Keyboard must be the primary input path and mouse a secondary convenience.
+
+---
+
+## 11. Provide a commit message after every completed change set
+
+After completing and verifying each change set, provide a concise, GitHub-ready commit message that describes the change.
+
+The commit message signals that engineering work for that change set is complete. Do not provide it while required implementation or verification work remains unfinished.
