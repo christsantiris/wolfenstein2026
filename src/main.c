@@ -338,17 +338,6 @@ int main(void) {
         int w = SCREEN_W, h = SCREEN_H;
 
         while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEBUTTONUP) {
-                float lx, ly;
-                SDL_RenderWindowToLogical(renderer, e.button.x, e.button.y, &lx, &ly);
-                e.button.x = (int)lx;
-                e.button.y = (int)ly;
-            } else if (e.type == SDL_MOUSEMOTION) {
-                float lx, ly;
-                SDL_RenderWindowToLogical(renderer, e.motion.x, e.motion.y, &lx, &ly);
-                e.motion.x = (int)lx;
-                e.motion.y = (int)ly;
-            }
             if (e.type == SDL_QUIT) {
                 running = 0;
             }
