@@ -993,6 +993,7 @@ void texture_generate_weapon_kit_battle_rifle(Texture *t) {
             int vary = ((x * 3 + y * 5) % 8) - 4;
             set_px(t, x, y, (unsigned char)(96 + vary), (unsigned char)(56 + vary), (unsigned char)(22 + vary));
         }
+        set_px(t, W * 3 / 64, y, 34, 20, 9);
     }
     for (int y = H * 22 / 64; y < H * 40 / 64; y++) {
         for (int x = W * 18 / 64; x < W * 36 / 64; x++) {
@@ -1017,7 +1018,19 @@ void texture_generate_weapon_kit_battle_rifle(Texture *t) {
     }
     for (int y = H * 39 / 64; y < H * 51 / 64; y++) {
         for (int x = W * 25 / 64; x < W * 34 / 64; x++) {
-            set_px(t, x, y, 42, 42, 47);
+            int edge = x == W * 25 / 64 || x == W * 34 / 64 - 1 || y == H * 50 / 64;
+            unsigned char v = edge ? 24 : 46;
+            set_px(t, x, y, v, v, (unsigned char)(v + 5));
+        }
+    }
+    for (int y = H * 27 / 64; y < H * 35 / 64; y++) {
+        for (int x = W * 21 / 64; x < W * 29 / 64; x++) {
+            set_px(t, x, y, 20, 20, 24);
+        }
+    }
+    for (int x = W * 38 / 64; x < W * 47 / 64; x += W * 3 / 64) {
+        for (int y = H * 26 / 64; y < H * 36 / 64; y++) {
+            set_px(t, x, y, 62, 34, 13);
         }
     }
     for (int y = H * 18 / 64; y < H * 23 / 64; y++) {
@@ -1036,7 +1049,9 @@ void texture_generate_weapon_kit_ak47(Texture *t) {
     int W = t->width;
     int H = t->height;
     for (int i = 0; i < W * H * 3; i += 3) {
-        t->pixels[i] = 255; t->pixels[i + 1] = 0; t->pixels[i + 2] = 255;
+        t->pixels[i] = 255;
+        t->pixels[i + 1] = 0;
+        t->pixels[i + 2] = 255;
     }
 
     /* wooden stock (left) */
@@ -1084,6 +1099,12 @@ void texture_generate_weapon_kit_ak47(Texture *t) {
             set_px(t, x, y, 66, 66, 70);
         }
     }
+    for (int y = H * 22 / 64; y < H * 34 / 64; y++) {
+        for (int x = W * 43 / 64; x < W * 54 / 64; x++) {
+            int grain = ((x * 5 + y * 7) % 7) - 3;
+            set_px(t, x, y, (unsigned char)(104 + grain), (unsigned char)(61 + grain), (unsigned char)(22 + grain));
+        }
+    }
     /* muzzle end */
     for (int y = H * 25 / 64; y < H * 32 / 64; y++) {
         set_px(t, W * 61 / 64, y, 30, 30, 34);
@@ -1103,11 +1124,13 @@ void texture_generate_weapon_kit_ak47(Texture *t) {
         for (int x = W * 20 / 64; x < W * 37 / 64; x++) {
             set_px(t, x, y, 48, 48, 52);
         }
+        set_px(t, W * 22 / 64, y, 72, 72, 77);
     }
     for (int y = H * 43 / 64; y < H * 50 / 64; y++) {
         for (int x = W * 22 / 64; x < W * 39 / 64; x++) {
             set_px(t, x, y, 46, 46, 50);
         }
+        set_px(t, W * 25 / 64, y, 68, 68, 73);
     }
     for (int y = H * 50 / 64; y < H * 56 / 64; y++) {
         for (int x = W * 26 / 64; x < W * 40 / 64; x++) {
@@ -1126,91 +1149,45 @@ void texture_generate_weapon_kit_dual(Texture *t) {
     int W = t->width;
     int H = t->height;
     for (int i = 0; i < W * H * 3; i += 3) {
-        t->pixels[i] = 255; t->pixels[i + 1] = 0; t->pixels[i + 2] = 255;
+        t->pixels[i] = 255;
+        t->pixels[i + 1] = 0;
+        t->pixels[i + 2] = 255;
     }
 
-    /* side-profile pistol, barrel pointing left */
+    for (int gun = 0; gun < 2; gun++) {
+        int x0 = gun == 0 ? W * 5 / 64 : W * 34 / 64;
+        int x1 = gun == 0 ? W * 31 / 64 : W * 60 / 64;
+        int y0 = gun == 0 ? H * 12 / 64 : H * 34 / 64;
+        int dir = gun == 0 ? 1 : -1;
 
-    /* slide */
-    for (int y = H * 28 / 64; y < H * 41 / 64; y++) {
-        for (int x = W * 6 / 64; x < W * 57 / 64; x++) {
-            int edge = (x == W * 6 / 64 || x == W * 57 / 64 - 1
-                     || y == H * 28 / 64 || y == H * 41 / 64 - 1);
-            unsigned char v;
-            if (edge) {
-                v = 18;
-            } else if (y < H * 32 / 64) {
-                v = 118;
-            } else {
-                v = 64;
+        for (int y = y0; y < y0 + H * 9 / 64; y++) {
+            for (int x = x0; x < x1; x++) {
+                int edge = x == x0 || x == x1 - 1 || y == y0 || y == y0 + H * 9 / 64 - 1;
+                unsigned char v = edge ? 18 : (y < y0 + H * 3 / 64 ? 108 : 62);
+                set_px(t, x, y, v, v, (unsigned char)(v + 6));
             }
-            set_px(t, x, y, v, v, (unsigned char)(v + 6));
         }
-    }
-    /* serration notches on rear slide */
-    for (int i = 0; i < 4; i++) {
-        int sx = W * 44 / 64 + i * 3;
-        for (int y = H * 29 / 64; y < H * 37 / 64; y++) {
-            set_px(t, sx,   y, 18, 18, 20);
-            set_px(t, sx+1, y, 42, 42, 48);
+
+        int frame_x0 = dir > 0 ? x1 - W * 13 / 64 : x0;
+        int frame_x1 = dir > 0 ? x1 : x0 + W * 13 / 64;
+        for (int y = y0 + H * 9 / 64; y < y0 + H * 14 / 64; y++) {
+            for (int x = frame_x0; x < frame_x1; x++) {
+                set_px(t, x, y, 52, 52, 58);
+            }
         }
-    }
 
-    /* barrel extension left of slide */
-    for (int y = H * 30 / 64; y < H * 39 / 64; y++) {
-        for (int x = W * 6 / 64; x < W * 19 / 64; x++) {
-            int edge = (x == W * 6 / 64 || x == W * 19 / 64 - 1
-                     || y == H * 30 / 64 || y == H * 39 / 64 - 1);
-            set_px(t, x, y, edge ? 18 : 42, edge ? 18 : 42, edge ? 20 : 48);
-        }
-    }
-    /* bore */
-    for (int y = H * 31 / 64; y < H * 38 / 64; y++) {
-        set_px(t, W * 6 / 64, y, 12, 12, 14);
-    }
-
-    /* lower frame */
-    for (int y = H * 40 / 64; y < H * 49 / 64; y++) {
-        for (int x = W * 30 / 64; x < W * 57 / 64; x++) {
-            int edge = (x == W * 30 / 64 || x == W * 57 / 64 - 1
-                     || y == H * 40 / 64 || y == H * 49 / 64 - 1);
-            set_px(t, x, y, edge ? 18 : 64, edge ? 18 : 64, edge ? 20 : 72);
-        }
-    }
-
-    /* trigger guard (open rectangle) */
-    for (int x = W * 30 / 64; x < W * 48 / 64; x++) {
-        set_px(t, x, H * 48 / 64, 18, 18, 20);
-        set_px(t, x, H * 60 / 64, 18, 18, 20);
-    }
-    for (int y = H * 48 / 64; y <= H * 60 / 64; y++) {
-        set_px(t, W * 30 / 64, y, 18, 18, 20);
-        set_px(t, W * 47 / 64, y, 18, 18, 20);
-    }
-
-    /* grip */
-    for (int y = H * 40 / 64; y < H * 64 / 64; y++) {
-        for (int x = W * 48 / 64; x < W * 57 / 64; x++) {
-            int edge = (x == W * 48 / 64 || x == W * 57 / 64 - 1
-                     || y == H * 40 / 64 || y == H * 63 / 64);
-            if (edge) {
-                set_px(t, x, y, 18, 18, 20);
-            } else {
+        int grip_x0 = dir > 0 ? x1 - W * 8 / 64 : x0;
+        int grip_x1 = grip_x0 + W * 8 / 64;
+        for (int y = y0 + H * 13 / 64; y < y0 + H * 26 / 64; y++) {
+            for (int x = grip_x0; x < grip_x1; x++) {
                 int grain = ((x * 7 + y * 11) % 7) - 3;
-                set_px(t, x, y,
-                    (unsigned char)(160 + grain * 4),
-                    (unsigned char)(122 + grain * 3),
-                    (unsigned char)(82  + grain * 2));
+                set_px(t, x, y, (unsigned char)(106 + grain), (unsigned char)(67 + grain), (unsigned char)(32 + grain));
             }
         }
-    }
 
-    /* hammer */
-    for (int y = H * 24 / 64; y < H * 29 / 64; y++) {
-        for (int x = W * 51 / 64; x < W * 57 / 64; x++) {
-            int edge = (x == W * 51 / 64 || x == W * 57 / 64 - 1
-                     || y == H * 24 / 64 || y == H * 29 / 64 - 1);
-            set_px(t, x, y, edge ? 18 : 42, edge ? 18 : 42, edge ? 20 : 48);
+        int muzzle_x = dir > 0 ? x0 : x1 - 1;
+        for (int y = y0 + H * 2 / 64; y < y0 + H * 7 / 64; y++) {
+            set_px(t, muzzle_x, y, 8, 8, 10);
         }
     }
 }
@@ -1219,7 +1196,9 @@ void texture_generate_weapon_kit(Texture *t) {
     int W = t->width;
     int H = t->height;
     for (int i = 0; i < W * H * 3; i += 3) {
-        t->pixels[i] = 255; t->pixels[i + 1] = 0; t->pixels[i + 2] = 255;
+        t->pixels[i] = 255;
+        t->pixels[i + 1] = 0;
+        t->pixels[i + 2] = 255;
     }
 
     /* side-profile pump-action shotgun, barrel pointing left */
@@ -1284,6 +1263,17 @@ void texture_generate_weapon_kit(Texture *t) {
         for (int x = W * 32 / 64; x < W * 42 / 64; x++) {
             set_px(t, x, y, 14, 14, 16);
         }
+    }
+
+    for (int y = H * 24 / 64; y < H * 42 / 64; y++) {
+        int inset = abs(y - H * 33 / 64) / 3;
+        for (int x = W * 46 / 64 + inset; x < W * 62 / 64; x++) {
+            int grain = ((x * 5 + y * 7) % 8) - 4;
+            set_px(t, x, y, (unsigned char)(102 + grain), (unsigned char)(58 + grain), (unsigned char)(21 + grain));
+        }
+    }
+    for (int y = H * 27 / 64; y < H * 39 / 64; y++) {
+        set_px(t, W * 61 / 64, y, 42, 24, 9);
     }
 
 }
