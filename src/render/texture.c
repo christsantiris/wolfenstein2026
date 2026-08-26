@@ -979,6 +979,59 @@ void texture_generate_sandstone(Texture *t) {
     }
 }
 
+void texture_generate_weapon_kit_battle_rifle(Texture *t) {
+    int W = t->width;
+    int H = t->height;
+    for (int i = 0; i < W * H * 3; i += 3) {
+        t->pixels[i] = 255;
+        t->pixels[i + 1] = 0;
+        t->pixels[i + 2] = 255;
+    }
+
+    for (int y = H * 25 / 64; y < H * 39 / 64; y++) {
+        for (int x = W * 3 / 64; x < W * 19 / 64; x++) {
+            int vary = ((x * 3 + y * 5) % 8) - 4;
+            set_px(t, x, y, (unsigned char)(96 + vary), (unsigned char)(56 + vary), (unsigned char)(22 + vary));
+        }
+    }
+    for (int y = H * 22 / 64; y < H * 40 / 64; y++) {
+        for (int x = W * 18 / 64; x < W * 36 / 64; x++) {
+            unsigned char v = (y < H * 25 / 64) ? 72 : 48;
+            set_px(t, x, y, v, v, (unsigned char)(v + 5));
+        }
+    }
+    for (int y = H * 24 / 64; y < H * 38 / 64; y++) {
+        for (int x = W * 35 / 64; x < W * 49 / 64; x++) {
+            int vary = ((x * 5 + y * 7) % 8) - 4;
+            set_px(t, x, y, (unsigned char)(104 + vary), (unsigned char)(62 + vary), (unsigned char)(24 + vary));
+        }
+    }
+    for (int y = H * 27 / 64; y < H * 32 / 64; y++) {
+        for (int x = W * 48 / 64; x < W * 62 / 64; x++) {
+            unsigned char v = (y == H * 27 / 64) ? 78 : 54;
+            set_px(t, x, y, v, v, (unsigned char)(v + 5));
+        }
+    }
+    for (int y = H * 25 / 64; y < H * 34 / 64; y++) {
+        set_px(t, W * 61 / 64, y, 24, 24, 28);
+    }
+    for (int y = H * 39 / 64; y < H * 51 / 64; y++) {
+        for (int x = W * 25 / 64; x < W * 34 / 64; x++) {
+            set_px(t, x, y, 42, 42, 47);
+        }
+    }
+    for (int y = H * 18 / 64; y < H * 23 / 64; y++) {
+        for (int x = W * 22 / 64; x < W * 26 / 64; x++) {
+            set_px(t, x, y, 34, 34, 38);
+        }
+    }
+    for (int y = H * 20 / 64; y < H * 25 / 64; y++) {
+        for (int x = W * 52 / 64; x < W * 55 / 64; x++) {
+            set_px(t, x, y, 34, 34, 38);
+        }
+    }
+}
+
 void texture_generate_weapon_kit_ak47(Texture *t) {
     int W = t->width;
     int H = t->height;
