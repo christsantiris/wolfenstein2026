@@ -225,9 +225,6 @@ int main(void) {
             texture_create(&enemy_tex[T][_d], etw, eth); \
         } \
         texture_derive_guard_dirs(&enemy_tex[T][0]); \
-        texture_create(&enemy_tex[T][ENEMY_SPRITE_WALK_B + 4], etw, eth); \
-        memcpy(enemy_tex[T][ENEMY_SPRITE_WALK_B + 4].pixels, enemy_tex[T][4].pixels, (size_t)etw * eth * 3); \
-        texture_generate_guard_walk_b(&enemy_tex[T][ENEMY_SPRITE_WALK_B + 4], 4); \
         for (int _d = 0; _d < 8; _d++) { \
             if (_d == 4) { continue; } \
             texture_create(&enemy_tex[T][ENEMY_SPRITE_WALK_B + _d], etw, eth); \
@@ -245,6 +242,13 @@ int main(void) {
         "assets/sprites/boss_front.ppm",
         "assets/sprites/shotgun_guard_front.ppm"
     };
+    const char *enemy_walk_paths[ENEMY_TYPE_COUNT] = {
+        "assets/sprites/guard_walk.ppm",
+        "assets/sprites/officer_walk.ppm",
+        "assets/sprites/ss_walk.ppm",
+        "assets/sprites/boss_walk.ppm",
+        "assets/sprites/shotgun_guard_walk.ppm"
+    };
     for (int t = 0; t < ENEMY_TYPE_COUNT; t++) {
         if (texture_load_ppm(&enemy_tex[t][4], enemy_paths[t]) != 0) {
             texture_create(&enemy_tex[t][4], etw, eth);
@@ -253,6 +257,11 @@ int main(void) {
             } else {
                 texture_generate_guard_dir(&enemy_tex[t][4], 4);
             }
+        }
+        if (texture_load_ppm(&enemy_tex[t][ENEMY_SPRITE_WALK_B + 4], enemy_walk_paths[t]) != 0) {
+            texture_create(&enemy_tex[t][ENEMY_SPRITE_WALK_B + 4], etw, eth);
+            memcpy(enemy_tex[t][ENEMY_SPRITE_WALK_B + 4].pixels, enemy_tex[t][4].pixels, (size_t)etw * eth * 3);
+            texture_generate_guard_walk_b(&enemy_tex[t][ENEMY_SPRITE_WALK_B + 4], 4);
         }
         BUILD_ENEMY_FRAMES(t);
     }
