@@ -30,6 +30,7 @@ A first-person shooter inspired by *Wolfenstein 3D* by id Software. Navigate maz
 
 <img width="797" height="627" alt="image" src="https://github.com/user-attachments/assets/08d364d7-11ec-40a1-8673-bce074ba79e0" />
 
+<img width="1602" height="1198" alt="image" src="https://github.com/user-attachments/assets/7deb1d5f-2593-4e39-aca8-acb1a447ddee" />
 
 ## Compile the Game
 To compile and launch the game run `cmake --build build` in the root directory.
