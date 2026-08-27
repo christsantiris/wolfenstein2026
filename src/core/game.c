@@ -17,6 +17,7 @@ static const WeaponDef WEAPON_DUAL_HANDGUN = { GUN_DUAL_HANDGUN, "assets/sounds/
 static const WeaponDef WEAPON_SHOTGUN      = { GUN_SHOTGUN,      "assets/sounds/shotgun.mp3",     "assets/sounds/handgunreload.mp3",  2, 20, 0.30f, 0.80f, 0.15f, 2.0f };
 static const WeaponDef WEAPON_AK47 = { GUN_AK47, "assets/sounds/ak-47.mp3", "assets/sounds/handgunreload.mp3", 30, 30, 0.25f, 0.12f, 0.08f, 2.0f };
 static const WeaponDef WEAPON_BATTLE_RIFLE = { GUN_BATTLE_RIFLE, "assets/sounds/rifle.mp3", "assets/sounds/handgunreload.mp3", 10, 55, 0.08f, 0.35f, 0.10f, 1.8f };
+static const WeaponDef WEAPON_KNIFE = { GUN_KNIFE, "assets/sounds/punch.mp3", NULL, 0, WHIP_DAMAGE, WHIP_CONE, WHIP_DURATION, WHIP_DURATION, 0.0f };
 
 static const WeaponDef *ALL_WEAPONS[GUN_COUNT] = {
     [GUN_9MM_HANDGUN]  = &WEAPON_PISTOL,
@@ -24,6 +25,16 @@ static const WeaponDef *ALL_WEAPONS[GUN_COUNT] = {
     [GUN_SHOTGUN]      = &WEAPON_SHOTGUN,
     [GUN_AK47]         = &WEAPON_AK47,
     [GUN_BATTLE_RIFLE] = &WEAPON_BATTLE_RIFLE,
+    [GUN_KNIFE] = &WEAPON_KNIFE,
+};
+
+static const GunType WEAPON_CYCLE_ORDER[GUN_COUNT] = {
+    GUN_KNIFE,
+    GUN_9MM_HANDGUN,
+    GUN_DUAL_HANDGUN,
+    GUN_SHOTGUN,
+    GUN_BATTLE_RIFLE,
+    GUN_AK47,
 };
 
 const WeaponDef *weapon_def(GunType type) {
@@ -37,6 +48,7 @@ void game_init(GameState *g) {
     memset(g->has_weapon, 0, sizeof(g->has_weapon));
     memset(g->ammo_per_gun, 0, sizeof(g->ammo_per_gun));
     g->has_weapon[GUN_9MM_HANDGUN] = 1;
+    g->has_weapon[GUN_KNIFE] = 1;
     g->current_weapon = WEAPON_PISTOL;
     g->health = 100;
     g->ammo = g->current_weapon.max_ammo;
@@ -70,6 +82,19 @@ void game_init(GameState *g) {
     g->current_weapon = WEAPON_AK47;
     g->ammo = WEAPON_AK47.max_ammo;
 #endif
+#ifdef DEBUG_START_WEAPON
+    GunType debug_weapon = (GunType)DEBUG_START_WEAPON;
+    if (debug_weapon >= 0 && debug_weapon < GUN_COUNT) {
+        const WeaponDef *debug_def = weapon_def(debug_weapon);
+        g->has_weapon[debug_weapon] = 1;
+        g->ammo_per_gun[debug_weapon] = debug_def->max_ammo;
+        if (debug_weapon != GUN_KNIFE) {
+            g->reserve_ammo_per_gun[debug_weapon] = AMMO_RESERVE_MAX;
+        }
+        g->current_weapon = *debug_def;
+        g->ammo = debug_def->max_ammo;
+    }
+#endif
 }
 
 int game_reload(GameState *g) {
@@ -83,15 +108,22 @@ int game_reload(GameState *g) {
 
 void game_cycle_weapon(GameState *g) {
     g->ammo_per_gun[g->current_weapon.type] = g->ammo;
-    int start = (int)g->current_weapon.type;
+    int start = 0;
+    for (int i = 0; i < GUN_COUNT; i++) {
+        if (WEAPON_CYCLE_ORDER[i] == g->current_weapon.type) {
+            start = i;
+            break;
+        }
+    }
     for (int i = 1; i < GUN_COUNT; i++) {
-        int next = (start + i) % GUN_COUNT;
+        int next = WEAPON_CYCLE_ORDER[(start + i) % GUN_COUNT];
         if (g->has_weapon[next]) {
             g->current_weapon = *ALL_WEAPONS[next];
             g->ammo = g->ammo_per_gun[next];
             g->is_reloading = 0;
             g->reload_timer = 0.0f;
             g->shot_cooldown = 0.0f;
+            g->pistol_whip_timer = 0.0f;
             return;
         }
     }
@@ -141,6 +173,9 @@ static void game_shoot_shotgun(GameState *g, const Player *p) {
 }
 
 int game_shoot(GameState *g, const Player *p) {
+    if (g->current_weapon.type == GUN_KNIFE) {
+        return game_pistol_whip(g, p);
+    }
     if (g->ammo <= 0 || g->shot_cooldown > 0.0f || g->is_reloading) {
         return 0;
     }
@@ -188,7 +223,8 @@ int game_shoot(GameState *g, const Player *p) {
 }
 
 int game_pistol_whip(GameState *g, const Player *p) {
-    if (g->ammo > 0 || g->is_reloading || g->pistol_whip_timer > 0.0f) {
+    int knife_selected = g->current_weapon.type == GUN_KNIFE;
+    if ((!knife_selected && g->ammo > 0) || g->is_reloading || g->pistol_whip_timer > 0.0f) {
         return 0;
     }
     g->pistol_whip_timer = WHIP_DURATION;

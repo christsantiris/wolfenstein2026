@@ -8,7 +8,8 @@
 #include <sys/stat.h>
 
 #define SAVE_MAGIC   "WOLF2026"
-#define SAVE_VERSION 7
+#define SAVE_VERSION 8
+#define SAVE_GUN_COUNT_V7 5
 
 static void save_path(int slot, char *buf, int bufsz) {
     snprintf(buf, bufsz, "saves/slot%d.sav", slot);
@@ -141,13 +142,14 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
     if (fread(&g->difficulty, sizeof(g->difficulty), 1, f) != 1) { fclose(f); return -1; }
     if (fread(&g->health, sizeof(g->health), 1, f) != 1) { fclose(f); return -1; }
     if (fread(&g->ammo, sizeof(g->ammo), 1, f) != 1) { fclose(f); return -1; }
-    if (fread(g->reserve_ammo_per_gun, sizeof(g->reserve_ammo_per_gun), 1, f) != 1) { fclose(f); return -1; }
+    size_t saved_gun_bytes = ver >= 8 ? sizeof(g->reserve_ammo_per_gun) : sizeof(int) * SAVE_GUN_COUNT_V7;
+    if (fread(g->reserve_ammo_per_gun, saved_gun_bytes, 1, f) != 1) { fclose(f); return -1; }
     if (fread(&g->score, sizeof(g->score), 1, f) != 1) { fclose(f); return -1; }
     int wtype;
     if (fread(&wtype, sizeof(wtype), 1, f) != 1) { fclose(f); return -1; }
     g->current_weapon = *weapon_def((GunType)wtype);
-    if (fread(g->has_weapon, sizeof(g->has_weapon), 1, f) != 1) { fclose(f); return -1; }
-    if (fread(g->ammo_per_gun, sizeof(g->ammo_per_gun), 1, f) != 1) { fclose(f); return -1; }
+    if (fread(g->has_weapon, saved_gun_bytes, 1, f) != 1) { fclose(f); return -1; }
+    if (fread(g->ammo_per_gun, saved_gun_bytes, 1, f) != 1) { fclose(f); return -1; }
 
     if (fread(&g->enemies.count, sizeof(g->enemies.count), 1, f) != 1) { fclose(f); return -1; }
     if (g->enemies.count < 0 || g->enemies.count > MAX_ENEMIES) { fclose(f); return -1; }

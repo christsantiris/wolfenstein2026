@@ -63,10 +63,12 @@ Pull requests are welcome. Please keep changes small and focused — one feature
 ## License
 MIT
 
+## Sound Effects courtesy of
+https://pixabay.com
+
 ## Roadmap
 - Installers for linux, windows
 - Additional levels
-- New sound effect for ak47
 - Enemy death animation
 - Health and ammo sprite improvements
 - Wall texture improvements

@@ -14,6 +14,7 @@ typedef enum {
     GUN_SHOTGUN,
     GUN_AK47,
     GUN_BATTLE_RIFLE,
+    GUN_KNIFE,
     GUN_COUNT
 } GunType;
 
