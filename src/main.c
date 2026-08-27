@@ -279,6 +279,13 @@ int main(void) {
         "assets/sprites/boss_aim.ppm",
         "assets/sprites/shotgun_guard_aim.ppm"
     };
+    const char *enemy_corpse_paths[ENEMY_TYPE_COUNT] = {
+        "assets/sprites/guard_corpse.ppm",
+        "assets/sprites/officer_corpse.ppm",
+        "assets/sprites/ss_corpse.ppm",
+        "assets/sprites/boss_corpse.ppm",
+        "assets/sprites/shotgun_guard_corpse.ppm"
+    };
     const int enemy_muzzle_y[ENEMY_TYPE_COUNT] = { 14, 13, 14, 15, 14 };
     const int enemy_flash_radius[ENEMY_TYPE_COUNT] = { 3, 3, 4, 5, 5 };
     for (int t = 0; t < ENEMY_TYPE_COUNT; t++) {
@@ -298,6 +305,10 @@ int main(void) {
         if (texture_load_ppm(&enemy_tex[t][ENEMY_SPRITE_AIM], enemy_aim_paths[t]) != 0) {
             texture_create(&enemy_tex[t][ENEMY_SPRITE_AIM], etw, eth);
             memcpy(enemy_tex[t][ENEMY_SPRITE_AIM].pixels, enemy_tex[t][4].pixels, (size_t)etw * eth * 3);
+        }
+        if (texture_load_ppm(&enemy_tex[t][ENEMY_SPRITE_CORPSE], enemy_corpse_paths[t]) != 0) {
+            texture_create(&enemy_tex[t][ENEMY_SPRITE_CORPSE], etw, eth);
+            memcpy(enemy_tex[t][ENEMY_SPRITE_CORPSE].pixels, enemy_tex[t][4].pixels, (size_t)etw * eth * 3);
         }
         texture_create(&enemy_tex[t][ENEMY_SPRITE_FIRE], etw, eth);
         memcpy(enemy_tex[t][ENEMY_SPRITE_FIRE].pixels, enemy_tex[t][ENEMY_SPRITE_AIM].pixels, (size_t)etw * eth * 3);

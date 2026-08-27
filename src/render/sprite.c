@@ -13,9 +13,6 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
 
     for (int i = 0; i < el->count; i++) {
         const Enemy *e = &el->enemies[i];
-        if (!e->active) {
-            continue;
-        }
 
         float view_angle = atan2f(e->y - p->y, e->x - p->x);
         float rel = view_angle - e->angle;
@@ -23,7 +20,9 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
         while (rel >= 2.0f * (float)M_PI)  { rel -= 2.0f * (float)M_PI; }
         int dir_idx = (int)(rel / ((float)M_PI / 4.0f) + 0.5f) % 8;
         int frame_idx;
-        if (e->state == ENEMY_ATTACK) {
+        if (!e->active) {
+            frame_idx = ENEMY_SPRITE_CORPSE;
+        } else if (e->state == ENEMY_ATTACK) {
             frame_idx = e->attack_flash_timer > 0.0f ? ENEMY_SPRITE_FIRE : ENEMY_SPRITE_AIM;
         } else {
             frame_idx = (e->walk_frame ? ENEMY_SPRITE_WALK_B : 0) + dir_idx;
@@ -76,7 +75,7 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
             }
         }
 
-        if (e->type == ENEMY_TYPE_BOSS && screen_x >= 0 && screen_x < screen_w && transform_y < zbuf[screen_x]) {
+        if (e->active && e->type == ENEMY_TYPE_BOSS && screen_x >= 0 && screen_x < screen_w && transform_y < zbuf[screen_x]) {
             const EnemyDef *def = enemy_def(e->type);
             int max_health = def->max_health;
             if (e->health > max_health) {

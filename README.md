@@ -70,8 +70,6 @@ https://pixabay.com
 ## Roadmap
 - Installers for linux, windows
 - Additional levels
-- Enemy death animation
 - Wall texture improvements
 - Floor texture improvements
-- Firing animation improvements
 
