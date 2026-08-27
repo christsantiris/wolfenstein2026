@@ -71,7 +71,6 @@ https://pixabay.com
 - Installers for linux, windows
 - Additional levels
 - Enemy death animation
-- Health and ammo sprite improvements
 - Wall texture improvements
 - Floor texture improvements
 - Firing animation improvements

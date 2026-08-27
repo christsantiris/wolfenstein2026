@@ -161,12 +161,16 @@ int main(void) {
     texture_generate_exit_door(&exit_tex);
 
     Texture ammo_pickup_tex;
-    texture_create(&ammo_pickup_tex, 64, 64);
-    texture_generate_ammo_pickup(&ammo_pickup_tex);
+    if (texture_load_ppm(&ammo_pickup_tex, "assets/sprites/ammo_pickup.ppm") != 0) {
+        texture_create(&ammo_pickup_tex, 64, 64);
+        texture_generate_ammo_pickup(&ammo_pickup_tex);
+    }
 
     Texture health_pickup_tex;
-    texture_create(&health_pickup_tex, 64, 64);
-    texture_generate_health_pickup(&health_pickup_tex);
+    if (texture_load_ppm(&health_pickup_tex, "assets/sprites/health_pickup.ppm") != 0) {
+        texture_create(&health_pickup_tex, 64, 64);
+        texture_generate_health_pickup(&health_pickup_tex);
+    }
 
     Texture face_tex[HUD_FACE_COUNT] = { 0 };
     const char *face_paths[HUD_FACE_COUNT] = {
