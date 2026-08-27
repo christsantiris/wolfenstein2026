@@ -3,6 +3,9 @@
 #include <math.h>
 #include <stdlib.h>
 
+#define ATTACK_AIM_TIME 0.25f
+#define ATTACK_FLASH_TIME 0.12f
+
 static const EnemyDef ENEMY_DEFS[ENEMY_TYPE_COUNT] = {
     { ENEMY_TYPE_GUARD,          100, 1.8f, 12.0f, 2.0f, 2.0f,  8 },
     { ENEMY_TYPE_OFFICER,         75, 2.4f, 14.0f, 2.0f, 1.5f, 12 },
@@ -65,6 +68,12 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficul
     if (e->attack_timer > 0.0f) {
         e->attack_timer -= dt;
     }
+    if (e->attack_flash_timer > 0.0f) {
+        e->attack_flash_timer -= dt;
+        if (e->attack_flash_timer < 0.0f) {
+            e->attack_flash_timer = 0.0f;
+        }
+    }
 
     if (e->state == ENEMY_IDLE) {
         e->walk_frame = 0;
@@ -80,6 +89,9 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficul
         }
         if (dist <= def->attack_range) {
             e->state = ENEMY_ATTACK;
+            if (e->attack_timer <= 0.0f) {
+                e->attack_timer = ATTACK_AIM_TIME;
+            }
         } else {
             e->angle = atan2f(dy, dx);
             float nx = e->x + (dx / dist) * speed * dt;
@@ -96,6 +108,7 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficul
             e->state = ENEMY_ALERT;
         } else if (e->attack_timer <= 0.0f && enemy_has_los(e, p, m)) {
             e->attack_timer = attack_cooldown;
+            e->attack_flash_timer = ATTACK_FLASH_TIME;
             return def->attack_damage;
         }
     }
@@ -133,6 +146,7 @@ static void place(EnemyList *el, float x, float y, EnemyType type, int difficult
     e->type = type;
     e->state = ENEMY_IDLE;
     e->attack_timer = 0.0f;
+    e->attack_flash_timer = 0.0f;
     e->walk_frame = 0;
     e->walk_timer = 0.0f;
 }

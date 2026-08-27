@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 
 #define SAVE_MAGIC   "WOLF2026"
-#define SAVE_VERSION 5
+#define SAVE_VERSION 6
 
 static void save_path(int slot, char *buf, int bufsz) {
     snprintf(buf, bufsz, "saves/slot%d.sav", slot);
@@ -66,6 +66,7 @@ int save_game(int slot, int level, const Player *p, const GameState *g, const Ma
         int estate = (int)e->state;
         fwrite(&estate, sizeof(estate), 1, f);
         fwrite(&e->attack_timer, sizeof(e->attack_timer), 1, f);
+        fwrite(&e->attack_flash_timer, sizeof(e->attack_flash_timer), 1, f);
         int etype = (int)e->type;
         fwrite(&etype, sizeof(etype), 1, f);
         fwrite(&e->walk_frame, sizeof(e->walk_frame), 1, f);
@@ -105,7 +106,7 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m) {
         return -1;
     }
     uint32_t ver;
-    if (fread(&ver, sizeof(ver), 1, f) != 1 || ver != SAVE_VERSION) {
+    if (fread(&ver, sizeof(ver), 1, f) != 1 || (ver != 5 && ver != SAVE_VERSION)) {
         fclose(f);
         return -1;
     }
@@ -154,6 +155,11 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m) {
         if (fread(&estate, sizeof(estate), 1, f) != 1) { fclose(f); return -1; }
         e->state = (EnemyState)estate;
         if (fread(&e->attack_timer, sizeof(e->attack_timer), 1, f) != 1) { fclose(f); return -1; }
+        if (ver >= 6) {
+            if (fread(&e->attack_flash_timer, sizeof(e->attack_flash_timer), 1, f) != 1) { fclose(f); return -1; }
+        } else {
+            e->attack_flash_timer = 0.0f;
+        }
         int etype;
         if (fread(&etype, sizeof(etype), 1, f) != 1) { fclose(f); return -1; }
         e->type = (EnemyType)etype;

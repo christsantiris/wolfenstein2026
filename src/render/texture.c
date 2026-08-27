@@ -329,6 +329,41 @@ void texture_generate_guard_attack(Texture *t) {
     }
 }
 
+void texture_generate_muzzle_flash(Texture *t, int cx, int cy, int radius) {
+    int reach = radius + 2;
+    for (int y = cy - reach; y <= cy + reach; y++) {
+        for (int x = cx - reach; x <= cx + reach; x++) {
+            if (x < 0 || x >= t->width || y < 0 || y >= t->height) {
+                continue;
+            }
+            int dx = abs(x - cx);
+            int dy = abs(y - cy);
+            int diamond = dx + dy <= radius;
+            int axial = (dx <= 1 && dy <= reach) || (dy <= 1 && dx <= reach);
+            if (!diamond && !axial) {
+                continue;
+            }
+
+            unsigned char r = 240;
+            unsigned char g = 82;
+            unsigned char b = 18;
+            if (dx + dy <= radius / 2) {
+                r = 255;
+                g = 248;
+                b = 190;
+            } else if (diamond) {
+                r = 255;
+                g = 190;
+                b = 38;
+            }
+            int index = (y * t->width + x) * 3;
+            t->pixels[index] = r;
+            t->pixels[index + 1] = g;
+            t->pixels[index + 2] = b;
+        }
+    }
+}
+
 void texture_generate_boss_dir(Texture *t, int dir) {
     int W = t->width;
     int H = t->height;

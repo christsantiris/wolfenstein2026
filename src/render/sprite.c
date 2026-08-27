@@ -24,7 +24,7 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
         int dir_idx = (int)(rel / ((float)M_PI / 4.0f) + 0.5f) % 8;
         int frame_idx;
         if (e->state == ENEMY_ATTACK) {
-            frame_idx = ENEMY_SPRITE_ATTACK;
+            frame_idx = e->attack_flash_timer > 0.0f ? ENEMY_SPRITE_FIRE : ENEMY_SPRITE_AIM;
         } else {
             frame_idx = (e->walk_frame ? ENEMY_SPRITE_WALK_B : 0) + dir_idx;
         }
