@@ -18,9 +18,9 @@ A first-person shooter inspired by *Wolfenstein 3D* by id Software. Navigate maz
 *Wolfenstein 2026* is a raycasting first-person shooter built in C with SDL2. Inspired by the 1992 id Software classic, it features a fast grid-based raycasting engine, textured walls, and enemy AI — faithful to the original in feel while running natively on modern hardware.
 
 ## Screenshot
-<img width="1604" height="1204" alt="image" src="https://github.com/user-attachments/assets/4b85f780-c554-4f2f-8a9e-65c7e15010ee" />
+<img width="1572" height="1174" alt="image" src="https://github.com/user-attachments/assets/3bc83ec6-2cdf-4857-a19a-4566fecf26b5" />
 
-<img width="1598" height="1204" alt="image" src="https://github.com/user-attachments/assets/1a9d2bc2-61e5-4376-ab20-ee796b3c6d71" />
+<img width="1596" height="1200" alt="image" src="https://github.com/user-attachments/assets/22d17ca8-eac0-43b6-87d3-b995804aa1af" />
 
 <img width="1406" height="396" alt="image" src="https://github.com/user-attachments/assets/bebda473-5e61-437e-8214-fce3cfb48153" />
 
