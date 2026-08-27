@@ -11,6 +11,22 @@
 #define FACE_W        50
 #define FACE_H        50
 
+static HudFace hud_face_for_health(int health) {
+    if (health <= 0) {
+        return HUD_FACE_DEAD;
+    }
+    if (health <= 25) {
+        return HUD_FACE_CRITICAL;
+    }
+    if (health <= 50) {
+        return HUD_FACE_INJURED;
+    }
+    if (health <= 75) {
+        return HUD_FACE_WOUNDED;
+    }
+    return HUD_FACE_HEALTHY;
+}
+
 void hud_draw_level_clear(SDL_Renderer *renderer, int screen_w, int screen_h, float timer) {
     if (fmodf(timer, 0.5f) < 0.25f) {
         return;
@@ -46,7 +62,7 @@ void hud_draw_exit_open(SDL_Renderer *renderer, int screen_w, int screen_h) {
     font_draw_string(renderer, msg, tx, ty, gold);
 }
 
-void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, int ammo, int reserve_ammo, int score, int enemies_remaining) {
+void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, int ammo, int reserve_ammo, int score, int enemies_remaining, const Texture face_tex[HUD_FACE_COUNT]) {
     int bar_y = screen_h - HUD_HEIGHT;
 
     SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
@@ -79,9 +95,22 @@ void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, 
 
     int face_x = (screen_w - FACE_W) / 2;
     int face_y = bar_y + (HUD_HEIGHT - FACE_H) / 2;
-    SDL_SetRenderDrawColor(renderer, 200, 160, 100, 255);
-    SDL_Rect face = { face_x, face_y, FACE_W, FACE_H };
-    SDL_RenderFillRect(renderer, &face);
+    const Texture *face = &face_tex[hud_face_for_health(health)];
+    if (face->pixels && face->width > 0 && face->height > 0) {
+        for (int y = 0; y < FACE_H; y++) {
+            int ty = y * face->height / FACE_H;
+            for (int x = 0; x < FACE_W; x++) {
+                int tx = x * face->width / FACE_W;
+                int idx = (ty * face->width + tx) * 3;
+                SDL_SetRenderDrawColor(renderer, face->pixels[idx], face->pixels[idx + 1], face->pixels[idx + 2], 255);
+                SDL_RenderDrawPoint(renderer, face_x + x, face_y + y);
+            }
+        }
+    } else {
+        SDL_SetRenderDrawColor(renderer, 200, 160, 100, 255);
+        SDL_Rect fallback = { face_x, face_y, FACE_W, FACE_H };
+        SDL_RenderFillRect(renderer, &fallback);
+    }
 
     int ammo_right = screen_w - BAR_PADDING;
     int ammo_top = bar_y + (HUD_HEIGHT - AMMO_BLOCK_H) / 2;
