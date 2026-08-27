@@ -8,6 +8,8 @@ typedef struct {
     int is_open;
     int music_on;
     int sound_on;
+    int minimap_on;
+    int enemy_markers_on;
     int difficulty;
     int selected;
     int current_level;
@@ -19,8 +21,10 @@ typedef enum {
     MENU_ACTION_NEW_GAME,
     MENU_ACTION_MUSIC_TOGGLE,
     MENU_ACTION_SOUND_TOGGLE,
+    MENU_ACTION_MINIMAP_TOGGLE,
+    MENU_ACTION_ENEMY_MARKERS_TOGGLE,
     MENU_ACTION_SAVE,
-    MENU_ACTION_LOAD,
+    MENU_ACTION_LOAD
 } MenuAction;
 
 MenuAction menu_handle_event(Menu *m, const SDL_Event *e, int sw, int sh);

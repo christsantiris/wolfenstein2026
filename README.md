@@ -66,5 +66,7 @@ MIT
 - New sound effect for ak47
 - Enemy death animation
 - Health and ammo sprite improvements
-- Toggle enemy positions in minimap
+- Wall texture improvements
+- Floor texture improvements
+- Firing animation improvements
 

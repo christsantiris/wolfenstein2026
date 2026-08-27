@@ -323,6 +323,8 @@ int main(void) {
     Menu menu = { 0 };
     menu.music_on = 1;
     menu.sound_on = 1;
+    menu.minimap_on = 1;
+    menu.enemy_markers_on = 0;
     int current_level = 1;
 #ifdef DEBUG_START_LEVEL
     current_level = DEBUG_START_LEVEL;
@@ -333,7 +335,6 @@ int main(void) {
 #endif
     int game_over = 0;
     int game_won = 0;
-    int show_minimap = 1;
     SlotPicker slot_picker = { 0 };
     int running = 1;
     float total_time = 0.0f;
@@ -460,7 +461,10 @@ int main(void) {
                         }
                     }
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_m) {
-                        show_minimap = !show_minimap;
+                        menu.minimap_on = !menu.minimap_on;
+                    }
+                    if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_n) {
+                        menu.enemy_markers_on = !menu.enemy_markers_on;
                     }
                     if (e.type == SDL_KEYDOWN && (e.key.keysym.sym == SDLK_c || e.key.keysym.sym == SDLK_w)) {
                         game_cycle_weapon(&game);
@@ -614,7 +618,9 @@ int main(void) {
             item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, &weapon_kit_dual_tex, &weapon_kit_battle_rifle_tex, w, h - HUD_HEIGHT);
             const Texture *weapon_textures[GUN_COUNT] = { [GUN_9MM_HANDGUN] = &pistol_tex, [GUN_DUAL_HANDGUN] = &dual_handgun_tex, [GUN_SHOTGUN] = &shotgun_tex, [GUN_AK47] = &ak47_tex, [GUN_BATTLE_RIFLE] = &battle_rifle_tex };
             weapon_render(renderer, weapon_textures[game.current_weapon.type], game.shot_timer, game.pistol_whip_timer, w, h - HUD_HEIGHT);
-            if (show_minimap) { minimap_render(renderer, &map, &player); }
+            if (menu.minimap_on) {
+                minimap_render(renderer, &map, &player, &game.enemies, menu.enemy_markers_on);
+            }
             int enemies_remaining = 0;
             for (int i = 0; i < game.enemies.count; i++) {
                 if (game.enemies.enemies[i].active) {

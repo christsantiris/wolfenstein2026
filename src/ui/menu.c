@@ -9,13 +9,15 @@
 #define CSTRIDE   (CW + SCALE)
 #define LHEIGHT   (CH + SCALE * 4)
 
-#define MENU_ITEM_COUNT    6
+#define MENU_ITEM_COUNT    8
 #define MENU_ITEM_MUSIC    0
 #define MENU_ITEM_SOUND    1
-#define MENU_ITEM_SAVE     2
-#define MENU_ITEM_LOAD     3
-#define MENU_ITEM_NEW_GAME 4
-#define MENU_ITEM_QUIT     5
+#define MENU_ITEM_MINIMAP  2
+#define MENU_ITEM_ENEMIES  3
+#define MENU_ITEM_SAVE     4
+#define MENU_ITEM_LOAD     5
+#define MENU_ITEM_NEW_GAME 6
+#define MENU_ITEM_QUIT     7
 
 static const uint8_t GLYPHS[96][7] = {
     { 0x00,0x00,0x00,0x00,0x00,0x00,0x00 }, /* ' '  32 */
@@ -143,25 +145,28 @@ static int button_hit(int mx, int my, int bx, int by, const char *label) {
 typedef struct {
     int bx, by, bw, bh;
     int music_y, sound_y;
+    int minimap_y, enemies_y;
     int save_x, load_x, row1_y;
     int new_game_x, quit_x, row2_y;
 } MenuLayout;
 
 static void menu_compute_layout(int sw, int sh, MenuLayout *l) {
     l->bw = 440;
-    l->bh = 474 + LHEIGHT * 2;
+    l->bh = 474 + LHEIGHT * 4;
     l->bx = (sw - l->bw) / 2;
     l->by = (sh - l->bh) / 2;
 
     int y = l->by + 18 + LHEIGHT + 4 + 10;
     y += LHEIGHT;
-    y += LHEIGHT * 8 + 4;
+    y += LHEIGHT * 10 + 4;
     y += 10;
     y += LHEIGHT;
     y += LHEIGHT;
     y += LHEIGHT;
     l->music_y = y; y += LHEIGHT;
-    l->sound_y = y; y += LHEIGHT + 4 + 14;
+    l->sound_y = y; y += LHEIGHT;
+    l->minimap_y = y; y += LHEIGHT;
+    l->enemies_y = y; y += LHEIGHT + 4 + 14;
 
     l->save_x = l->bx + l->bw / 2 - str_px_w("SAVE") - 24;
     l->load_x = l->bx + l->bw / 2 + 8;
@@ -184,6 +189,14 @@ static MenuAction activate_item(Menu *m, int item) {
     if (item == MENU_ITEM_SOUND) {
         m->sound_on = !m->sound_on;
         return MENU_ACTION_SOUND_TOGGLE;
+    }
+    if (item == MENU_ITEM_MINIMAP) {
+        m->minimap_on = !m->minimap_on;
+        return MENU_ACTION_MINIMAP_TOGGLE;
+    }
+    if (item == MENU_ITEM_ENEMIES) {
+        m->enemy_markers_on = !m->enemy_markers_on;
+        return MENU_ACTION_ENEMY_MARKERS_TOGGLE;
     }
     if (item == MENU_ITEM_SAVE) {
         return MENU_ACTION_SAVE;
@@ -213,6 +226,14 @@ MenuAction menu_handle_event(Menu *m, const SDL_Event *e, int sw, int sh) {
         if (e->key.keysym.sym == SDLK_RETURN || e->key.keysym.sym == SDLK_KP_ENTER || e->key.keysym.sym == SDLK_SPACE) {
             return activate_item(m, m->selected);
         }
+        if (e->key.keysym.sym == SDLK_m) {
+            m->selected = MENU_ITEM_MINIMAP;
+            return activate_item(m, MENU_ITEM_MINIMAP);
+        }
+        if (e->key.keysym.sym == SDLK_n) {
+            m->selected = MENU_ITEM_ENEMIES;
+            return activate_item(m, MENU_ITEM_ENEMIES);
+        }
     }
 
     if (e->type != SDL_MOUSEBUTTONDOWN || e->button.button != SDL_BUTTON_LEFT) {
@@ -233,6 +254,16 @@ MenuAction menu_handle_event(Menu *m, const SDL_Event *e, int sw, int sh) {
         mx >= l.bx && mx < l.bx + l.bw) {
         m->selected = MENU_ITEM_SOUND;
         return activate_item(m, MENU_ITEM_SOUND);
+    }
+    if (my >= l.minimap_y && my < l.minimap_y + CH &&
+        mx >= l.bx && mx < l.bx + l.bw) {
+        m->selected = MENU_ITEM_MINIMAP;
+        return activate_item(m, MENU_ITEM_MINIMAP);
+    }
+    if (my >= l.enemies_y && my < l.enemies_y + CH &&
+        mx >= l.bx && mx < l.bx + l.bw) {
+        m->selected = MENU_ITEM_ENEMIES;
+        return activate_item(m, MENU_ITEM_ENEMIES);
     }
     if (button_hit(mx, my, l.save_x, l.row1_y, "SAVE")) {
         return MENU_ACTION_SAVE;
@@ -287,6 +318,8 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
     draw_row(r, "SHOOT",        "SPACE", l.bx, y, l.bw); y += LHEIGHT;
     draw_row(r, "RELOAD",       "R",     l.bx, y, l.bw); y += LHEIGHT;
     draw_row(r, "OPEN DOOR",    "O",     l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "MINIMAP", "M", l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "ENEMY POSITIONS", "N", l.bx, y, l.bw); y += LHEIGHT;
     draw_row(r, "FULLSCREEN",   "F",     l.bx, y, l.bw); y += LHEIGHT + 4;
 
     SDL_SetRenderDrawColor(r, 80, 60, 20, 255);
@@ -319,6 +352,20 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
         SDL_RenderFillRect(r, &hl);
     }
     draw_row(r, "SOUND",       m->sound_on ? "ON" : "OFF", l.bx, y, l.bw);
+    y += LHEIGHT;
+    if (m->selected == MENU_ITEM_MINIMAP) {
+        SDL_SetRenderDrawColor(r, 70, 52, 12, 255);
+        SDL_Rect hl = { l.bx + 4, y - 2, l.bw - 8, CH + 4 };
+        SDL_RenderFillRect(r, &hl);
+    }
+    draw_row(r, "MINIMAP", m->minimap_on ? "ON" : "OFF", l.bx, y, l.bw);
+    y += LHEIGHT;
+    if (m->selected == MENU_ITEM_ENEMIES) {
+        SDL_SetRenderDrawColor(r, 70, 52, 12, 255);
+        SDL_Rect hl = { l.bx + 4, y - 2, l.bw - 8, CH + 4 };
+        SDL_RenderFillRect(r, &hl);
+    }
+    draw_row(r, "ENEMY POSITIONS", m->enemy_markers_on ? "ON" : "OFF", l.bx, y, l.bw);
     y += LHEIGHT + 4;
 
     SDL_SetRenderDrawColor(r, 80, 60, 20, 255);

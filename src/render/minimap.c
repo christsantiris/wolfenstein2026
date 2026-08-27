@@ -5,8 +5,9 @@
 #define MARGIN      8
 #define PLAYER_R    3
 #define DIR_LEN     8
+#define ENEMY_SIZE  4
 
-void minimap_render(SDL_Renderer *renderer, const Map *m, const Player *p) {
+void minimap_render(SDL_Renderer *renderer, const Map *m, const Player *p, const EnemyList *enemies, int show_enemy_positions) {
     for (int y = 0; y < m->height; y++) {
         for (int x = 0; x < m->width; x++) {
             SDL_Rect cell = {
@@ -21,6 +22,20 @@ void minimap_render(SDL_Renderer *renderer, const Map *m, const Player *p) {
                 SDL_SetRenderDrawColor(renderer, 40, 40, 40, 180);
             }
             SDL_RenderFillRect(renderer, &cell);
+        }
+    }
+
+    if (show_enemy_positions) {
+        SDL_SetRenderDrawColor(renderer, 255, 105, 30, 255);
+        for (int i = 0; i < enemies->count; i++) {
+            const Enemy *enemy = &enemies->enemies[i];
+            if (!enemy->active) {
+                continue;
+            }
+            int ex = MARGIN + (int)(enemy->x * CELL_SIZE);
+            int ey = MARGIN + (int)(enemy->y * CELL_SIZE);
+            SDL_Rect marker = { ex - ENEMY_SIZE / 2, ey - ENEMY_SIZE / 2, ENEMY_SIZE, ENEMY_SIZE };
+            SDL_RenderFillRect(renderer, &marker);
         }
     }
 
