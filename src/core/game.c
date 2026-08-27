@@ -15,8 +15,8 @@ static const int KILL_SCORE[4] = { 75, 100, 150, 200 };
 static const WeaponDef WEAPON_PISTOL       = { GUN_9MM_HANDGUN,  "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3",  8, 34, 0.15f, 0.50f, 0.12f, 1.5f };
 static const WeaponDef WEAPON_DUAL_HANDGUN = { GUN_DUAL_HANDGUN, "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3", 16, 34, 0.15f, 0.25f, 0.10f, 1.2f };
 static const WeaponDef WEAPON_SHOTGUN      = { GUN_SHOTGUN,      "assets/sounds/shotgun.mp3",     "assets/sounds/handgunreload.mp3",  2, 20, 0.30f, 0.80f, 0.15f, 2.0f };
-static const WeaponDef WEAPON_AK47         = { GUN_AK47,         "assets/sounds/ak47.mp3",        "assets/sounds/handgunreload.mp3", 30, 30, 0.25f, 0.12f, 0.08f, 2.0f };
-static const WeaponDef WEAPON_BATTLE_RIFLE = { GUN_BATTLE_RIFLE, "assets/sounds/ak47.mp3", "assets/sounds/handgunreload.mp3", 10, 55, 0.08f, 0.35f, 0.10f, 1.8f };
+static const WeaponDef WEAPON_AK47 = { GUN_AK47, "assets/sounds/ak-47.mp3", "assets/sounds/handgunreload.mp3", 30, 30, 0.25f, 0.12f, 0.08f, 2.0f };
+static const WeaponDef WEAPON_BATTLE_RIFLE = { GUN_BATTLE_RIFLE, "assets/sounds/rifle.mp3", "assets/sounds/handgunreload.mp3", 10, 55, 0.08f, 0.35f, 0.10f, 1.8f };
 
 static const WeaponDef *ALL_WEAPONS[GUN_COUNT] = {
     [GUN_9MM_HANDGUN]  = &WEAPON_PISTOL,
