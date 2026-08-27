@@ -366,18 +366,32 @@ int main(void) {
                 int picked_slot = 0;
                 SlotResult sr = slot_picker_handle_event(&slot_picker, &e, w, h, &picked_slot);
                 if (sr == SLOT_RESULT_SELECTED) {
+                    SaveSettings settings = {
+                        .music_on = menu.music_on,
+                        .sound_on = menu.sound_on,
+                        .minimap_on = menu.minimap_on,
+                        .enemy_positions_on = menu.enemy_markers_on
+                    };
                     if (slot_picker.is_save) {
-                        save_game(picked_slot, current_level, &player, &game, &map);
+                        save_game(picked_slot, current_level, &player, &game, &map, &settings);
                     } else {
-                        if (load_game(picked_slot, &current_level, &player, &game, &map) == 0) {
+                        if (load_game(picked_slot, &current_level, &player, &game, &map, &settings) == 0) {
+                            menu.music_on = settings.music_on;
+                            menu.sound_on = settings.sound_on;
+                            menu.minimap_on = settings.minimap_on;
+                            menu.enemy_markers_on = settings.enemy_positions_on;
+                            sound_set_enabled(menu.sound_on);
                             game_over = 0;
                             game_won = 0;
                             menu.is_open = 0;
                             app_state = APP_PLAYING;
                             music_stop();
                             int idx = current_level - 1;
-                            if (menu.music_on && idx >= 0 && idx < LEVEL_COUNT) {
+                            if (idx >= 0 && idx < LEVEL_COUNT) {
                                 music_play(&level_music[idx]);
+                                if (!menu.music_on) {
+                                    Mix_PauseMusic();
+                                }
                             }
                         }
                     }

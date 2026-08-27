@@ -7,8 +7,15 @@
 
 #define SAVE_SLOT_COUNT 3
 
-int save_game(int slot, int level, const Player *p, const GameState *g, const Map *m);
-int load_game(int slot, int *level, Player *p, GameState *g, Map *m);
+typedef struct {
+    int music_on;
+    int sound_on;
+    int minimap_on;
+    int enemy_positions_on;
+} SaveSettings;
+
+int save_game(int slot, int level, const Player *p, const GameState *g, const Map *m, const SaveSettings *s);
+int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSettings *s);
 int save_slot_exists(int slot);
 
 #endif

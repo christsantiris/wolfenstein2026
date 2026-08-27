@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 
 #define SAVE_MAGIC   "WOLF2026"
-#define SAVE_VERSION 6
+#define SAVE_VERSION 7
 
 static void save_path(int slot, char *buf, int bufsz) {
     snprintf(buf, bufsz, "saves/slot%d.sav", slot);
@@ -25,7 +25,7 @@ int save_slot_exists(int slot) {
     return 1;
 }
 
-int save_game(int slot, int level, const Player *p, const GameState *g, const Map *m) {
+int save_game(int slot, int level, const Player *p, const GameState *g, const Map *m, const SaveSettings *s) {
     mkdir("saves", 0755);
     char path[64];
     save_path(slot, path, sizeof(path));
@@ -83,6 +83,11 @@ int save_game(int slot, int level, const Player *p, const GameState *g, const Ma
         fwrite(&it->active, sizeof(it->active), 1, f);
     }
 
+    fwrite(&s->music_on, sizeof(s->music_on), 1, f);
+    fwrite(&s->sound_on, sizeof(s->sound_on), 1, f);
+    fwrite(&s->minimap_on, sizeof(s->minimap_on), 1, f);
+    fwrite(&s->enemy_positions_on, sizeof(s->enemy_positions_on), 1, f);
+
     fwrite(&m->width, sizeof(m->width), 1, f);
     fwrite(&m->height, sizeof(m->height), 1, f);
     fwrite(m->cells, sizeof(int) * m->width * m->height, 1, f);
@@ -91,7 +96,7 @@ int save_game(int slot, int level, const Player *p, const GameState *g, const Ma
     return 0;
 }
 
-int load_game(int slot, int *level, Player *p, GameState *g, Map *m) {
+int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSettings *s) {
     char path[64];
     save_path(slot, path, sizeof(path));
 
@@ -106,10 +111,12 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m) {
         return -1;
     }
     uint32_t ver;
-    if (fread(&ver, sizeof(ver), 1, f) != 1 || (ver != 5 && ver != SAVE_VERSION)) {
+    if (fread(&ver, sizeof(ver), 1, f) != 1 || ver < 5 || ver > SAVE_VERSION) {
         fclose(f);
         return -1;
     }
+
+    SaveSettings loaded_settings = *s;
 
     if (fread(level, sizeof(*level), 1, f) != 1) {
         fclose(f);
@@ -179,6 +186,29 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m) {
         if (fread(&it->active, sizeof(it->active), 1, f) != 1) { fclose(f); return -1; }
     }
 
+    if (ver >= 7) {
+        if (fread(&loaded_settings.music_on, sizeof(loaded_settings.music_on), 1, f) != 1) {
+            fclose(f);
+            return -1;
+        }
+        if (fread(&loaded_settings.sound_on, sizeof(loaded_settings.sound_on), 1, f) != 1) {
+            fclose(f);
+            return -1;
+        }
+        if (fread(&loaded_settings.minimap_on, sizeof(loaded_settings.minimap_on), 1, f) != 1) {
+            fclose(f);
+            return -1;
+        }
+        if (fread(&loaded_settings.enemy_positions_on, sizeof(loaded_settings.enemy_positions_on), 1, f) != 1) {
+            fclose(f);
+            return -1;
+        }
+        loaded_settings.music_on = loaded_settings.music_on != 0;
+        loaded_settings.sound_on = loaded_settings.sound_on != 0;
+        loaded_settings.minimap_on = loaded_settings.minimap_on != 0;
+        loaded_settings.enemy_positions_on = loaded_settings.enemy_positions_on != 0;
+    }
+
     int mw, mh;
     if (fread(&mw, sizeof(mw), 1, f) != 1) { fclose(f); return -1; }
     if (fread(&mh, sizeof(mh), 1, f) != 1) { fclose(f); return -1; }
@@ -187,5 +217,6 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m) {
     }
 
     fclose(f);
+    *s = loaded_settings;
     return 0;
 }
