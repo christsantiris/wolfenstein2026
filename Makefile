@@ -1,4 +1,4 @@
-.PHONY: all run clean debug debug-pistol debug-dual-handguns debug-shotgun debug-battle-rifle debug-ak47 debug-knife debug-level test linux sprites
+.PHONY: all run clean debug debug-pistol debug-dual-handguns debug-shotgun debug-battle-rifle debug-ak47 debug-knife debug-level test linux appimage sprites
 
 all:
 	cmake -B build -DCMAKE_BUILD_TYPE=Release
@@ -14,6 +14,9 @@ dmg:
 
 linux:
 	bash package/linux/build_linux.sh
+
+appimage:
+	bash package/linux/build_appimage.sh
 
 debug: debug-shotgun
 

@@ -68,7 +68,7 @@ MIT
 https://pixabay.com
 
 ## Roadmap
-- Installers for linux, windows
+- Installers windows
 - Additional levels
 - Mini bosses
 - Additional weapons (grenades?)

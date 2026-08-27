@@ -1,0 +1,10 @@
+Package: wolfenstein2026
+Version: 1.0.0
+Section: games
+Priority: optional
+Architecture: @ARCH@
+Depends: libsdl2-2.0-0, libsdl2-mixer-2.0-0
+Maintainer: Wolfenstein 2026
+Description: Retro first-person raycasting shooter
+ Navigate castle mazes, fight enemies, collect weapons, and survive ten
+ increasingly dangerous levels in a modern homage to classic raycasting games.

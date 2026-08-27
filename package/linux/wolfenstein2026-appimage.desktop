@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Wolfenstein 2026
+Comment=Retro first-person raycasting shooter
+Exec=wolf
+TryExec=wolf
+Icon=wolfenstein2026
+Terminal=false
+Categories=Game;ActionGame;
