@@ -11,12 +11,52 @@
 #define FLOOR_G     30
 #define FLOOR_B     30
 
-void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, const Texture *wall_tex, const Texture *door_tex, const Texture *exit_tex, float *zbuf, int screen_w, int screen_h, float time) {
+static void render_floor(SDL_Renderer *renderer, const Player *p, const Texture *floor_tex, int screen_w, int screen_h) {
+    float dir_x = cosf(p->angle);
+    float dir_y = sinf(p->angle);
+    float plane_x = -dir_y * FOV_FACTOR;
+    float plane_y = dir_x * FOV_FACTOR;
+    float ray_left_x = dir_x - plane_x;
+    float ray_left_y = dir_y - plane_y;
+    float ray_right_x = dir_x + plane_x;
+    float ray_right_y = dir_y + plane_y;
+    int horizon = screen_h / 2;
+
+    SDL_SetRenderDrawColor(renderer, FLOOR_R, FLOOR_G, FLOOR_B, 255);
+    SDL_RenderDrawLine(renderer, 0, horizon, screen_w - 1, horizon);
+
+    for (int y = horizon + 1; y < screen_h; y++) {
+        float row_dist = (0.5f * screen_h) / (y - horizon);
+        float floor_step_x = row_dist * (ray_right_x - ray_left_x) / screen_w;
+        float floor_step_y = row_dist * (ray_right_y - ray_left_y) / screen_w;
+        float floor_x = p->x + row_dist * ray_left_x;
+        float floor_y = p->y + row_dist * ray_left_y;
+        float shade = 1.0f / (1.0f + row_dist * 0.08f);
+        if (shade < 0.28f) {
+            shade = 0.28f;
+        }
+
+        for (int x = 0; x < screen_w; x++) {
+            unsigned int colour = texture_sample(floor_tex, floor_x, floor_y);
+            unsigned char r = (unsigned char)(((colour >> 16) & 0xFF) * shade);
+            unsigned char g = (unsigned char)(((colour >> 8) & 0xFF) * shade);
+            unsigned char b = (unsigned char)((colour & 0xFF) * shade);
+            SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+            SDL_RenderDrawPoint(renderer, x, y);
+            floor_x += floor_step_x;
+            floor_y += floor_step_y;
+        }
+    }
+}
+
+void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, const Texture *wall_tex, const Texture *floor_tex, const Texture *door_tex, const Texture *exit_tex, float *zbuf, int screen_w, int screen_h, float time) {
     float pulse = 0.5f + 0.5f * sinf(time * 3.0f);
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
     float plane_x = -dir_y * FOV_FACTOR;
     float plane_y = dir_x * FOV_FACTOR;
+
+    render_floor(renderer, p, floor_tex, screen_w, screen_h);
 
     for (int x = 0; x < screen_w; x++) {
         float camera_x = 2.0f * x / screen_w - 1.0f;
@@ -136,8 +176,5 @@ void raycaster_render(SDL_Renderer *renderer, const Map *m, const Player *p, con
             SDL_SetRenderDrawColor(renderer, r, g, b, 255);
             SDL_RenderDrawPoint(renderer, x, y);
         }
-
-        SDL_SetRenderDrawColor(renderer, FLOOR_R, FLOOR_G, FLOOR_B, 255);
-        SDL_RenderDrawLine(renderer, x, draw_end, x, screen_h - 1);
     }
 }

@@ -154,8 +154,42 @@ int main(void) {
         return 1;
     }
 
+    Texture floor_tex[LEVEL_COUNT] = { 0 };
+    const char *floor_paths[LEVEL_COUNT] = {
+        "assets/textures/floor_level1_flagstone.ppm",
+        "assets/textures/floor_level2_stone.ppm",
+        "assets/textures/floor_level3_sandstone.ppm",
+        "assets/textures/floor_level4_blue_slate.ppm",
+        "assets/textures/floor_level5_wood.ppm",
+        "assets/textures/floor_level6_moss_stone.ppm",
+        "assets/textures/floor_level7_military_brick.ppm",
+        "assets/textures/floor_level8_steel.ppm",
+        "assets/textures/floor_level9_bunker.ppm",
+        "assets/textures/floor_level10_obsidian.ppm"
+    };
+    int floor_tex_ready = 1;
+    for (int fl = 0; fl < LEVEL_COUNT; fl++) {
+        if (texture_load_ppm(&floor_tex[fl], floor_paths[fl]) != 0) {
+            if (texture_create(&floor_tex[fl], 64, 64) != 0) {
+                floor_tex_ready = 0;
+                break;
+            }
+            wall_fallbacks[fl](&floor_tex[fl]);
+        }
+    }
+    if (!floor_tex_ready) {
+        for (int fl = 0; fl < LEVEL_COUNT; fl++) { texture_free(&floor_tex[fl]); }
+        for (int wl = 0; wl < LEVEL_COUNT; wl++) { texture_free(&wall_tex[wl]); }
+        map_free(&map);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+
     Texture door_tex;
     if (texture_create(&door_tex, 64, 64) != 0) {
+        for (int fl = LEVEL_COUNT - 1; fl >= 0; fl--) { texture_free(&floor_tex[fl]); }
         for (int wl = LEVEL_COUNT - 1; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
         map_free(&map);
         SDL_DestroyRenderer(renderer);
@@ -168,6 +202,7 @@ int main(void) {
     Texture exit_tex;
     if (texture_create(&exit_tex, 64, 64) != 0) {
         texture_free(&door_tex);
+        for (int fl = LEVEL_COUNT - 1; fl >= 0; fl--) { texture_free(&floor_tex[fl]); }
         for (int wl = LEVEL_COUNT - 1; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
         map_free(&map);
         SDL_DestroyRenderer(renderer);
@@ -684,7 +719,7 @@ int main(void) {
             difficulty_screen_render(renderer, w, h);
         } else {
             int wall_idx = (current_level - 1 < LEVEL_COUNT) ? current_level - 1 : LEVEL_COUNT - 1;
-            raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT, total_time);
+            raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &floor_tex[wall_idx], &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT, total_time);
             sprite_render_all(renderer, &player, &game.enemies, zbuf, enemy_tex, w, h - HUD_HEIGHT);
             item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, &weapon_kit_dual_tex, &weapon_kit_battle_rifle_tex, w, h - HUD_HEIGHT);
             const Texture *weapon_textures[GUN_COUNT] = { [GUN_9MM_HANDGUN] = &pistol_tex, [GUN_DUAL_HANDGUN] = &dual_handgun_tex, [GUN_SHOTGUN] = &shotgun_tex, [GUN_AK47] = &ak47_tex, [GUN_BATTLE_RIFLE] = &battle_rifle_tex, [GUN_KNIFE] = &knife_tex };
@@ -757,6 +792,7 @@ int main(void) {
     }
     texture_free(&exit_tex);
     texture_free(&door_tex);
+    for (int fl = LEVEL_COUNT - 1; fl >= 0; fl--) { texture_free(&floor_tex[fl]); }
     for (int wl = LEVEL_COUNT - 1; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
     map_free(&map);
     SDL_DestroyRenderer(renderer);
