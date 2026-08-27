@@ -39,6 +39,7 @@ typedef struct {
     int active;
     EnemyState state;
     float attack_timer;
+    float attack_flash_timer;
     EnemyType type;
     int walk_frame;
     float walk_timer;

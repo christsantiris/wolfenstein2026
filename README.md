@@ -60,4 +60,9 @@ MIT
 
 ## Roadmap
 - Installers for linux, windows
+- Additional levels
+- New sound effect for ak47
+- Enemy death animation
+- Health and ammo sprite improvements
+- Toggle enemy positions in minimap
 

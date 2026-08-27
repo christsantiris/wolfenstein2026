@@ -217,7 +217,7 @@ int main(void) {
     Texture enemy_tex[ENEMY_TYPE_COUNT][ENEMY_SPRITE_FRAMES];
     int etw = 64, eth = 64;
 
-    /* Build all 17 frames from each enemy type's front-facing source sprite. */
+    /* Build directional frames from each enemy type's two walking poses. */
 #define BUILD_ENEMY_FRAMES(T) \
     do { \
         for (int _d = 0; _d < 8; _d++) { \
@@ -230,9 +230,6 @@ int main(void) {
             texture_create(&enemy_tex[T][ENEMY_SPRITE_WALK_B + _d], etw, eth); \
         } \
         texture_derive_guard_dirs(&enemy_tex[T][ENEMY_SPRITE_WALK_B]); \
-        texture_create(&enemy_tex[T][ENEMY_SPRITE_ATTACK], etw, eth); \
-        memcpy(enemy_tex[T][ENEMY_SPRITE_ATTACK].pixels, enemy_tex[T][4].pixels, (size_t)etw * eth * 3); \
-        texture_generate_guard_walk_b(&enemy_tex[T][ENEMY_SPRITE_ATTACK], 4); \
     } while (0)
 
     const char *enemy_paths[ENEMY_TYPE_COUNT] = {
@@ -249,6 +246,15 @@ int main(void) {
         "assets/sprites/boss_walk.ppm",
         "assets/sprites/shotgun_guard_walk.ppm"
     };
+    const char *enemy_aim_paths[ENEMY_TYPE_COUNT] = {
+        "assets/sprites/guard_aim.ppm",
+        "assets/sprites/officer_aim.ppm",
+        "assets/sprites/ss_aim.ppm",
+        "assets/sprites/boss_aim.ppm",
+        "assets/sprites/shotgun_guard_aim.ppm"
+    };
+    const int enemy_muzzle_y[ENEMY_TYPE_COUNT] = { 14, 13, 14, 15, 14 };
+    const int enemy_flash_radius[ENEMY_TYPE_COUNT] = { 3, 3, 4, 5, 5 };
     for (int t = 0; t < ENEMY_TYPE_COUNT; t++) {
         if (texture_load_ppm(&enemy_tex[t][4], enemy_paths[t]) != 0) {
             texture_create(&enemy_tex[t][4], etw, eth);
@@ -263,6 +269,14 @@ int main(void) {
             memcpy(enemy_tex[t][ENEMY_SPRITE_WALK_B + 4].pixels, enemy_tex[t][4].pixels, (size_t)etw * eth * 3);
             texture_generate_guard_walk_b(&enemy_tex[t][ENEMY_SPRITE_WALK_B + 4], 4);
         }
+        if (texture_load_ppm(&enemy_tex[t][ENEMY_SPRITE_AIM], enemy_aim_paths[t]) != 0) {
+            texture_create(&enemy_tex[t][ENEMY_SPRITE_AIM], etw, eth);
+            memcpy(enemy_tex[t][ENEMY_SPRITE_AIM].pixels, enemy_tex[t][4].pixels, (size_t)etw * eth * 3);
+        }
+        texture_create(&enemy_tex[t][ENEMY_SPRITE_FIRE], etw, eth);
+        memcpy(enemy_tex[t][ENEMY_SPRITE_FIRE].pixels, enemy_tex[t][ENEMY_SPRITE_AIM].pixels, (size_t)etw * eth * 3);
+        texture_generate_guard_walk_b(&enemy_tex[t][ENEMY_SPRITE_FIRE], 4);
+        texture_generate_muzzle_flash(&enemy_tex[t][ENEMY_SPRITE_FIRE], etw / 2, enemy_muzzle_y[t] - 2, enemy_flash_radius[t]);
         BUILD_ENEMY_FRAMES(t);
     }
 
@@ -657,7 +671,7 @@ int main(void) {
     texture_free(&weapon_kit_battle_rifle_tex);
     texture_free(&pistol_tex);
     for (int t = ENEMY_TYPE_COUNT - 1; t >= 0; t--) {
-        for (int d = 7; d >= 0; d--) { texture_free(&enemy_tex[t][d]); }
+        for (int d = ENEMY_SPRITE_FRAMES - 1; d >= 0; d--) { texture_free(&enemy_tex[t][d]); }
     }
     texture_free(&exit_tex);
     texture_free(&door_tex);

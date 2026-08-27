@@ -26,6 +26,7 @@ void texture_generate_exit_door(Texture *t);
 void texture_generate_guard_dir(Texture *t, int dir);
 void texture_generate_guard_walk_b(Texture *t, int dir);
 void texture_generate_guard_attack(Texture *t);
+void texture_generate_muzzle_flash(Texture *t, int cx, int cy, int radius);
 void texture_generate_boss_dir(Texture *t, int dir);
 void texture_derive_guard_dirs(Texture guard_tex[8]);
 int  texture_recolor_uniform(Texture *dst, const Texture *src, unsigned char ur, unsigned char ug, unsigned char ub);
