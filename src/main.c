@@ -168,6 +168,18 @@ int main(void) {
     texture_create(&health_pickup_tex, 64, 64);
     texture_generate_health_pickup(&health_pickup_tex);
 
+    Texture face_tex[HUD_FACE_COUNT] = { 0 };
+    const char *face_paths[HUD_FACE_COUNT] = {
+        [HUD_FACE_HEALTHY] = "assets/sprites/player_face_healthy.ppm",
+        [HUD_FACE_WOUNDED] = "assets/sprites/player_face_wounded.ppm",
+        [HUD_FACE_INJURED] = "assets/sprites/player_face_injured.ppm",
+        [HUD_FACE_CRITICAL] = "assets/sprites/player_face_critical.ppm",
+        [HUD_FACE_DEAD] = "assets/sprites/player_face_dead.ppm"
+    };
+    for (int f = 0; f < HUD_FACE_COUNT; f++) {
+        texture_load_ppm(&face_tex[f], face_paths[f]);
+    }
+
     Texture weapon_kit_tex;
     texture_create(&weapon_kit_tex, 64, 64);
     texture_generate_weapon_kit(&weapon_kit_tex);
@@ -641,7 +653,7 @@ int main(void) {
                     enemies_remaining++;
                 }
             }
-            hud_render(renderer, w, h, game.health, game.ammo, game.reserve_ammo_per_gun[game.current_weapon.type], game.score, enemies_remaining);
+            hud_render(renderer, w, h, game.health, game.ammo, game.reserve_ammo_per_gun[game.current_weapon.type], game.score, enemies_remaining, face_tex);
             if (game.level_clear_timer > 0.0f) {
                 hud_draw_level_clear(renderer, w, h - HUD_HEIGHT, game.level_clear_timer);
             } else if (enemy_list_all_dead(&game.enemies)) {
@@ -690,6 +702,7 @@ int main(void) {
     texture_free(&weapon_kit_dual_tex);
     texture_free(&weapon_kit_battle_rifle_tex);
     texture_free(&pistol_tex);
+    for (int f = HUD_FACE_COUNT - 1; f >= 0; f--) { texture_free(&face_tex[f]); }
     for (int t = ENEMY_TYPE_COUNT - 1; t >= 0; t--) {
         for (int d = ENEMY_SPRITE_FRAMES - 1; d >= 0; d--) { texture_free(&enemy_tex[t][d]); }
     }
