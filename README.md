@@ -70,6 +70,7 @@ https://pixabay.com
 ## Roadmap
 - Installers for linux, windows
 - Additional levels
-- Wall texture improvements
-- Floor texture improvements
+- Mini bosses
+- Additional weapons (grenades?)
+- Better weapon/enemy power scaling with selected difficulty
 

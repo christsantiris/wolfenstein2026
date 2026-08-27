@@ -111,11 +111,38 @@ int main(void) {
     game_init(&game);
 
     Texture wall_tex[LEVEL_COUNT] = { 0 };
+    const char *wall_paths[LEVEL_COUNT] = {
+        "assets/textures/wall_level1_brick.ppm",
+        "assets/textures/wall_level2_stone.ppm",
+        "assets/textures/wall_level3_sandstone.ppm",
+        "assets/textures/wall_level4_blue_brick.ppm",
+        "assets/textures/wall_level5_wood.ppm",
+        "assets/textures/wall_level6_moss_stone.ppm",
+        "assets/textures/wall_level7_military_brick.ppm",
+        "assets/textures/wall_level8_steel.ppm",
+        "assets/textures/wall_level9_bunker.ppm",
+        "assets/textures/wall_level10_obsidian.ppm"
+    };
+    void (*wall_fallbacks[LEVEL_COUNT])(Texture *) = {
+        texture_generate_brick,
+        texture_generate_stone,
+        texture_generate_sandstone,
+        texture_generate_blue_brick,
+        texture_generate_wood,
+        texture_generate_moss_stone,
+        texture_generate_red_blue_brick,
+        texture_generate_metal_panels,
+        texture_generate_command_bunker,
+        texture_generate_obsidian_command
+    };
     int wall_tex_ready = 1;
     for (int wl = 0; wl < LEVEL_COUNT; wl++) {
-        if (texture_create(&wall_tex[wl], 64, 64) != 0) {
-            wall_tex_ready = 0;
-            break;
+        if (texture_load_ppm(&wall_tex[wl], wall_paths[wl]) != 0) {
+            if (texture_create(&wall_tex[wl], 64, 64) != 0) {
+                wall_tex_ready = 0;
+                break;
+            }
+            wall_fallbacks[wl](&wall_tex[wl]);
         }
     }
     if (!wall_tex_ready) {
@@ -126,16 +153,6 @@ int main(void) {
         SDL_Quit();
         return 1;
     }
-    texture_generate_brick(&wall_tex[0]);
-    texture_generate_stone(&wall_tex[1]);
-    texture_generate_sandstone(&wall_tex[2]);
-    texture_generate_blue_brick(&wall_tex[3]);
-    texture_generate_wood(&wall_tex[4]);
-    texture_generate_moss_stone(&wall_tex[5]);
-    texture_generate_red_blue_brick(&wall_tex[6]);
-    texture_generate_metal_panels(&wall_tex[7]);
-    texture_generate_command_bunker(&wall_tex[8]);
-    texture_generate_obsidian_command(&wall_tex[9]);
 
     Texture door_tex;
     if (texture_create(&door_tex, 64, 64) != 0) {
