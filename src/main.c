@@ -663,7 +663,7 @@ int main(void) {
             int knife_visible = game.current_weapon.type == GUN_KNIFE || game.pistol_whip_timer > 0.0f;
             const Texture *weapon_tex = knife_visible ? &knife_tex : weapon_textures[game.current_weapon.type];
             float shot_timer = knife_visible ? 0.0f : game.shot_timer;
-            weapon_render(renderer, weapon_tex, shot_timer, game.pistol_whip_timer, w, h - HUD_HEIGHT);
+            weapon_render(renderer, &game.current_weapon, weapon_tex, game.ammo, shot_timer, game.shot_cooldown, game.pistol_whip_timer, w, h - HUD_HEIGHT);
             if (menu.minimap_on) {
                 minimap_render(renderer, &map, &player, &game.enemies, menu.enemy_markers_on);
             }

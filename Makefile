@@ -48,7 +48,7 @@ debug-knife:
 	./build-debug/wolf
 
 debug-level:
-	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=2 -DDEBUG_START_WEAPON=
+	cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug -DDEBUG_START_LEVEL=1 -DDEBUG_START_WEAPON= -DDEBUG_AK47=ON
 	cmake --build build-debug
 	./build-debug/wolf
 
