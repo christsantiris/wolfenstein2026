@@ -12,7 +12,7 @@
 #endif
 
 #define SAVE_MAGIC   "WOLF2026"
-#define SAVE_VERSION 8
+#define SAVE_VERSION 9
 #define SAVE_GUN_COUNT_V7 5
 
 static void create_save_directory(void) {
@@ -84,6 +84,7 @@ int save_game(int slot, int level, const Player *p, const GameState *g, const Ma
         fwrite(&etype, sizeof(etype), 1, f);
         fwrite(&e->walk_frame, sizeof(e->walk_frame), 1, f);
         fwrite(&e->walk_timer, sizeof(e->walk_timer), 1, f);
+        fwrite(&e->reinforcements_called, sizeof(e->reinforcements_called), 1, f);
     }
 
     fwrite(&g->items.count, sizeof(g->items.count), 1, f);
@@ -134,6 +135,9 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
     if (fread(level, sizeof(*level), 1, f) != 1) {
         fclose(f);
         return -1;
+    }
+    if (ver < 9 && *level >= 6) {
+        (*level)++;
     }
 
     char map_path[64];
@@ -186,6 +190,11 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
         e->type = (EnemyType)etype;
         if (fread(&e->walk_frame, sizeof(e->walk_frame), 1, f) != 1) { fclose(f); return -1; }
         if (fread(&e->walk_timer, sizeof(e->walk_timer), 1, f) != 1) { fclose(f); return -1; }
+        if (ver >= 9) {
+            if (fread(&e->reinforcements_called, sizeof(e->reinforcements_called), 1, f) != 1) { fclose(f); return -1; }
+        } else {
+            e->reinforcements_called = 0;
+        }
     }
 
     if (fread(&g->items.count, sizeof(g->items.count), 1, f) != 1) { fclose(f); return -1; }

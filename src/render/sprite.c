@@ -41,7 +41,12 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
 
         int screen_x = (int)((screen_w / 2) * (1.0f + transform_x / transform_y));
 
-        float sprite_scale = (e->type == ENEMY_TYPE_BOSS) ? 1.35f : 1.0f;
+        float sprite_scale = 1.0f;
+        if (e->type == ENEMY_TYPE_BOSS) {
+            sprite_scale = 1.35f;
+        } else if (e->type == ENEMY_TYPE_MINIBOSS) {
+            sprite_scale = 1.18f;
+        }
         int sprite_h = abs((int)(screen_h * sprite_scale / transform_y));
         int draw_y0 = (screen_h - sprite_h) / 2;
         int draw_y1 = (screen_h + sprite_h) / 2;
@@ -75,7 +80,8 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
             }
         }
 
-        if (e->active && e->type == ENEMY_TYPE_BOSS && screen_x >= 0 && screen_x < screen_w && transform_y < zbuf[screen_x]) {
+        int is_boss = e->type == ENEMY_TYPE_BOSS || e->type == ENEMY_TYPE_MINIBOSS;
+        if (e->active && is_boss && screen_x >= 0 && screen_x < screen_w && transform_y < zbuf[screen_x]) {
             int max_health = enemy_max_health(e->type, difficulty);
 
             int bar_w = sprite_w * 3 / 5;

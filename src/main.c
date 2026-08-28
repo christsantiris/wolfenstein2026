@@ -22,7 +22,7 @@
 
 #define SCREEN_W 800
 #define SCREEN_H 600
-#define LEVEL_COUNT 10
+#define LEVEL_COUNT 11
 
 typedef enum {
     APP_LANDING,
@@ -119,11 +119,12 @@ int main(int argc, char **argv) {
         "assets/textures/wall_level3_sandstone.ppm",
         "assets/textures/wall_level4_blue_brick.ppm",
         "assets/textures/wall_level5_wood.ppm",
-        "assets/textures/wall_level6_moss_stone.ppm",
-        "assets/textures/wall_level7_military_brick.ppm",
-        "assets/textures/wall_level8_steel.ppm",
-        "assets/textures/wall_level9_bunker.ppm",
-        "assets/textures/wall_level10_obsidian.ppm"
+        "assets/textures/wall_level6_command_bunker.ppm",
+        "assets/textures/wall_level7_moss_stone.ppm",
+        "assets/textures/wall_level8_military_brick.ppm",
+        "assets/textures/wall_level9_steel.ppm",
+        "assets/textures/wall_level10_bunker.ppm",
+        "assets/textures/wall_level11_obsidian.ppm"
     };
     void (*wall_fallbacks[LEVEL_COUNT])(Texture *) = {
         texture_generate_brick,
@@ -131,6 +132,7 @@ int main(int argc, char **argv) {
         texture_generate_sandstone,
         texture_generate_blue_brick,
         texture_generate_wood,
+        texture_generate_command_bunker,
         texture_generate_moss_stone,
         texture_generate_red_blue_brick,
         texture_generate_metal_panels,
@@ -163,11 +165,12 @@ int main(int argc, char **argv) {
         "assets/textures/floor_level3_sandstone.ppm",
         "assets/textures/floor_level4_blue_slate.ppm",
         "assets/textures/floor_level5_wood.ppm",
-        "assets/textures/floor_level6_moss_stone.ppm",
-        "assets/textures/floor_level7_military_brick.ppm",
-        "assets/textures/floor_level8_steel.ppm",
-        "assets/textures/floor_level9_bunker.ppm",
-        "assets/textures/floor_level10_obsidian.ppm"
+        "assets/textures/floor_level6_command_bunker.ppm",
+        "assets/textures/floor_level7_moss_stone.ppm",
+        "assets/textures/floor_level8_military_brick.ppm",
+        "assets/textures/floor_level9_steel.ppm",
+        "assets/textures/floor_level10_bunker.ppm",
+        "assets/textures/floor_level11_obsidian.ppm"
     };
     int floor_tex_ready = 1;
     for (int fl = 0; fl < LEVEL_COUNT; fl++) {
@@ -345,35 +348,39 @@ int main(int argc, char **argv) {
         "assets/sprites/officer_front.ppm",
         "assets/sprites/ss_front.ppm",
         "assets/sprites/boss_front.ppm",
-        "assets/sprites/shotgun_guard_front.ppm"
+        "assets/sprites/shotgun_guard_front.ppm",
+        "assets/sprites/miniboss_front.ppm"
     };
     const char *enemy_walk_paths[ENEMY_TYPE_COUNT] = {
         "assets/sprites/guard_walk.ppm",
         "assets/sprites/officer_walk.ppm",
         "assets/sprites/ss_walk.ppm",
         "assets/sprites/boss_walk.ppm",
-        "assets/sprites/shotgun_guard_walk.ppm"
+        "assets/sprites/shotgun_guard_walk.ppm",
+        "assets/sprites/miniboss_walk.ppm"
     };
     const char *enemy_aim_paths[ENEMY_TYPE_COUNT] = {
         "assets/sprites/guard_aim.ppm",
         "assets/sprites/officer_aim.ppm",
         "assets/sprites/ss_aim.ppm",
         "assets/sprites/boss_aim.ppm",
-        "assets/sprites/shotgun_guard_aim.ppm"
+        "assets/sprites/shotgun_guard_aim.ppm",
+        "assets/sprites/miniboss_aim.ppm"
     };
     const char *enemy_corpse_paths[ENEMY_TYPE_COUNT] = {
         "assets/sprites/guard_corpse.ppm",
         "assets/sprites/officer_corpse.ppm",
         "assets/sprites/ss_corpse.ppm",
         "assets/sprites/boss_corpse.ppm",
-        "assets/sprites/shotgun_guard_corpse.ppm"
+        "assets/sprites/shotgun_guard_corpse.ppm",
+        "assets/sprites/miniboss_corpse.ppm"
     };
-    const int enemy_muzzle_y[ENEMY_TYPE_COUNT] = { 14, 13, 14, 15, 14 };
-    const int enemy_flash_radius[ENEMY_TYPE_COUNT] = { 3, 3, 4, 5, 5 };
+    const int enemy_muzzle_y[ENEMY_TYPE_COUNT] = { 14, 13, 14, 15, 14, 18 };
+    const int enemy_flash_radius[ENEMY_TYPE_COUNT] = { 3, 3, 4, 5, 5, 5 };
     for (int t = 0; t < ENEMY_TYPE_COUNT; t++) {
         if (texture_load_ppm(&enemy_tex[t][4], enemy_paths[t]) != 0) {
             texture_create(&enemy_tex[t][4], etw, eth);
-            if (t == ENEMY_TYPE_BOSS) {
+            if (t == ENEMY_TYPE_BOSS || t == ENEMY_TYPE_MINIBOSS) {
                 texture_generate_boss_dir(&enemy_tex[t][4], 4);
             } else {
                 texture_generate_guard_dir(&enemy_tex[t][4], 4);
@@ -433,6 +440,7 @@ int main(int argc, char **argv) {
     music_load(&level_music[7], "assets/music/level8theme.mp3");
     music_load(&level_music[8], "assets/music/level9theme.mp3");
     music_load(&level_music[9], "assets/music/level10theme.mp3");
+    music_load(&level_music[10], "assets/music/level11theme.mp3");
 
     HighScoreTable hs_table;
     highscore_load(&hs_table);
