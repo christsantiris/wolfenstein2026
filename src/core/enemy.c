@@ -40,6 +40,22 @@ static int enemy_has_los(const Enemy *e, const Player *p, const Map *m) {
     return 1;
 }
 
+static int enemy_can_stand(const Map *m, float x, float y, float radius) {
+    if (map_is_wall(m, (int)(x - radius), (int)(y - radius))) {
+        return 0;
+    }
+    if (map_is_wall(m, (int)(x + radius), (int)(y - radius))) {
+        return 0;
+    }
+    if (map_is_wall(m, (int)(x - radius), (int)(y + radius))) {
+        return 0;
+    }
+    if (map_is_wall(m, (int)(x + radius), (int)(y + radius))) {
+        return 0;
+    }
+    return 1;
+}
+
 static const float SPEED_MULT[4]  = { 0.70f, 1.0f, 1.20f, 1.50f };
 static const float SIGHT_MULT[4]  = { 0.70f, 1.0f, 1.30f, 1.60f };
 static const float HEALTH_MULT[4] = { 0.6f, 1.0f, 1.2f, 1.3f };
@@ -111,10 +127,11 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficul
             e->angle = atan2f(dy, dx);
             float nx = e->x + (dx / dist) * speed * dt;
             float ny = e->y + (dy / dist) * speed * dt;
-            if (!map_is_wall(m, (int)nx, (int)e->y)) {
+            float collision_radius = e->type == ENEMY_TYPE_MINIBOSS ? 0.48f : 0.0f;
+            if (enemy_can_stand(m, nx, e->y, collision_radius)) {
                 e->x = nx;
             }
-            if (!map_is_wall(m, (int)e->x, (int)ny)) {
+            if (enemy_can_stand(m, e->x, ny, collision_radius)) {
                 e->y = ny;
             }
         }
