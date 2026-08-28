@@ -538,6 +538,11 @@ int main(int argc, char **argv) {
                     game.score = 0;
                     game.difficulty = (int)d;
                     menu.difficulty = (int)d;
+                    menu.music_on = 1;
+                    menu.sound_on = 1;
+                    menu.minimap_on = 1;
+                    menu.enemy_markers_on = 0;
+                    sound_set_enabled(menu.sound_on);
                     start_game(&map, &player, &game, current_level);
                     music_play(&level_music[current_level - 1]);
                     game_over = 0;
