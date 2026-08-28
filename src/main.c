@@ -755,7 +755,7 @@ int main(int argc, char **argv) {
         } else {
             int wall_idx = (current_level - 1 < LEVEL_COUNT) ? current_level - 1 : LEVEL_COUNT - 1;
             raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &floor_tex[wall_idx], &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT, total_time);
-            sprite_render_all(renderer, &player, &game.enemies, zbuf, enemy_tex, w, h - HUD_HEIGHT);
+            sprite_render_all(renderer, &player, &game.enemies, zbuf, enemy_tex, game.difficulty, w, h - HUD_HEIGHT);
             item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, &weapon_kit_dual_tex, &weapon_kit_battle_rifle_tex, w, h - HUD_HEIGHT);
             int knife_visible = game.current_weapon.type == GUN_KNIFE || game.pistol_whip_timer > 0.0f;
             const Texture *weapon_tex = knife_visible ? &knife_tex : weapon_textures[game.current_weapon.type];

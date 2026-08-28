@@ -42,6 +42,16 @@ static int enemy_has_los(const Enemy *e, const Player *p, const Map *m) {
 static const float SPEED_MULT[4]  = { 0.70f, 1.0f, 1.20f, 1.50f };
 static const float SIGHT_MULT[4]  = { 0.70f, 1.0f, 1.30f, 1.60f };
 static const float HEALTH_MULT[4] = { 0.6f, 1.0f, 1.2f, 1.3f };
+static const int BOSS_MAX_HEALTH[4] = { 1200, 1600, 2000, 2400 };
+
+int enemy_max_health(EnemyType type, int difficulty) {
+    int d = difficulty < 4 ? difficulty : 3;
+    if (type == ENEMY_TYPE_BOSS) {
+        return BOSS_MAX_HEALTH[d];
+    }
+    int health = (int)(enemy_def(type)->max_health * HEALTH_MULT[d]);
+    return health > 0 ? health : 1;
+}
 
 int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficulty) {
     if (!e->active) {
@@ -54,7 +64,7 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficul
     float attack_cooldown = def->attack_cooldown;
 
     if (e->type == ENEMY_TYPE_BOSS) {
-        int phase_health = (int)(def->max_health * HEALTH_MULT[d] * 0.5f);
+        int phase_health = enemy_max_health(e->type, difficulty) / 2;
         if (e->health <= phase_health) {
             speed *= 1.35f;
             attack_cooldown *= 0.65f;
@@ -138,10 +148,7 @@ static void place(EnemyList *el, float x, float y, EnemyType type, int difficult
     e->x = x;
     e->y = y;
     e->angle = (float)(rand() % 8) * ((float)M_PI / 4.0f);
-    int base_hp = enemy_def(type)->max_health;
-    float mult = HEALTH_MULT[difficulty < 4 ? difficulty : 3];
-    e->health = (int)(base_hp * mult);
-    if (e->health < 1) { e->health = 1; }
+    e->health = enemy_max_health(type, difficulty);
     e->active = 1;
     e->type = type;
     e->state = ENEMY_IDLE;

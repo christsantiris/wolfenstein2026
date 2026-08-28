@@ -4,7 +4,7 @@
 
 #define FOV_FACTOR 0.66f
 
-void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, const float *zbuf, const Texture enemy_tex[][ENEMY_SPRITE_FRAMES], int screen_w, int screen_h) {
+void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, const float *zbuf, const Texture enemy_tex[][ENEMY_SPRITE_FRAMES], int difficulty, int screen_w, int screen_h) {
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
     float plane_x = -dir_y * FOV_FACTOR;
@@ -76,11 +76,7 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
         }
 
         if (e->active && e->type == ENEMY_TYPE_BOSS && screen_x >= 0 && screen_x < screen_w && transform_y < zbuf[screen_x]) {
-            const EnemyDef *def = enemy_def(e->type);
-            int max_health = def->max_health;
-            if (e->health > max_health) {
-                max_health = e->health;
-            }
+            int max_health = enemy_max_health(e->type, difficulty);
 
             int bar_w = sprite_w * 3 / 5;
             if (bar_w < 36) { bar_w = 36; }
