@@ -18,19 +18,29 @@ A first-person shooter inspired by *Wolfenstein 3D* by id Software. Navigate maz
 *Wolfenstein 2026* is a raycasting first-person shooter built in C with SDL2. Inspired by the 1992 id Software classic, it features a fast grid-based raycasting engine, textured walls, and enemy AI — faithful to the original in feel while running natively on modern hardware. This game is for everyone who gaming left behind in 1999. You don't have to be a gamer to play this game. It is fun and easy to play. 
 
 ## Screenshots
-<img width="797" height="627" alt="Screenshot 2026-08-26 at 9 59 56 PM" src="https://github.com/user-attachments/assets/583dba77-bec5-4cb4-be1a-7bbfd9728696" />
+<img width="1808" height="968" alt="image" src="https://github.com/user-attachments/assets/7051036f-b3b6-47cf-9d8c-3bc92a2c3cb4" />
 
-<img width="797" height="627" alt="image" src="https://github.com/user-attachments/assets/3bc83ec6-2cdf-4857-a19a-4566fecf26b5" />
+<img width="3836" height="2046" alt="image" src="https://github.com/user-attachments/assets/2ff43031-d01d-4a09-a940-0516335750eb" />
 
-<img width="797" height="627" alt="image" src="https://github.com/user-attachments/assets/22d17ca8-eac0-43b6-87d3-b995804aa1af" />
+<img width="3838" height="2040" alt="image" src="https://github.com/user-attachments/assets/1b866d45-eeb1-4a88-a9e1-12ee687de128" />
 
-<img width="797" height="627" alt="image" src="https://github.com/user-attachments/assets/d1e7f87b-e671-48a4-be15-97a350c54c7c" />
+<img width="3832" height="2042" alt="image" src="https://github.com/user-attachments/assets/c2bc6051-26dd-4e26-a43b-47dafddddbd2" />
 
-<img width="797" height="627" alt="image" src="https://github.com/user-attachments/assets/3a01b0ca-f311-4dc4-957f-ca0f467c5522" />
+<img width="3838" height="2036" alt="image" src="https://github.com/user-attachments/assets/c19d3fd6-2720-4b86-a105-c2cde09f59c5" />
 
-<img width="797" height="627" alt="image" src="https://github.com/user-attachments/assets/08d364d7-11ec-40a1-8673-bce074ba79e0" />
+<img width="3842" height="2052" alt="image" src="https://github.com/user-attachments/assets/dbb94491-e350-4f6b-aa60-549e17529613" />
 
-<img width="1602" height="1198" alt="image" src="https://github.com/user-attachments/assets/7deb1d5f-2593-4e39-aca8-acb1a447ddee" />
+<img width="3838" height="2052" alt="image" src="https://github.com/user-attachments/assets/5aac2d96-650b-4d12-920f-a894fd01456f" />
+
+<img width="3836" height="2044" alt="image" src="https://github.com/user-attachments/assets/044e41a9-833e-4162-b575-d48651ebd505" />
+
+<img width="3836" height="2056" alt="image" src="https://github.com/user-attachments/assets/abbc5b72-5212-402c-ba95-3128afc8cc4d" />
+
+<img width="870" height="270" alt="image" src="https://github.com/user-attachments/assets/9f722407-4515-4d29-9161-c4c81442f58b" />
+
+<img width="3844" height="2056" alt="image" src="https://github.com/user-attachments/assets/d5b757f6-935d-425a-84d8-3405a5816227" />
+
+<img width="3824" height="2048" alt="image" src="https://github.com/user-attachments/assets/0248e1c2-b32d-4272-82eb-f13f867950d7" />
 
 ## Building and Running
 
