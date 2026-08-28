@@ -79,5 +79,4 @@ https://pixabay.com
 
 ## Roadmap
 - Additional weapons (grenades?)
-- Better weapon/enemy power scaling with selected difficulty
 

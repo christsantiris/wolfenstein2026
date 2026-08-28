@@ -669,7 +669,7 @@ int main(int argc, char **argv) {
                         if (game.current_weapon.type == GUN_KNIFE) {
                             continue;
                         }
-                        game.reserve_ammo_per_gun[game.current_weapon.type] += AMMO_PICKUP_AMOUNT;
+                        game.reserve_ammo_per_gun[game.current_weapon.type] += game_ammo_pickup_amount(game.difficulty);
                         if (game.reserve_ammo_per_gun[game.current_weapon.type] > AMMO_RESERVE_MAX) {
                             game.reserve_ammo_per_gun[game.current_weapon.type] = AMMO_RESERVE_MAX;
                         }
@@ -682,7 +682,7 @@ int main(int argc, char **argv) {
                         if (!game.has_weapon[GUN_DUAL_HANDGUN]) {
                             game.has_weapon[GUN_DUAL_HANDGUN] = 1;
                             game.ammo_per_gun[GUN_DUAL_HANDGUN] = weapon_def(GUN_DUAL_HANDGUN)->max_ammo;
-                            game.reserve_ammo_per_gun[GUN_DUAL_HANDGUN] = AMMO_RESERVE_MAX;
+                            game.reserve_ammo_per_gun[GUN_DUAL_HANDGUN] = game_weapon_unlock_reserve(weapon_def(GUN_DUAL_HANDGUN), game.difficulty);
                             game.ammo_per_gun[game.current_weapon.type] = game.ammo;
                             game.current_weapon = *weapon_def(GUN_DUAL_HANDGUN);
                             game.ammo = game.ammo_per_gun[GUN_DUAL_HANDGUN];
@@ -694,7 +694,7 @@ int main(int argc, char **argv) {
                         if (!game.has_weapon[GUN_SHOTGUN]) {
                             game.has_weapon[GUN_SHOTGUN] = 1;
                             game.ammo_per_gun[GUN_SHOTGUN] = weapon_def(GUN_SHOTGUN)->max_ammo;
-                            game.reserve_ammo_per_gun[GUN_SHOTGUN] = AMMO_RESERVE_MAX;
+                            game.reserve_ammo_per_gun[GUN_SHOTGUN] = game_weapon_unlock_reserve(weapon_def(GUN_SHOTGUN), game.difficulty);
                             game.ammo_per_gun[game.current_weapon.type] = game.ammo;
                             game.current_weapon = *weapon_def(GUN_SHOTGUN);
                             game.ammo = game.ammo_per_gun[GUN_SHOTGUN];
@@ -706,7 +706,7 @@ int main(int argc, char **argv) {
                         if (!game.has_weapon[GUN_AK47]) {
                             game.has_weapon[GUN_AK47] = 1;
                             game.ammo_per_gun[GUN_AK47] = weapon_def(GUN_AK47)->max_ammo;
-                            game.reserve_ammo_per_gun[GUN_AK47] = AMMO_RESERVE_MAX;
+                            game.reserve_ammo_per_gun[GUN_AK47] = game_weapon_unlock_reserve(weapon_def(GUN_AK47), game.difficulty);
                             game.ammo_per_gun[game.current_weapon.type] = game.ammo;
                             game.current_weapon = *weapon_def(GUN_AK47);
                             game.ammo = game.ammo_per_gun[GUN_AK47];
@@ -718,7 +718,7 @@ int main(int argc, char **argv) {
                         if (!game.has_weapon[GUN_BATTLE_RIFLE]) {
                             game.has_weapon[GUN_BATTLE_RIFLE] = 1;
                             game.ammo_per_gun[GUN_BATTLE_RIFLE] = weapon_def(GUN_BATTLE_RIFLE)->max_ammo;
-                            game.reserve_ammo_per_gun[GUN_BATTLE_RIFLE] = AMMO_RESERVE_MAX;
+                            game.reserve_ammo_per_gun[GUN_BATTLE_RIFLE] = game_weapon_unlock_reserve(weapon_def(GUN_BATTLE_RIFLE), game.difficulty);
                             game.ammo_per_gun[game.current_weapon.type] = game.ammo;
                             game.current_weapon = *weapon_def(GUN_BATTLE_RIFLE);
                             game.ammo = game.ammo_per_gun[GUN_BATTLE_RIFLE];

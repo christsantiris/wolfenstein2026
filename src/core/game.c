@@ -44,6 +44,19 @@ const WeaponDef *weapon_def(GunType type) {
     return ALL_WEAPONS[type];
 }
 
+int game_ammo_pickup_amount(int difficulty) {
+    static const int AMOUNTS[4] = { 12, 10, 8, 6 };
+    int d = difficulty >= 0 && difficulty < 4 ? difficulty : 3;
+    return AMOUNTS[d];
+}
+
+int game_weapon_unlock_reserve(const WeaponDef *weapon, int difficulty) {
+    static const int SPARE_MAGAZINES[4] = { 3, 2, 1, 1 };
+    int d = difficulty >= 0 && difficulty < 4 ? difficulty : 3;
+    int reserve = weapon->max_ammo * SPARE_MAGAZINES[d];
+    return reserve < AMMO_RESERVE_MAX ? reserve : AMMO_RESERVE_MAX;
+}
+
 void game_init(GameState *g) {
     memset(g->has_weapon, 0, sizeof(g->has_weapon));
     memset(g->ammo_per_gun, 0, sizeof(g->ammo_per_gun));

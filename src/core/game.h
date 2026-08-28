@@ -5,7 +5,6 @@
 #include "core/item.h"
 #include "core/player.h"
 
-#define AMMO_PICKUP_AMOUNT  8
 #define AMMO_RESERVE_MAX    99
 
 typedef enum {
@@ -51,6 +50,8 @@ typedef struct {
 } GameState;
 
 const WeaponDef *weapon_def(GunType type);
+int game_ammo_pickup_amount(int difficulty);
+int game_weapon_unlock_reserve(const WeaponDef *weapon, int difficulty);
 void game_init(GameState *g);
 int  game_shoot(GameState *g, const Player *p);
 int  game_pistol_whip(GameState *g, const Player *p);
