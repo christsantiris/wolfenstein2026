@@ -5,11 +5,23 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#ifdef _WIN32
+#include <direct.h>
+#else
 #include <sys/stat.h>
+#endif
 
 #define SAVE_MAGIC   "WOLF2026"
 #define SAVE_VERSION 8
 #define SAVE_GUN_COUNT_V7 5
+
+static void create_save_directory(void) {
+#ifdef _WIN32
+    _mkdir("saves");
+#else
+    mkdir("saves", 0755);
+#endif
+}
 
 static void save_path(int slot, char *buf, int bufsz) {
     snprintf(buf, bufsz, "saves/slot%d.sav", slot);
@@ -27,7 +39,7 @@ int save_slot_exists(int slot) {
 }
 
 int save_game(int slot, int level, const Player *p, const GameState *g, const Map *m, const SaveSettings *s) {
-    mkdir("saves", 0755);
+    create_save_directory();
     char path[64];
     save_path(slot, path, sizeof(path));
 

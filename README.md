@@ -4,7 +4,7 @@ A first-person shooter inspired by *Wolfenstein 3D* by id Software. Navigate maz
 
 ## Table of Contents
 - [Overview](#overview)
-- [Screenshot](#screenshot)
+- [Screenshots](#screenshots)
 - [Building and Running](#building-and-running)
   - [Compile the Game](#compile-the-game)
   - [Run the Game](#run-the-game)
@@ -15,7 +15,7 @@ A first-person shooter inspired by *Wolfenstein 3D* by id Software. Navigate maz
 - [Roadmap](#roadmap)
 
 ## Overview
-*Wolfenstein 2026* is a raycasting first-person shooter built in C with SDL2. Inspired by the 1992 id Software classic, it features a fast grid-based raycasting engine, textured walls, and enemy AI — faithful to the original in feel while running natively on modern hardware.
+*Wolfenstein 2026* is a raycasting first-person shooter built in C with SDL2. Inspired by the 1992 id Software classic, it features a fast grid-based raycasting engine, textured walls, and enemy AI — faithful to the original in feel while running natively on modern hardware. This game is for everyone who gaming left behind in 1999. You don't have to be a gamer to play this game. It is fun and easy to play. 
 
 ## Screenshots
 <img width="797" height="627" alt="Screenshot 2026-08-26 at 9 59 56 PM" src="https://github.com/user-attachments/assets/583dba77-bec5-4cb4-be1a-7bbfd9728696" />
@@ -31,6 +31,8 @@ A first-person shooter inspired by *Wolfenstein 3D* by id Software. Navigate maz
 <img width="797" height="627" alt="image" src="https://github.com/user-attachments/assets/08d364d7-11ec-40a1-8673-bce074ba79e0" />
 
 <img width="1602" height="1198" alt="image" src="https://github.com/user-attachments/assets/7deb1d5f-2593-4e39-aca8-acb1a447ddee" />
+
+## Building and Running
 
 ## Compile the Game
 To compile and launch the game run `cmake --build build` in the root directory.
@@ -68,7 +70,6 @@ MIT
 https://pixabay.com
 
 ## Roadmap
-- Installers windows
 - Additional levels
 - Mini bosses
 - Additional weapons (grenades?)
