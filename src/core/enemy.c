@@ -56,11 +56,11 @@ static int enemy_can_stand(const Map *m, float x, float y, float radius) {
     return 1;
 }
 
-static const float SPEED_MULT[4]  = { 0.70f, 1.0f, 1.20f, 1.50f };
-static const float SIGHT_MULT[4]  = { 0.70f, 1.0f, 1.30f, 1.60f };
-static const float HEALTH_MULT[4] = { 0.6f, 1.0f, 1.2f, 1.3f };
-static const int BOSS_MAX_HEALTH[4] = { 1200, 1600, 2000, 2400 };
-static const int MINIBOSS_MAX_HEALTH[4] = { 700, 950, 1200, 1500 };
+static const float SPEED_MULT[4] = { 0.80f, 1.0f, 1.15f, 1.30f };
+static const float SIGHT_MULT[4] = { 0.80f, 1.0f, 1.20f, 1.40f };
+static const float HEALTH_MULT[4] = { 0.75f, 1.0f, 1.15f, 1.30f };
+static const int BOSS_MAX_HEALTH[4] = { 1200, 1600, 1840, 2080 };
+static const int MINIBOSS_MAX_HEALTH[4] = { 712, 950, 1092, 1235 };
 
 int enemy_max_health(EnemyType type, int difficulty) {
     int d = difficulty < 4 ? difficulty : 3;
@@ -160,7 +160,7 @@ int enemy_list_all_dead(const EnemyList *el) {
     return 1;
 }
 
-static const int   COUNT_BONUS[4] = { -1,   0,    2,    5   };
+static const int COUNT_BONUS[4] = { -1, 0, 2, 4 };
 
 static void place(EnemyList *el, float x, float y, EnemyType type, int difficulty) {
     if (el->count >= MAX_ENEMIES) {

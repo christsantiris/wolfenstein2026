@@ -281,7 +281,7 @@ int game_update_enemies(GameState *g, const Player *p, const Map *m, float dt) {
     for (int i = 0; i < g->enemies.count; i++) {
         Enemy *e = &g->enemies.enemies[i];
         EnemyState prev = e->state;
-        static const float DAMAGE_MULT[4] = { 0.5f, 1.0f, 1.3f, 2.5f };
+        static const float DAMAGE_MULT[4] = { 0.6f, 1.0f, 1.35f, 1.9f };
         int dmg = enemy_update(e, p, m, dt, g->difficulty);
         if (dmg > 0) {
             int d = g->difficulty < 4 ? g->difficulty : 3;
