@@ -78,8 +78,6 @@ MIT
 https://pixabay.com
 
 ## Roadmap
-- Additional levels
-- Mini bosses
 - Additional weapons (grenades?)
 - Better weapon/enemy power scaling with selected difficulty
 

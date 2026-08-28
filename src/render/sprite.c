@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #define FOV_FACTOR 0.66f
+#define CORPSE_MIN_RENDER_DISTANCE2 1.0f
 
 void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, const float *zbuf, const Texture enemy_tex[][ENEMY_SPRITE_FRAMES], int difficulty, int screen_w, int screen_h) {
     float dir_x = cosf(p->angle);
@@ -31,6 +32,9 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
 
         float ex = e->x - p->x;
         float ey = e->y - p->y;
+        if (!e->active && ex * ex + ey * ey < CORPSE_MIN_RENDER_DISTANCE2) {
+            continue;
+        }
 
         float transform_x = inv_det * ( dir_y * ex - dir_x * ey);
         float transform_y = inv_det * (-plane_y * ex + plane_x * ey);
