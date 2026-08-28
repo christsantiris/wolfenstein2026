@@ -127,7 +127,7 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficul
             e->angle = atan2f(dy, dx);
             float nx = e->x + (dx / dist) * speed * dt;
             float ny = e->y + (dy / dist) * speed * dt;
-            float collision_radius = e->type == ENEMY_TYPE_MINIBOSS ? 0.48f : 0.0f;
+            float collision_radius = e->type == ENEMY_TYPE_MINIBOSS ? 0.48f : 0.28f;
             if (enemy_can_stand(m, nx, e->y, collision_radius)) {
                 e->x = nx;
             }
