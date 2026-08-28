@@ -12,6 +12,7 @@ static const EnemyDef ENEMY_DEFS[ENEMY_TYPE_COUNT] = {
     { ENEMY_TYPE_SS,             200, 1.4f, 10.0f, 2.0f, 2.5f, 15 },
     { ENEMY_TYPE_BOSS,           850, 1.5f, 18.0f, 2.5f, 1.2f, 26 },
     { ENEMY_TYPE_GUARD_SHOTGUN,  100, 1.8f, 12.0f, 2.0f, 2.0f,  8 },
+    { ENEMY_TYPE_MINIBOSS, 700, 1.6f, 16.0f, 7.0f, 1.5f, 18 },
 };
 
 const EnemyDef *enemy_def(EnemyType type) {
@@ -43,11 +44,15 @@ static const float SPEED_MULT[4]  = { 0.70f, 1.0f, 1.20f, 1.50f };
 static const float SIGHT_MULT[4]  = { 0.70f, 1.0f, 1.30f, 1.60f };
 static const float HEALTH_MULT[4] = { 0.6f, 1.0f, 1.2f, 1.3f };
 static const int BOSS_MAX_HEALTH[4] = { 1200, 1600, 2000, 2400 };
+static const int MINIBOSS_MAX_HEALTH[4] = { 700, 950, 1200, 1500 };
 
 int enemy_max_health(EnemyType type, int difficulty) {
     int d = difficulty < 4 ? difficulty : 3;
     if (type == ENEMY_TYPE_BOSS) {
         return BOSS_MAX_HEALTH[d];
+    }
+    if (type == ENEMY_TYPE_MINIBOSS) {
+        return MINIBOSS_MAX_HEALTH[d];
     }
     int health = (int)(enemy_def(type)->max_health * HEALTH_MULT[d]);
     return health > 0 ? health : 1;
@@ -156,12 +161,69 @@ static void place(EnemyList *el, float x, float y, EnemyType type, int difficult
     e->attack_flash_timer = 0.0f;
     e->walk_frame = 0;
     e->walk_timer = 0.0f;
+    e->reinforcements_called = 0;
+}
+
+int enemy_list_call_reinforcements(EnemyList *el, const Player *p, const Map *m, int difficulty) {
+    Enemy *commander = NULL;
+    for (int i = 0; i < el->count; i++) {
+        if (el->enemies[i].type == ENEMY_TYPE_MINIBOSS) {
+            commander = &el->enemies[i];
+            break;
+        }
+    }
+    if (!commander || !commander->active || commander->reinforcements_called) {
+        return 0;
+    }
+    if (commander->health > enemy_max_health(ENEMY_TYPE_MINIBOSS, difficulty) / 2) {
+        return 0;
+    }
+
+    commander->reinforcements_called = 1;
+    int d = difficulty < 4 ? difficulty : 3;
+    static const int WAVE_COUNT[4] = { 2, 3, 4, 5 };
+    static const EnemyType WAVE_TYPES[4][5] = {
+        { ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD_SHOTGUN },
+        { ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER },
+        { ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS, ENEMY_TYPE_GUARD },
+        { ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS, ENEMY_TYPE_SS, ENEMY_TYPE_GUARD }
+    };
+    static const float SPAWN_X[8] = { 2.5f, 25.5f, 2.5f, 25.5f, 14.5f, 14.5f, 2.5f, 25.5f };
+    static const float SPAWN_Y[8] = { 2.5f, 2.5f, 18.5f, 18.5f, 18.5f, 7.5f, 10.5f, 10.5f };
+
+    int spawned = 0;
+    for (int i = 0; i < 8 && spawned < WAVE_COUNT[d]; i++) {
+        if (el->count >= MAX_ENEMIES) {
+            break;
+        }
+        float dx = SPAWN_X[i] - p->x;
+        float dy = SPAWN_Y[i] - p->y;
+        if (dx * dx + dy * dy < 9.0f) {
+            continue;
+        }
+        if (map_cell(m, (int)SPAWN_X[i], (int)SPAWN_Y[i]) != 0) {
+            continue;
+        }
+        place(el, SPAWN_X[i], SPAWN_Y[i], WAVE_TYPES[d][spawned], difficulty);
+        el->enemies[el->count - 1].state = ENEMY_ALERT;
+        spawned++;
+    }
+    return spawned > 0;
 }
 
 void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, float px, float py) {
     memset(el, 0, sizeof(EnemyList));
 
-    if (level == 10) {
+    if (level == 6) {
+        place(el, 14.5f, 4.5f, ENEMY_TYPE_MINIBOSS, difficulty);
+        place(el, 5.5f, 4.5f, ENEMY_TYPE_GUARD, difficulty);
+        place(el, 22.5f, 4.5f, ENEMY_TYPE_OFFICER, difficulty);
+        place(el, 5.5f, 14.5f, ENEMY_TYPE_GUARD, difficulty);
+        place(el, 21.5f, 10.5f, ENEMY_TYPE_GUARD_SHOTGUN, difficulty);
+        return;
+    }
+
+    if (level == 11) {
         place(el, 14.5f, 4.5f, ENEMY_TYPE_BOSS, difficulty);
         place(el, 5.5f, 14.5f, ENEMY_TYPE_GUARD, difficulty);
         place(el, 22.5f, 14.5f, ENEMY_TYPE_GUARD, difficulty);

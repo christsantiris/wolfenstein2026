@@ -284,6 +284,9 @@ int game_update_enemies(GameState *g, const Player *p, const Map *m, float dt) {
             bark = 1;
         }
     }
+    if (enemy_list_call_reinforcements(&g->enemies, p, m, g->difficulty)) {
+        bark = 1;
+    }
     if (enemy_list_all_dead(&g->enemies) && g->level_clear_timer == 0.0f) {
         g->level_clear_timer = 4.0f;
     }

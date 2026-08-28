@@ -8,6 +8,33 @@
 void item_list_init(ItemList *il, const Map *m, int level, float px, float py) {
     memset(il, 0, sizeof(*il));
 
+    if (level == 6) {
+        Item *ammo = &il->items[il->count++];
+        ammo->x = 8.5f;
+        ammo->y = 10.5f;
+        ammo->type = ITEM_AMMO;
+        ammo->active = 1;
+
+        Item *health = &il->items[il->count++];
+        health->x = 14.5f;
+        health->y = 17.5f;
+        health->type = ITEM_HEALTH;
+        health->active = 1;
+
+        Item *reserve = &il->items[il->count++];
+        reserve->x = 8.5f;
+        reserve->y = 17.5f;
+        reserve->type = ITEM_AMMO;
+        reserve->active = 1;
+
+        Item *rifle = &il->items[il->count++];
+        rifle->x = 18.5f;
+        rifle->y = 10.5f;
+        rifle->type = ITEM_WEAPON_KIT_BATTLE_RIFLE;
+        rifle->active = 1;
+        return;
+    }
+
     typedef struct { float x; float y; } Pos;
     Pos candidates[1024];
     int nc = 0;
@@ -60,15 +87,7 @@ void item_list_init(ItemList *il, const Map *m, int level, float px, float py) {
         it->type = ITEM_WEAPON_KIT;
         it->active = 1;
     }
-    if (level == 6 && il->count < MAX_ITEMS && nc > count) {
-        int j = count + rand() % (nc - count);
-        Item *it = &il->items[il->count++];
-        it->x = candidates[j].x;
-        it->y = candidates[j].y;
-        it->type = ITEM_WEAPON_KIT_BATTLE_RIFLE;
-        it->active = 1;
-    }
-    if (level == 8 && il->count < MAX_ITEMS && nc > count) {
+    if (level == 9 && il->count < MAX_ITEMS && nc > count) {
         int j = count + rand() % (nc - count);
         Item *it = &il->items[il->count++];
         it->x = candidates[j].x;

@@ -12,6 +12,7 @@ typedef enum {
     ENEMY_TYPE_SS,
     ENEMY_TYPE_BOSS,
     ENEMY_TYPE_GUARD_SHOTGUN,
+    ENEMY_TYPE_MINIBOSS,
     ENEMY_TYPE_COUNT
 } EnemyType;
 
@@ -43,6 +44,7 @@ typedef struct {
     EnemyType type;
     int walk_frame;
     float walk_timer;
+    int reinforcements_called;
 } Enemy;
 
 typedef struct {
@@ -53,7 +55,8 @@ typedef struct {
 const EnemyDef *enemy_def(EnemyType type);
 int enemy_max_health(EnemyType type, int difficulty);
 void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, float px, float py);
-int  enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficulty);
-int  enemy_list_all_dead(const EnemyList *el);
+int enemy_list_call_reinforcements(EnemyList *el, const Player *p, const Map *m, int difficulty);
+int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficulty);
+int enemy_list_all_dead(const EnemyList *el);
 
 #endif
