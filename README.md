@@ -36,7 +36,7 @@ A first-person shooter inspired by *Wolfenstein 3D* by id Software. Navigate maz
 
 <img width="3836" height="2056" alt="image" src="https://github.com/user-attachments/assets/abbc5b72-5212-402c-ba95-3128afc8cc4d" />
 
-<img width="870" height="270" alt="image" src="https://github.com/user-attachments/assets/9f722407-4515-4d29-9161-c4c81442f58b" />
+<img width="3844" height="2056" alt="image" src="https://github.com/user-attachments/assets/9f722407-4515-4d29-9161-c4c81442f58b" />
 
 <img width="3844" height="2056" alt="image" src="https://github.com/user-attachments/assets/d5b757f6-935d-425a-84d8-3405a5816227" />
 
