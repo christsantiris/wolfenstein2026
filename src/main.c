@@ -192,8 +192,17 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    Texture door_tex;
-    if (texture_create(&door_tex, 64, 64) != 0) {
+    Texture door_tex[LEVEL_COUNT] = { 0 };
+    int door_tex_ready = 1;
+    for (int dl = 0; dl < LEVEL_COUNT; dl++) {
+        if (texture_create(&door_tex[dl], 64, 64) != 0) {
+            door_tex_ready = 0;
+            break;
+        }
+        texture_generate_door(&door_tex[dl], dl + 1);
+    }
+    if (!door_tex_ready) {
+        for (int dl = LEVEL_COUNT - 1; dl >= 0; dl--) { texture_free(&door_tex[dl]); }
         for (int fl = LEVEL_COUNT - 1; fl >= 0; fl--) { texture_free(&floor_tex[fl]); }
         for (int wl = LEVEL_COUNT - 1; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
         map_free(&map);
@@ -202,11 +211,10 @@ int main(int argc, char **argv) {
         SDL_Quit();
         return 1;
     }
-    texture_generate_door(&door_tex);
 
     Texture exit_tex;
     if (texture_create(&exit_tex, 64, 64) != 0) {
-        texture_free(&door_tex);
+        for (int dl = LEVEL_COUNT - 1; dl >= 0; dl--) { texture_free(&door_tex[dl]); }
         for (int fl = LEVEL_COUNT - 1; fl >= 0; fl--) { texture_free(&floor_tex[fl]); }
         for (int wl = LEVEL_COUNT - 1; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
         map_free(&map);
@@ -762,7 +770,7 @@ int main(int argc, char **argv) {
             difficulty_screen_render(renderer, w, h);
         } else {
             int wall_idx = (current_level - 1 < LEVEL_COUNT) ? current_level - 1 : LEVEL_COUNT - 1;
-            raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &floor_tex[wall_idx], &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT, total_time);
+            raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &floor_tex[wall_idx], &door_tex[wall_idx], &exit_tex, zbuf, w, h - HUD_HEIGHT, total_time);
             sprite_render_all(renderer, &player, &game.enemies, zbuf, enemy_tex, game.difficulty, w, h - HUD_HEIGHT);
             item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, &weapon_kit_dual_tex, &weapon_kit_battle_rifle_tex, w, h - HUD_HEIGHT);
             int knife_visible = game.current_weapon.type == GUN_KNIFE || game.pistol_whip_timer > 0.0f;
@@ -836,7 +844,7 @@ int main(int argc, char **argv) {
         for (int d = ENEMY_SPRITE_FRAMES - 1; d >= 0; d--) { texture_free(&enemy_tex[t][d]); }
     }
     texture_free(&exit_tex);
-    texture_free(&door_tex);
+    for (int dl = LEVEL_COUNT - 1; dl >= 0; dl--) { texture_free(&door_tex[dl]); }
     for (int fl = LEVEL_COUNT - 1; fl >= 0; fl--) { texture_free(&floor_tex[fl]); }
     for (int wl = LEVEL_COUNT - 1; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
     map_free(&map);

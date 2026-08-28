@@ -80,44 +80,173 @@ unsigned int texture_sample(const Texture *t, float u, float v) {
          |  (unsigned int)t->pixels[idx + 2];
 }
 
-void texture_generate_door(Texture *t) {
-    int border = 6;
-    int mid = t->width / 2;
+typedef struct {
+    int panel_r;
+    int panel_g;
+    int panel_b;
+    int recess_r;
+    int recess_g;
+    int recess_b;
+    int trim_r;
+    int trim_g;
+    int trim_b;
+    int metal_r;
+    int metal_g;
+    int metal_b;
+} DoorPalette;
 
+static const DoorPalette DOOR_PALETTES[11] = {
+    { 126, 54, 42, 92, 34, 28, 158, 82, 58, 72, 68, 62 },
+    { 104, 108, 106, 70, 75, 75, 145, 148, 140, 68, 72, 72 },
+    { 142, 112, 72, 100, 75, 48, 178, 145, 84, 82, 71, 55 },
+    { 66, 86, 112, 43, 58, 80, 96, 124, 150, 56, 66, 78 },
+    { 88, 62, 38, 55, 39, 26, 142, 105, 62, 70, 65, 56 },
+    { 72, 78, 59, 48, 54, 40, 112, 116, 76, 61, 66, 63 },
+    { 76, 87, 67, 47, 59, 46, 108, 119, 81, 62, 68, 64 },
+    { 112, 58, 48, 76, 39, 34, 138, 82, 63, 66, 69, 70 },
+    { 92, 101, 108, 58, 66, 73, 134, 145, 150, 62, 70, 76 },
+    { 58, 65, 55, 36, 43, 38, 91, 99, 77, 50, 57, 55 },
+    { 48, 43, 48, 27, 24, 29, 84, 70, 66, 45, 48, 52 }
+};
+
+static unsigned char door_colour(int value) {
+    if (value < 0) {
+        return 0;
+    }
+    if (value > 255) {
+        return 255;
+    }
+    return (unsigned char)value;
+}
+
+static void generate_detailed_door(Texture *t, const DoorPalette *p, int exit_door, int seed) {
+    int mid = t->width / 2;
     for (int y = 0; y < t->height; y++) {
         for (int x = 0; x < t->width; x++) {
-            int on_border = (x < border || x >= t->width - border ||
-                             y < border || y >= t->height - border ||
-                             (x >= mid - 2 && x < mid + 2));
-            unsigned char r, g, b;
-            if (on_border) {
-                int vary = ((x * 5 + y * 11) % 14) - 7;
-                r = (unsigned char)(90 + vary);
-                g = (unsigned char)(55 + vary / 2);
-                b = (unsigned char)(30 + vary / 2);
-            } else {
-                int vary = ((x * 3 + y * 7) % 18) - 9;
-                r = (unsigned char)(160 + vary);
-                g = (unsigned char)(100 + vary / 2);
-                b = (unsigned char)(55  + vary / 2);
+            int noise = ((x * 17 + y * 29 + seed * 11) % 13) - 6;
+            int r = p->panel_r + noise;
+            int g = p->panel_g + noise;
+            int b = p->panel_b + noise;
+
+            int outer_frame = x < 7 || x >= t->width - 7 || y < 5 || y >= t->height - 5;
+            int crossbar = y >= 29 && y <= 34;
+            int seam = x >= mid - 2 && x <= mid + 1;
+            if (outer_frame || crossbar || seam) {
+                int frame_noise = ((x * 7 + y * 19 + seed * 5) % 11) - 5;
+                r = p->metal_r + frame_noise;
+                g = p->metal_g + frame_noise;
+                b = p->metal_b + frame_noise;
             }
-            int panel_cx = (x < mid) ? (border + (mid - border) / 2) : (mid + (t->width - border - mid) / 2);
-            int panel_cy = t->height * 2 / 3;
-            int handle = (abs(x - panel_cx) <= 2 && abs(y - panel_cy) <= 2);
+
+            int panel_x0 = x < mid ? 10 : 36;
+            int panel_x1 = x < mid ? 27 : 53;
+            int panel_y0 = y < mid ? 8 : 38;
+            int panel_y1 = y < mid ? 25 : 55;
+            int in_panel = x >= panel_x0 && x <= panel_x1 && y >= panel_y0 && y <= panel_y1;
+            if (in_panel) {
+                if (x == panel_x0 || y == panel_y0) {
+                    r = p->trim_r + 18;
+                    g = p->trim_g + 18;
+                    b = p->trim_b + 18;
+                } else if (x == panel_x1 || y == panel_y1) {
+                    r = p->trim_r - 28;
+                    g = p->trim_g - 28;
+                    b = p->trim_b - 28;
+                } else if (x == panel_x0 + 1 || y == panel_y0 + 1 || x == panel_x1 - 1 || y == panel_y1 - 1) {
+                    r = p->trim_r;
+                    g = p->trim_g;
+                    b = p->trim_b;
+                } else {
+                    r = p->recess_r + noise;
+                    g = p->recess_g + noise;
+                    b = p->recess_b + noise;
+                }
+            }
+
+            if (x == 7 || y == 5 || x == mid - 3) {
+                r += 24;
+                g += 24;
+                b += 24;
+            }
+            if (x == t->width - 8 || y == t->height - 6 || x == mid + 2) {
+                r -= 24;
+                g -= 24;
+                b -= 24;
+            }
+
+            int lock_plate = x >= mid + 1 && x <= mid + 9 && y >= 26 && y <= 43;
+            if (lock_plate) {
+                int plate_edge = x == mid + 1 || x == mid + 9 || y == 26 || y == 43;
+                r = p->trim_r + (plate_edge ? 18 : -8);
+                g = p->trim_g + (plate_edge ? 18 : -8);
+                b = p->trim_b + (plate_edge ? 18 : -8);
+            }
+
+            int handle = x >= mid + 7 && x <= mid + 18 && y >= 31 && y <= 34;
             if (handle) {
-                r = 200; g = 170; b = 80;
+                r = exit_door ? 205 : 172;
+                g = exit_door ? 151 : 139;
+                b = exit_door ? 66 : 86;
+                if (y == 34) {
+                    r -= 45;
+                    g -= 45;
+                    b -= 35;
+                }
             }
+            int keyhole = x >= mid + 4 && x <= mid + 6 && y >= 37 && y <= 41;
+            if (keyhole) {
+                r = 18;
+                g = 17;
+                b = 16;
+            }
+
+            int rivet_column = (x >= 2 && x <= 4) || (x >= t->width - 5 && x <= t->width - 3);
+            int rivet_row = y == 9 || y == 21 || y == 33 || y == 45 || y == 56;
+            if (rivet_column && rivet_row) {
+                int rivet_highlight = x == 2 || x == t->width - 5;
+                r = rivet_highlight ? 154 : 54;
+                g = rivet_highlight ? 151 : 53;
+                b = rivet_highlight ? 139 : 51;
+            }
+
+            int worn = (x * 23 + y * 37 + seed * 41) % 211 == 0;
+            if (worn && !keyhole) {
+                r += 34;
+                g += 30;
+                b += 24;
+            }
+            int grime = y > 48 && (x * 11 + y * 5 + seed) % 17 < 3;
+            if (grime) {
+                r -= 16;
+                g -= 16;
+                b -= 14;
+            }
+
+            if (exit_door && (x == 7 || x == t->width - 8 || y == 5)) {
+                r = 184;
+                g = 133;
+                b = 52;
+            }
+
             int idx = (y * t->width + x) * 3;
-            t->pixels[idx]     = r;
-            t->pixels[idx + 1] = g;
-            t->pixels[idx + 2] = b;
+            t->pixels[idx] = door_colour(r);
+            t->pixels[idx + 1] = door_colour(g);
+            t->pixels[idx + 2] = door_colour(b);
         }
     }
 }
 
+void texture_generate_door(Texture *t, int level) {
+    int palette = level - 1;
+    if (palette < 0 || palette >= 11) {
+        palette = 0;
+    }
+    generate_detailed_door(t, &DOOR_PALETTES[palette], 0, level);
+}
+
 void texture_generate_exit_door(Texture *t) {
     int rivet_spacing = 16;
-    int rivet_size    = 2;
+    int rivet_size = 2;
 
     for (int y = 0; y < t->height; y++) {
         for (int x = 0; x < t->width; x++) {
@@ -128,13 +257,15 @@ void texture_generate_exit_door(Texture *t) {
 
             int rx = x % rivet_spacing;
             int ry = y % rivet_spacing;
-            int on_rivet = (rx < rivet_size && ry < rivet_size);
+            int on_rivet = rx < rivet_size && ry < rivet_size;
             if (on_rivet) {
-                r = 80; g = 80; b = 80;
+                r = 80;
+                g = 80;
+                b = 80;
             }
 
             int idx = (y * t->width + x) * 3;
-            t->pixels[idx]     = r;
+            t->pixels[idx] = r;
             t->pixels[idx + 1] = g;
             t->pixels[idx + 2] = b;
         }
