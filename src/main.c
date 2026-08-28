@@ -292,6 +292,34 @@ int main(void) {
         for (int i = 0; i < 64 * 64 * 3; i++) { battle_rifle_tex.pixels[i] = 0; }
     }
 
+    const Texture *weapon_textures[GUN_COUNT] = {
+        [GUN_9MM_HANDGUN] = &pistol_tex,
+        [GUN_DUAL_HANDGUN] = &dual_handgun_tex,
+        [GUN_SHOTGUN] = &shotgun_tex,
+        [GUN_AK47] = &ak47_tex,
+        [GUN_BATTLE_RIFLE] = &battle_rifle_tex,
+        [GUN_KNIFE] = &knife_tex
+    };
+    Texture reload_tex[GUN_COUNT][WEAPON_RELOAD_FRAME_COUNT] = { 0 };
+    const char *reload_paths[GUN_COUNT][WEAPON_RELOAD_FRAME_COUNT] = {
+        [GUN_9MM_HANDGUN] = { "assets/sprites/pistol_reload_1.ppm", "assets/sprites/pistol_reload_2.ppm", "assets/sprites/pistol_reload_3.ppm" },
+        [GUN_DUAL_HANDGUN] = { "assets/sprites/dual_handgun_reload_1.ppm", "assets/sprites/dual_handgun_reload_2.ppm", "assets/sprites/dual_handgun_reload_3.ppm" },
+        [GUN_SHOTGUN] = { "assets/sprites/shotgun_reload_1.ppm", "assets/sprites/shotgun_reload_2.ppm", "assets/sprites/shotgun_reload_3.ppm" },
+        [GUN_AK47] = { "assets/sprites/ak47_reload_1.ppm", "assets/sprites/ak47_reload_2.ppm", "assets/sprites/ak47_reload_3.ppm" },
+        [GUN_BATTLE_RIFLE] = { "assets/sprites/battle_rifle_reload_1.ppm", "assets/sprites/battle_rifle_reload_2.ppm", "assets/sprites/battle_rifle_reload_3.ppm" }
+    };
+    for (int gun = 0; gun < GUN_KNIFE; gun++) {
+        const Texture *base_tex = weapon_textures[gun];
+        for (int frame = 0; frame < WEAPON_RELOAD_FRAME_COUNT; frame++) {
+            if (texture_load_ppm(&reload_tex[gun][frame], reload_paths[gun][frame]) != 0) {
+                texture_create(&reload_tex[gun][frame], base_tex->width, base_tex->height);
+                for (int i = 0; i < base_tex->width * base_tex->height * 3; i++) {
+                    reload_tex[gun][frame].pixels[i] = base_tex->pixels[i];
+                }
+            }
+        }
+    }
+
     Texture enemy_tex[ENEMY_TYPE_COUNT][ENEMY_SPRITE_FRAMES];
     int etw = 64, eth = 64;
 
@@ -722,11 +750,10 @@ int main(void) {
             raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &floor_tex[wall_idx], &door_tex, &exit_tex, zbuf, w, h - HUD_HEIGHT, total_time);
             sprite_render_all(renderer, &player, &game.enemies, zbuf, enemy_tex, w, h - HUD_HEIGHT);
             item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, &weapon_kit_dual_tex, &weapon_kit_battle_rifle_tex, w, h - HUD_HEIGHT);
-            const Texture *weapon_textures[GUN_COUNT] = { [GUN_9MM_HANDGUN] = &pistol_tex, [GUN_DUAL_HANDGUN] = &dual_handgun_tex, [GUN_SHOTGUN] = &shotgun_tex, [GUN_AK47] = &ak47_tex, [GUN_BATTLE_RIFLE] = &battle_rifle_tex, [GUN_KNIFE] = &knife_tex };
             int knife_visible = game.current_weapon.type == GUN_KNIFE || game.pistol_whip_timer > 0.0f;
             const Texture *weapon_tex = knife_visible ? &knife_tex : weapon_textures[game.current_weapon.type];
             float shot_timer = knife_visible ? 0.0f : game.shot_timer;
-            weapon_render(renderer, &game.current_weapon, weapon_tex, game.ammo, shot_timer, game.shot_cooldown, game.pistol_whip_timer, w, h - HUD_HEIGHT);
+            weapon_render(renderer, &game.current_weapon, weapon_tex, reload_tex[game.current_weapon.type], game.ammo, shot_timer, game.shot_cooldown, game.pistol_whip_timer, game.is_reloading, game.reload_timer, w, h - HUD_HEIGHT);
             if (menu.minimap_on) {
                 minimap_render(renderer, &map, &player, &game.enemies, menu.enemy_markers_on);
             }
@@ -776,6 +803,9 @@ int main(void) {
     sound_free(&whip_sound);
     for (int g = 0; g < GUN_COUNT; g++) { sound_free(&gun_sounds[g]); sound_free(&reload_sounds[g]); }
     Mix_CloseAudio();
+    for (int gun = GUN_KNIFE - 1; gun >= 0; gun--) {
+        for (int frame = WEAPON_RELOAD_FRAME_COUNT - 1; frame >= 0; frame--) { texture_free(&reload_tex[gun][frame]); }
+    }
     texture_free(&battle_rifle_tex);
     texture_free(&ak47_tex);
     texture_free(&shotgun_tex);

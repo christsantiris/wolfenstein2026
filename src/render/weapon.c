@@ -65,9 +65,23 @@ static void draw_muzzle_flash(SDL_Renderer *renderer, int cx, int cy, const Weap
     SDL_RenderDrawLine(renderer, cx - anim->flash_radius - 5, cy, cx + anim->flash_radius + 5, cy);
 }
 
-void weapon_render(SDL_Renderer *renderer, const WeaponDef *weapon, const Texture *tex, int ammo, float shot_timer, float shot_cooldown, float whip_timer, int screen_w, int screen_h) {
+void weapon_render(SDL_Renderer *renderer, const WeaponDef *weapon, const Texture *tex, const Texture reload_tex[WEAPON_RELOAD_FRAME_COUNT], int ammo, float shot_timer, float shot_cooldown, float whip_timer, int is_reloading, float reload_timer, int screen_w, int screen_h) {
     const WeaponAnimDef *anim = &WEAPON_ANIMS[weapon->type];
-    float recoil = whip_timer > 0.0f ? 0.0f : weapon_recoil(weapon, shot_cooldown);
+    if (is_reloading && weapon->type != GUN_KNIFE && weapon->reload_time > 0.0f) {
+        float progress = 1.0f - reload_timer / weapon->reload_time;
+        if (progress < 0.0f) {
+            progress = 0.0f;
+        }
+        if (progress > 1.0f) {
+            progress = 1.0f;
+        }
+        int frame = (int)(progress * WEAPON_RELOAD_FRAME_COUNT);
+        if (frame >= WEAPON_RELOAD_FRAME_COUNT) {
+            frame = WEAPON_RELOAD_FRAME_COUNT - 1;
+        }
+        tex = &reload_tex[frame];
+    }
+    float recoil = whip_timer > 0.0f || is_reloading ? 0.0f : weapon_recoil(weapon, shot_cooldown);
     float scale = WEAPON_SCALE + recoil * anim->scale_kick;
     int w = (int)(tex->width * scale);
     int h = (int)(tex->height * scale);
