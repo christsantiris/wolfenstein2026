@@ -182,34 +182,43 @@ static void place(EnemyList *el, float x, float y, EnemyType type, int difficult
 }
 
 int enemy_list_call_reinforcements(EnemyList *el, const Player *p, const Map *m, int difficulty) {
-    Enemy *commander = NULL;
+    Enemy *leader = NULL;
     for (int i = 0; i < el->count; i++) {
-        if (el->enemies[i].type == ENEMY_TYPE_MINIBOSS) {
-            commander = &el->enemies[i];
+        if (el->enemies[i].type == ENEMY_TYPE_MINIBOSS || el->enemies[i].type == ENEMY_TYPE_BOSS) {
+            leader = &el->enemies[i];
             break;
         }
     }
-    if (!commander || !commander->active || commander->reinforcements_called) {
+    if (!leader || !leader->active || leader->reinforcements_called) {
         return 0;
     }
-    if (commander->health > enemy_max_health(ENEMY_TYPE_MINIBOSS, difficulty) / 2) {
+    if (leader->health > enemy_max_health(leader->type, difficulty) / 2) {
         return 0;
     }
 
-    commander->reinforcements_called = 1;
+    leader->reinforcements_called = 1;
     int d = difficulty < 4 ? difficulty : 3;
-    static const int WAVE_COUNT[4] = { 2, 3, 4, 5 };
-    static const EnemyType WAVE_TYPES[4][5] = {
+    static const int MINIBOSS_WAVE_COUNT[4] = { 2, 3, 4, 5 };
+    static const EnemyType MINIBOSS_WAVE_TYPES[4][5] = {
         { ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD_SHOTGUN },
         { ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER },
         { ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS, ENEMY_TYPE_GUARD },
         { ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS, ENEMY_TYPE_SS, ENEMY_TYPE_GUARD }
     };
+    static const int BOSS_WAVE_COUNT[4] = { 2, 3, 4, 5 };
+    static const EnemyType BOSS_WAVE_TYPES[4][5] = {
+        { ENEMY_TYPE_GUARD, ENEMY_TYPE_OFFICER },
+        { ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS },
+        { ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS, ENEMY_TYPE_SS },
+        { ENEMY_TYPE_OFFICER, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS, ENEMY_TYPE_SS, ENEMY_TYPE_SS }
+    };
     static const float SPAWN_X[8] = { 2.5f, 25.5f, 2.5f, 25.5f, 14.5f, 14.5f, 2.5f, 25.5f };
     static const float SPAWN_Y[8] = { 2.5f, 2.5f, 18.5f, 18.5f, 18.5f, 7.5f, 10.5f, 10.5f };
+    int wave_count = leader->type == ENEMY_TYPE_BOSS ? BOSS_WAVE_COUNT[d] : MINIBOSS_WAVE_COUNT[d];
+    const EnemyType *wave_types = leader->type == ENEMY_TYPE_BOSS ? BOSS_WAVE_TYPES[d] : MINIBOSS_WAVE_TYPES[d];
 
     int spawned = 0;
-    for (int i = 0; i < 8 && spawned < WAVE_COUNT[d]; i++) {
+    for (int i = 0; i < 8 && spawned < wave_count; i++) {
         if (el->count >= MAX_ENEMIES) {
             break;
         }
@@ -221,7 +230,7 @@ int enemy_list_call_reinforcements(EnemyList *el, const Player *p, const Map *m,
         if (map_cell(m, (int)SPAWN_X[i], (int)SPAWN_Y[i]) != 0) {
             continue;
         }
-        place(el, SPAWN_X[i], SPAWN_Y[i], WAVE_TYPES[d][spawned], difficulty);
+        place(el, SPAWN_X[i], SPAWN_Y[i], wave_types[spawned], difficulty);
         el->enemies[el->count - 1].state = ENEMY_ALERT;
         spawned++;
     }
@@ -241,10 +250,20 @@ void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, flo
     }
 
     if (level == 11) {
+        static const int SUPPORT_COUNT[4] = { 3, 4, 5, 6 };
+        static const EnemyType SUPPORT_TYPES[4][6] = {
+            { ENEMY_TYPE_GUARD, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS },
+            { ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS },
+            { ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS, ENEMY_TYPE_SS },
+            { ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS, ENEMY_TYPE_SS, ENEMY_TYPE_SS }
+        };
+        static const float SUPPORT_X[6] = { 5.5f, 22.5f, 22.5f, 5.5f, 5.5f, 22.5f };
+        static const float SUPPORT_Y[6] = { 14.5f, 14.5f, 12.5f, 12.5f, 8.5f, 8.5f };
+        int d = difficulty < 4 ? difficulty : 3;
         place(el, 14.5f, 4.5f, ENEMY_TYPE_BOSS, difficulty);
-        place(el, 5.5f, 14.5f, ENEMY_TYPE_GUARD, difficulty);
-        place(el, 22.5f, 14.5f, ENEMY_TYPE_GUARD, difficulty);
-        place(el, 22.5f, 12.5f, ENEMY_TYPE_OFFICER, difficulty);
+        for (int i = 0; i < SUPPORT_COUNT[d]; i++) {
+            place(el, SUPPORT_X[i], SUPPORT_Y[i], SUPPORT_TYPES[d][i], difficulty);
+        }
         return;
     }
 
