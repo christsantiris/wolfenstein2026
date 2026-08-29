@@ -6,8 +6,13 @@
 #define PLAYER_R    3
 #define DIR_LEN     8
 #define ENEMY_SIZE  4
+#define WEAPON_SIZE 4
 
-void minimap_render(SDL_Renderer *renderer, const Map *m, const Player *p, const EnemyList *enemies, int show_enemy_positions) {
+static int minimap_is_weapon_pickup(ItemType type) {
+    return type == ITEM_WEAPON_KIT || type == ITEM_WEAPON_KIT_AK47 || type == ITEM_WEAPON_KIT_DUAL || type == ITEM_WEAPON_KIT_BATTLE_RIFLE || type == ITEM_WEAPON_KIT_RIFLE_GRENADE;
+}
+
+void minimap_render(SDL_Renderer *renderer, const Map *m, const Player *p, const EnemyList *enemies, const ItemList *items, int show_enemy_positions, int show_weapon_pickups) {
     for (int y = 0; y < m->height; y++) {
         for (int x = 0; x < m->width; x++) {
             SDL_Rect cell = {
@@ -35,6 +40,20 @@ void minimap_render(SDL_Renderer *renderer, const Map *m, const Player *p, const
             int ex = MARGIN + (int)(enemy->x * CELL_SIZE);
             int ey = MARGIN + (int)(enemy->y * CELL_SIZE);
             SDL_Rect marker = { ex - ENEMY_SIZE / 2, ey - ENEMY_SIZE / 2, ENEMY_SIZE, ENEMY_SIZE };
+            SDL_RenderFillRect(renderer, &marker);
+        }
+    }
+
+    if (show_weapon_pickups) {
+        SDL_SetRenderDrawColor(renderer, 40, 210, 255, 255);
+        for (int i = 0; i < items->count; i++) {
+            const Item *item = &items->items[i];
+            if (!item->active || !minimap_is_weapon_pickup(item->type)) {
+                continue;
+            }
+            int item_x = MARGIN + (int)(item->x * CELL_SIZE);
+            int item_y = MARGIN + (int)(item->y * CELL_SIZE);
+            SDL_Rect marker = { item_x - WEAPON_SIZE / 2, item_y - WEAPON_SIZE / 2, WEAPON_SIZE, WEAPON_SIZE };
             SDL_RenderFillRect(renderer, &marker);
         }
     }

@@ -526,6 +526,7 @@ int main(int argc, char **argv) {
     menu.sound_on = 1;
     menu.minimap_on = 1;
     menu.enemy_markers_on = 0;
+    menu.weapon_markers_on = 0;
     int current_level = 1;
 #ifdef DEBUG_START_LEVEL
     current_level = DEBUG_START_LEVEL;
@@ -571,7 +572,8 @@ int main(int argc, char **argv) {
                         .music_on = menu.music_on,
                         .sound_on = menu.sound_on,
                         .minimap_on = menu.minimap_on,
-                        .enemy_positions_on = menu.enemy_markers_on
+                        .enemy_positions_on = menu.enemy_markers_on,
+                        .weapon_pickups_on = menu.weapon_markers_on
                     };
                     if (slot_picker.is_save) {
                         save_game(picked_slot, current_level, &player, &game, &map, &settings);
@@ -581,6 +583,7 @@ int main(int argc, char **argv) {
                             menu.sound_on = settings.sound_on;
                             menu.minimap_on = settings.minimap_on;
                             menu.enemy_markers_on = settings.enemy_positions_on;
+                            menu.weapon_markers_on = settings.weapon_pickups_on;
                             sound_set_enabled(menu.sound_on);
                             game_over = 0;
                             game_won = 0;
@@ -624,6 +627,7 @@ int main(int argc, char **argv) {
                     menu.sound_on = 1;
                     menu.minimap_on = 1;
                     menu.enemy_markers_on = 0;
+                    menu.weapon_markers_on = 0;
                     sound_set_enabled(menu.sound_on);
                     start_game(&map, &player, &game, current_level);
                     music_play(&level_music[current_level - 1]);
@@ -874,7 +878,7 @@ int main(int argc, char **argv) {
             float shot_timer = knife_visible ? 0.0f : game.shot_timer;
             weapon_render(renderer, &game.current_weapon, weapon_tex, reload_tex[game.current_weapon.type], game.ammo, shot_timer, game.shot_cooldown, game.pistol_whip_timer, game.is_reloading, game.reload_timer, w, h - HUD_HEIGHT);
             if (menu.minimap_on) {
-                minimap_render(renderer, &map, &player, &game.enemies, menu.enemy_markers_on);
+                minimap_render(renderer, &map, &player, &game.enemies, &game.items, menu.enemy_markers_on, menu.weapon_markers_on);
             }
             int enemies_remaining = 0;
             for (int i = 0; i < game.enemies.count; i++) {

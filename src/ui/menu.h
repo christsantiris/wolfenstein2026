@@ -10,6 +10,7 @@ typedef struct {
     int sound_on;
     int minimap_on;
     int enemy_markers_on;
+    int weapon_markers_on;
     int difficulty;
     int selected;
     int current_level;
@@ -23,6 +24,7 @@ typedef enum {
     MENU_ACTION_SOUND_TOGGLE,
     MENU_ACTION_MINIMAP_TOGGLE,
     MENU_ACTION_ENEMY_MARKERS_TOGGLE,
+    MENU_ACTION_WEAPON_MARKERS_TOGGLE,
     MENU_ACTION_SAVE,
     MENU_ACTION_LOAD
 } MenuAction;

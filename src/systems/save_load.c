@@ -12,7 +12,7 @@
 #endif
 
 #define SAVE_MAGIC   "WOLF2026"
-#define SAVE_VERSION 12
+#define SAVE_VERSION 13
 #define SAVE_GUN_COUNT_V7 5
 #define SAVE_GUN_COUNT_V10 6
 
@@ -111,6 +111,7 @@ int save_game(int slot, int level, const Player *p, const GameState *g, const Ma
     fwrite(&s->sound_on, sizeof(s->sound_on), 1, f);
     fwrite(&s->minimap_on, sizeof(s->minimap_on), 1, f);
     fwrite(&s->enemy_positions_on, sizeof(s->enemy_positions_on), 1, f);
+    fwrite(&s->weapon_pickups_on, sizeof(s->weapon_pickups_on), 1, f);
 
     fwrite(&m->width, sizeof(m->width), 1, f);
     fwrite(&m->height, sizeof(m->height), 1, f);
@@ -141,6 +142,9 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
     }
 
     SaveSettings loaded_settings = *s;
+    if (ver < 13) {
+        loaded_settings.weapon_pickups_on = 0;
+    }
 
     if (fread(level, sizeof(*level), 1, f) != 1) {
         fclose(f);
@@ -257,10 +261,15 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
             fclose(f);
             return -1;
         }
+        if (ver >= 13 && fread(&loaded_settings.weapon_pickups_on, sizeof(loaded_settings.weapon_pickups_on), 1, f) != 1) {
+            fclose(f);
+            return -1;
+        }
         loaded_settings.music_on = loaded_settings.music_on != 0;
         loaded_settings.sound_on = loaded_settings.sound_on != 0;
         loaded_settings.minimap_on = loaded_settings.minimap_on != 0;
         loaded_settings.enemy_positions_on = loaded_settings.enemy_positions_on != 0;
+        loaded_settings.weapon_pickups_on = loaded_settings.weapon_pickups_on != 0;
     }
 
     int mw, mh;

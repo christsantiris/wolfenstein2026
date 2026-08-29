@@ -12,6 +12,7 @@ typedef struct {
     int sound_on;
     int minimap_on;
     int enemy_positions_on;
+    int weapon_pickups_on;
 } SaveSettings;
 
 int save_game(int slot, int level, const Player *p, const GameState *g, const Map *m, const SaveSettings *s);
