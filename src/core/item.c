@@ -21,6 +21,12 @@ void item_list_init(ItemList *il, const Map *m, int level, float px, float py) {
         health->type = ITEM_HEALTH;
         health->active = 1;
 
+        Item *extra_health = &il->items[il->count++];
+        extra_health->x = 20.5f;
+        extra_health->y = 17.5f;
+        extra_health->type = ITEM_HEALTH;
+        extra_health->active = 1;
+
         Item *reserve = &il->items[il->count++];
         reserve->x = 8.5f;
         reserve->y = 17.5f;
