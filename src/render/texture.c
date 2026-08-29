@@ -1212,6 +1212,25 @@ void texture_generate_weapon_kit_battle_rifle(Texture *t) {
     }
 }
 
+void texture_generate_weapon_kit_rifle_grenade(Texture *t) {
+    texture_generate_weapon_kit_battle_rifle(t);
+    int W = t->width;
+    int H = t->height;
+    for (int y = H * 20 / 64; y < H * 39 / 64; y++) {
+        for (int x = W * 51 / 64; x < W * 61 / 64; x++) {
+            int edge = x == W * 51 / 64 || x == W * 61 / 64 - 1 || y == H * 20 / 64 || y == H * 39 / 64 - 1;
+            unsigned char value = edge ? 24 : 58;
+            set_px(t, x, y, value, value, (unsigned char)(value + 5));
+        }
+    }
+    for (int y = H * 22 / 64; y < H * 37 / 64; y++) {
+        for (int x = W * 57 / 64; x < W * 63 / 64; x++) {
+            int vary = ((x * 5 + y * 3) % 8) - 4;
+            set_px(t, x, y, (unsigned char)(82 + vary), (unsigned char)(79 + vary), (unsigned char)(38 + vary));
+        }
+    }
+}
+
 void texture_generate_weapon_kit_ak47(Texture *t) {
     int W = t->width;
     int H = t->height;

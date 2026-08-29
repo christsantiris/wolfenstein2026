@@ -5,8 +5,6 @@
 #include "core/item.h"
 #include "core/player.h"
 
-#define AMMO_RESERVE_MAX    99
-
 typedef enum {
     GUN_9MM_HANDGUN = 0,
     GUN_DUAL_HANDGUN,
@@ -14,6 +12,7 @@ typedef enum {
     GUN_AK47,
     GUN_BATTLE_RIFLE,
     GUN_KNIFE,
+    GUN_RIFLE_GRENADE,
     GUN_COUNT
 } GunType;
 
@@ -22,6 +21,7 @@ typedef struct {
     const char *sound_path;
     const char *reload_sound_path;
     int max_ammo;
+    int reserve_capacity;
     int damage;
     float cone;
     float shot_cooldown;
@@ -54,7 +54,7 @@ int game_ammo_pickup_amount(int difficulty);
 int game_weapon_unlock_reserve(const WeaponDef *weapon, int difficulty);
 int game_level_start_health(int health, int difficulty);
 void game_init(GameState *g);
-int  game_shoot(GameState *g, const Player *p);
+int  game_shoot(GameState *g, const Player *p, const Map *m);
 int  game_pistol_whip(GameState *g, const Player *p);
 int  game_reload(GameState *g);
 void game_cycle_weapon(GameState *g);

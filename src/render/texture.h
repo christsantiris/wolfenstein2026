@@ -36,5 +36,6 @@ void texture_generate_weapon_kit(Texture *t);
 void texture_generate_weapon_kit_ak47(Texture *t);
 void texture_generate_weapon_kit_dual(Texture *t);
 void texture_generate_weapon_kit_battle_rifle(Texture *t);
+void texture_generate_weapon_kit_rifle_grenade(Texture *t);
 
 #endif

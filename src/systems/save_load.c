@@ -12,8 +12,9 @@
 #endif
 
 #define SAVE_MAGIC   "WOLF2026"
-#define SAVE_VERSION 10
+#define SAVE_VERSION 11
 #define SAVE_GUN_COUNT_V7 5
+#define SAVE_GUN_COUNT_V10 6
 
 static void create_save_directory(void) {
 #ifdef _WIN32
@@ -161,7 +162,14 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
     if (fread(&g->difficulty, sizeof(g->difficulty), 1, f) != 1) { fclose(f); return -1; }
     if (fread(&g->health, sizeof(g->health), 1, f) != 1) { fclose(f); return -1; }
     if (fread(&g->ammo, sizeof(g->ammo), 1, f) != 1) { fclose(f); return -1; }
-    size_t saved_gun_bytes = ver >= 8 ? sizeof(g->reserve_ammo_per_gun) : sizeof(int) * SAVE_GUN_COUNT_V7;
+    size_t saved_gun_bytes;
+    if (ver >= 11) {
+        saved_gun_bytes = sizeof(g->reserve_ammo_per_gun);
+    } else if (ver >= 8) {
+        saved_gun_bytes = sizeof(int) * SAVE_GUN_COUNT_V10;
+    } else {
+        saved_gun_bytes = sizeof(int) * SAVE_GUN_COUNT_V7;
+    }
     if (fread(g->reserve_ammo_per_gun, saved_gun_bytes, 1, f) != 1) { fclose(f); return -1; }
     if (fread(&g->score, sizeof(g->score), 1, f) != 1) { fclose(f); return -1; }
     int wtype;

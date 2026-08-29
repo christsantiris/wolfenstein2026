@@ -87,6 +87,13 @@ void item_list_init(ItemList *il, const Map *m, int level, float px, float py) {
         it->type = ITEM_WEAPON_KIT;
         it->active = 1;
     }
+    if (level == 8 && il->count < MAX_ITEMS) {
+        Item *it = &il->items[il->count++];
+        it->x = 14.5f;
+        it->y = 12.5f;
+        it->type = ITEM_WEAPON_KIT_RIFLE_GRENADE;
+        it->active = 1;
+    }
     if (level == 10 && il->count < MAX_ITEMS && nc > count) {
         int j = count + rand() % (nc - count);
         Item *it = &il->items[il->count++];
