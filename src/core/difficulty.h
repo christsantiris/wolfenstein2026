@@ -10,12 +10,24 @@ typedef enum {
 } Difficulty;
 
 typedef struct {
+    Difficulty id;
     const char *name;
     int enabled;
-    int enemy_damage;
-    float enemy_speed;
-    float attack_cooldown;
-    float sight_range;
+    float enemy_health_multiplier;
+    float enemy_speed_multiplier;
+    float enemy_sight_multiplier;
+    float enemy_damage_multiplier;
+    int enemy_count_bonus;
+    int health_pickup_amount;
+    int ammo_pickup_amount;
+    int weapon_unlock_spare_magazines;
+    int level_start_health_floor;
+    int kill_score;
+    int boss_max_health;
+    int miniboss_max_health;
+    int miniboss_wave_count;
+    int boss_support_count;
+    int boss_wave_count;
 } DifficultyDef;
 
 const DifficultyDef *difficulty_get(Difficulty d);

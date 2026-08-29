@@ -1,4 +1,5 @@
 #include "core/enemy.h"
+#include "core/difficulty.h"
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
@@ -56,21 +57,15 @@ static int enemy_can_stand(const Map *m, float x, float y, float radius) {
     return 1;
 }
 
-static const float SPEED_MULT[4] = { 0.80f, 1.0f, 1.15f, 1.30f };
-static const float SIGHT_MULT[4] = { 0.80f, 1.0f, 1.20f, 1.40f };
-static const float HEALTH_MULT[4] = { 0.75f, 1.0f, 1.15f, 1.30f };
-static const int BOSS_MAX_HEALTH[4] = { 1200, 1600, 1840, 2080 };
-static const int MINIBOSS_MAX_HEALTH[4] = { 712, 950, 1092, 1235 };
-
 int enemy_max_health(EnemyType type, int difficulty) {
-    int d = difficulty < 4 ? difficulty : 3;
+    const DifficultyDef *settings = difficulty_get((Difficulty)difficulty);
     if (type == ENEMY_TYPE_BOSS) {
-        return BOSS_MAX_HEALTH[d];
+        return settings->boss_max_health;
     }
     if (type == ENEMY_TYPE_MINIBOSS) {
-        return MINIBOSS_MAX_HEALTH[d];
+        return settings->miniboss_max_health;
     }
-    int health = (int)(enemy_def(type)->max_health * HEALTH_MULT[d]);
+    int health = (int)(enemy_def(type)->max_health * settings->enemy_health_multiplier);
     return health > 0 ? health : 1;
 }
 
@@ -79,9 +74,9 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficul
         return 0;
     }
     const EnemyDef *def = enemy_def(e->type);
-    int d = difficulty < 4 ? difficulty : 3;
-    float speed = def->speed * SPEED_MULT[d];
-    float sight = def->sight_range * SIGHT_MULT[d];
+    const DifficultyDef *settings = difficulty_get((Difficulty)difficulty);
+    float speed = def->speed * settings->enemy_speed_multiplier;
+    float sight = def->sight_range * settings->enemy_sight_multiplier;
     float attack_cooldown = def->attack_cooldown;
 
     if (e->type == ENEMY_TYPE_BOSS) {
@@ -160,8 +155,6 @@ int enemy_list_all_dead(const EnemyList *el) {
     return 1;
 }
 
-static const int COUNT_BONUS[4] = { -1, 0, 2, 4 };
-
 static void place(EnemyList *el, float x, float y, EnemyType type, int difficulty) {
     if (el->count >= MAX_ENEMIES) {
         return;
@@ -197,15 +190,14 @@ int enemy_list_call_reinforcements(EnemyList *el, const Player *p, const Map *m,
     }
 
     leader->reinforcements_called = 1;
-    int d = difficulty < 4 ? difficulty : 3;
-    static const int MINIBOSS_WAVE_COUNT[4] = { 2, 3, 4, 5 };
+    const DifficultyDef *settings = difficulty_get((Difficulty)difficulty);
+    int d = settings->id;
     static const EnemyType MINIBOSS_WAVE_TYPES[4][5] = {
         { ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD_SHOTGUN },
         { ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER },
         { ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS, ENEMY_TYPE_GUARD },
         { ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS, ENEMY_TYPE_SS, ENEMY_TYPE_GUARD }
     };
-    static const int BOSS_WAVE_COUNT[4] = { 2, 3, 4, 5 };
     static const EnemyType BOSS_WAVE_TYPES[4][5] = {
         { ENEMY_TYPE_GUARD, ENEMY_TYPE_OFFICER },
         { ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS },
@@ -214,7 +206,7 @@ int enemy_list_call_reinforcements(EnemyList *el, const Player *p, const Map *m,
     };
     static const float SPAWN_X[8] = { 2.5f, 25.5f, 2.5f, 25.5f, 14.5f, 14.5f, 2.5f, 25.5f };
     static const float SPAWN_Y[8] = { 2.5f, 2.5f, 18.5f, 18.5f, 18.5f, 7.5f, 10.5f, 10.5f };
-    int wave_count = leader->type == ENEMY_TYPE_BOSS ? BOSS_WAVE_COUNT[d] : MINIBOSS_WAVE_COUNT[d];
+    int wave_count = leader->type == ENEMY_TYPE_BOSS ? settings->boss_wave_count : settings->miniboss_wave_count;
     const EnemyType *wave_types = leader->type == ENEMY_TYPE_BOSS ? BOSS_WAVE_TYPES[d] : MINIBOSS_WAVE_TYPES[d];
 
     int spawned = 0;
@@ -250,7 +242,6 @@ void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, flo
     }
 
     if (level == 11) {
-        static const int SUPPORT_COUNT[4] = { 3, 4, 5, 6 };
         static const EnemyType SUPPORT_TYPES[4][6] = {
             { ENEMY_TYPE_GUARD, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS },
             { ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS },
@@ -259,15 +250,17 @@ void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, flo
         };
         static const float SUPPORT_X[6] = { 5.5f, 22.5f, 22.5f, 5.5f, 5.5f, 22.5f };
         static const float SUPPORT_Y[6] = { 14.5f, 14.5f, 12.5f, 12.5f, 8.5f, 8.5f };
-        int d = difficulty < 4 ? difficulty : 3;
+        const DifficultyDef *settings = difficulty_get((Difficulty)difficulty);
+        int d = settings->id;
         place(el, 14.5f, 4.5f, ENEMY_TYPE_BOSS, difficulty);
-        for (int i = 0; i < SUPPORT_COUNT[d]; i++) {
+        for (int i = 0; i < settings->boss_support_count; i++) {
             place(el, SUPPORT_X[i], SUPPORT_Y[i], SUPPORT_TYPES[d][i], difficulty);
         }
         return;
     }
 
-    int count = 4 + level + COUNT_BONUS[difficulty < 4 ? difficulty : 3];
+    const DifficultyDef *settings = difficulty_get((Difficulty)difficulty);
+    int count = 4 + level + settings->enemy_count_bonus;
     if (count > MAX_ENEMIES) { count = MAX_ENEMIES; }
 
     typedef struct { float x; float y; } Pos;

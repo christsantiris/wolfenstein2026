@@ -1,10 +1,10 @@
 #include "core/game.h"
+#include "core/difficulty.h"
 #include <math.h>
 #include <stddef.h>
 #include <string.h>
 
 #define SHOT_RANGE 20.0f
-static const int KILL_SCORE[4] = { 75, 100, 150, 200 };
 #define WHIP_DAMAGE 50
 #define WHIP_RANGE 1.5f
 #define WHIP_CONE 0.5f
@@ -45,22 +45,18 @@ const WeaponDef *weapon_def(GunType type) {
 }
 
 int game_ammo_pickup_amount(int difficulty) {
-    static const int AMOUNTS[4] = { 12, 10, 8, 6 };
-    int d = difficulty >= 0 && difficulty < 4 ? difficulty : 3;
-    return AMOUNTS[d];
+    return difficulty_get((Difficulty)difficulty)->ammo_pickup_amount;
 }
 
 int game_weapon_unlock_reserve(const WeaponDef *weapon, int difficulty) {
-    static const int SPARE_MAGAZINES[4] = { 3, 2, 1, 1 };
-    int d = difficulty >= 0 && difficulty < 4 ? difficulty : 3;
-    int reserve = weapon->max_ammo * SPARE_MAGAZINES[d];
+    const DifficultyDef *settings = difficulty_get((Difficulty)difficulty);
+    int reserve = weapon->max_ammo * settings->weapon_unlock_spare_magazines;
     return reserve < AMMO_RESERVE_MAX ? reserve : AMMO_RESERVE_MAX;
 }
 
 int game_level_start_health(int health, int difficulty) {
-    static const int RECOVERY_FLOOR[4] = { 100, 100, 75, 50 };
-    int d = difficulty >= 0 && difficulty < 4 ? difficulty : 3;
-    return health < RECOVERY_FLOOR[d] ? RECOVERY_FLOOR[d] : health;
+    int floor = difficulty_get((Difficulty)difficulty)->level_start_health_floor;
+    return health < floor ? floor : health;
 }
 
 void game_init(GameState *g) {
@@ -185,7 +181,7 @@ static void game_shoot_shotgun(GameState *g, const Player *p) {
             target->health -= g->current_weapon.damage;
             if (target->health <= 0) {
                 target->active = 0;
-                g->score += KILL_SCORE[g->difficulty < 4 ? g->difficulty : 3];
+                g->score += difficulty_get((Difficulty)g->difficulty)->kill_score;
             }
         }
     }
@@ -235,7 +231,7 @@ int game_shoot(GameState *g, const Player *p) {
         target->health -= g->current_weapon.damage;
         if (target->health <= 0) {
             target->active = 0;
-            g->score += KILL_SCORE[g->difficulty < 4 ? g->difficulty : 3];
+            g->score += difficulty_get((Difficulty)g->difficulty)->kill_score;
         }
     }
     return 1;
@@ -276,7 +272,7 @@ int game_pistol_whip(GameState *g, const Player *p) {
         target->health -= WHIP_DAMAGE;
         if (target->health <= 0) {
             target->active = 0;
-            g->score += KILL_SCORE[g->difficulty < 4 ? g->difficulty : 3];
+            g->score += difficulty_get((Difficulty)g->difficulty)->kill_score;
         }
     }
     return 1;
@@ -284,14 +280,13 @@ int game_pistol_whip(GameState *g, const Player *p) {
 
 int game_update_enemies(GameState *g, const Player *p, const Map *m, float dt) {
     int bark = 0;
+    const DifficultyDef *settings = difficulty_get((Difficulty)g->difficulty);
     for (int i = 0; i < g->enemies.count; i++) {
         Enemy *e = &g->enemies.enemies[i];
         EnemyState prev = e->state;
-        static const float DAMAGE_MULT[4] = { 0.6f, 1.0f, 1.35f, 1.9f };
         int dmg = enemy_update(e, p, m, dt, g->difficulty);
         if (dmg > 0) {
-            int d = g->difficulty < 4 ? g->difficulty : 3;
-            dmg = (int)(dmg * DAMAGE_MULT[d]);
+            dmg = (int)(dmg * settings->enemy_damage_multiplier);
             if (dmg < 1) { dmg = 1; }
             g->health -= dmg;
             if (g->health < 0) {

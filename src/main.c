@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "core/difficulty.h"
 #include "core/map.h"
 #include "core/player.h"
 #include "core/game.h"
@@ -674,8 +675,7 @@ int main(int argc, char **argv) {
                             game.reserve_ammo_per_gun[game.current_weapon.type] = AMMO_RESERVE_MAX;
                         }
                     } else if (it->type == ITEM_HEALTH) {
-                        static const int HEALTH_PICKUP[4] = { 40, 25, 15, 10 };
-                        int heal = HEALTH_PICKUP[game.difficulty < 4 ? game.difficulty : 3];
+                        int heal = difficulty_get((Difficulty)game.difficulty)->health_pickup_amount;
                         game.health += heal;
                         if (game.health > 100) { game.health = 100; }
                     } else if (it->type == ITEM_WEAPON_KIT_DUAL) {

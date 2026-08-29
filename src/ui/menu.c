@@ -1,4 +1,5 @@
 #include "ui/menu.h"
+#include "core/difficulty.h"
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
@@ -326,19 +327,14 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
     SDL_RenderDrawLine(r, l.bx + 10, y, l.bx + l.bw - 10, y);
     y += 10;
 
-    static const char *DIFF_LABELS[4] = {
-        "CAN I PLAY, DADDY?",
-        "DONT HURT ME.",
-        "BRING EM ON",
-        "I AM DEATH INCARNATE"
-    };
-    int di = (m->difficulty >= 0 && m->difficulty < 4) ? m->difficulty : 0;
+    Difficulty difficulty = m->difficulty >= 0 && m->difficulty < DIFF_COUNT ? (Difficulty)m->difficulty : DIFF_CAN_I_PLAY_DADDY;
+    const char *difficulty_name = difficulty_get(difficulty)->name;
     draw_centered(r, "SETTINGS", l.bx, y, l.bw, dim);
     y += LHEIGHT;
     char level_buf[8];
     snprintf(level_buf, sizeof(level_buf), "%d", m->current_level);
     draw_row(r, "LEVEL",       level_buf,                   l.bx, y, l.bw); y += LHEIGHT;
-    draw_row(r, "DIFFICULTY",  DIFF_LABELS[di],             l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "DIFFICULTY", difficulty_name, l.bx, y, l.bw); y += LHEIGHT;
     if (m->selected == MENU_ITEM_MUSIC) {
         SDL_SetRenderDrawColor(r, 70, 52, 12, 255);
         SDL_Rect hl = { l.bx + 4, y - 2, l.bw - 8, CH + 4 };
