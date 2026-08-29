@@ -23,7 +23,7 @@
 
 #define SCREEN_W 800
 #define SCREEN_H 600
-#define LEVEL_COUNT 11
+#define LEVEL_COUNT 12
 
 typedef enum {
     APP_LANDING,
@@ -122,10 +122,11 @@ int main(int argc, char **argv) {
         "assets/textures/wall_level5_wood.ppm",
         "assets/textures/wall_level6_command_bunker.ppm",
         "assets/textures/wall_level7_moss_stone.ppm",
-        "assets/textures/wall_level8_military_brick.ppm",
-        "assets/textures/wall_level9_steel.ppm",
-        "assets/textures/wall_level10_bunker.ppm",
-        "assets/textures/wall_level11_obsidian.ppm"
+        "assets/textures/wall_level8_kennels.ppm",
+        "assets/textures/wall_level9_military_brick.ppm",
+        "assets/textures/wall_level10_steel.ppm",
+        "assets/textures/wall_level11_bunker.ppm",
+        "assets/textures/wall_level12_obsidian.ppm"
     };
     void (*wall_fallbacks[LEVEL_COUNT])(Texture *) = {
         texture_generate_brick,
@@ -135,6 +136,7 @@ int main(int argc, char **argv) {
         texture_generate_wood,
         texture_generate_command_bunker,
         texture_generate_moss_stone,
+        texture_generate_stone,
         texture_generate_red_blue_brick,
         texture_generate_metal_panels,
         texture_generate_command_bunker,
@@ -168,10 +170,11 @@ int main(int argc, char **argv) {
         "assets/textures/floor_level5_wood.ppm",
         "assets/textures/floor_level6_command_bunker.ppm",
         "assets/textures/floor_level7_moss_stone.ppm",
-        "assets/textures/floor_level8_military_brick.ppm",
-        "assets/textures/floor_level9_steel.ppm",
-        "assets/textures/floor_level10_bunker.ppm",
-        "assets/textures/floor_level11_obsidian.ppm"
+        "assets/textures/floor_level8_kennels.ppm",
+        "assets/textures/floor_level9_military_brick.ppm",
+        "assets/textures/floor_level10_steel.ppm",
+        "assets/textures/floor_level11_bunker.ppm",
+        "assets/textures/floor_level12_obsidian.ppm"
     };
     int floor_tex_ready = 1;
     for (int fl = 0; fl < LEVEL_COUNT; fl++) {
@@ -485,6 +488,9 @@ int main(int argc, char **argv) {
     music_load(&level_music[8], "assets/music/level9theme.mp3");
     music_load(&level_music[9], "assets/music/level10theme.mp3");
     music_load(&level_music[10], "assets/music/level11theme.mp3");
+    music_load(&level_music[11], "assets/music/level12theme.mp3");
+    music_load(&level_music[10], "assets/music/level11theme.mp3");
+    music_load(&level_music[11], "assets/music/level12theme.mp3");
 
     HighScoreTable hs_table;
     highscore_load(&hs_table);

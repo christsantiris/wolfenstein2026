@@ -95,7 +95,7 @@ typedef struct {
     int metal_b;
 } DoorPalette;
 
-static const DoorPalette DOOR_PALETTES[11] = {
+static const DoorPalette DOOR_PALETTES[12] = {
     { 126, 54, 42, 92, 34, 28, 158, 82, 58, 72, 68, 62 },
     { 104, 108, 106, 70, 75, 75, 145, 148, 140, 68, 72, 72 },
     { 142, 112, 72, 100, 75, 48, 178, 145, 84, 82, 71, 55 },
@@ -103,6 +103,7 @@ static const DoorPalette DOOR_PALETTES[11] = {
     { 88, 62, 38, 55, 39, 26, 142, 105, 62, 70, 65, 56 },
     { 72, 78, 59, 48, 54, 40, 112, 116, 76, 61, 66, 63 },
     { 76, 87, 67, 47, 59, 46, 108, 119, 81, 62, 68, 64 },
+    { 82, 88, 74, 52, 58, 47, 119, 126, 103, 63, 68, 61 },
     { 112, 58, 48, 76, 39, 34, 138, 82, 63, 66, 69, 70 },
     { 92, 101, 108, 58, 66, 73, 134, 145, 150, 62, 70, 76 },
     { 58, 65, 55, 36, 43, 38, 91, 99, 77, 50, 57, 55 },
@@ -238,7 +239,7 @@ static void generate_detailed_door(Texture *t, const DoorPalette *p, int exit_do
 
 void texture_generate_door(Texture *t, int level) {
     int palette = level - 1;
-    if (palette < 0 || palette >= 11) {
+    if (palette < 0 || palette >= 12) {
         palette = 0;
     }
     generate_detailed_door(t, &DOOR_PALETTES[palette], 0, level);

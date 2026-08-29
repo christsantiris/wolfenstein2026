@@ -247,7 +247,24 @@ void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, flo
         return;
     }
 
-    if (level == 11) {
+    if (level == 8) {
+        static const float DOG_X[20] = {
+            3.5f, 24.5f, 3.5f, 24.5f, 3.5f, 24.5f, 3.5f, 24.5f, 3.5f, 24.5f,
+            8.5f, 19.5f, 8.5f, 19.5f, 8.5f, 19.5f, 8.5f, 19.5f, 8.5f, 19.5f
+        };
+        static const float DOG_Y[20] = {
+            1.5f, 1.5f, 5.5f, 5.5f, 9.5f, 9.5f, 14.5f, 14.5f, 18.5f, 18.5f,
+            3.5f, 3.5f, 7.5f, 7.5f, 11.5f, 11.5f, 16.5f, 16.5f, 20.5f, 20.5f
+        };
+        const DifficultyDef *settings = difficulty_get((Difficulty)difficulty);
+        int dog_count = 14 + settings->enemy_count_bonus;
+        for (int i = 0; i < dog_count; i++) {
+            place(el, DOG_X[i], DOG_Y[i], ENEMY_TYPE_DOG, difficulty);
+        }
+        return;
+    }
+
+    if (level == 12) {
         static const EnemyType SUPPORT_TYPES[4][6] = {
             { ENEMY_TYPE_GUARD, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS },
             { ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS },

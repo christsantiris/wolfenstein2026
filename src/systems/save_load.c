@@ -12,7 +12,7 @@
 #endif
 
 #define SAVE_MAGIC   "WOLF2026"
-#define SAVE_VERSION 9
+#define SAVE_VERSION 10
 #define SAVE_GUN_COUNT_V7 5
 
 static void create_save_directory(void) {
@@ -137,6 +137,9 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
         return -1;
     }
     if (ver < 9 && *level >= 6) {
+        (*level)++;
+    }
+    if (ver < 10 && *level >= 8) {
         (*level)++;
     }
 
