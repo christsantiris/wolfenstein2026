@@ -99,6 +99,15 @@ int main(int argc, char **argv) {
         return 1;
     }
     SDL_RenderSetLogicalSize(renderer, SCREEN_W, SCREEN_H);
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+
+    SDL_Texture *frame_target = NULL;
+    if (SDL_RenderTargetSupported(renderer)) {
+        frame_target = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_W, SCREEN_H);
+    }
+    if (!frame_target) {
+        fprintf(stderr, "Fixed render target unavailable: %s\n", SDL_GetError());
+    }
 
     Map map;
     if (map_load(&map, "assets/maps/level1.map") != 0) {
@@ -865,6 +874,11 @@ int main(int argc, char **argv) {
             world_depth_size = required_depth_size;
         }
 
+        int using_frame_target = 0;
+        if (frame_target && SDL_SetRenderTarget(renderer, frame_target) == 0) {
+            using_frame_target = 1;
+        }
+
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
@@ -925,6 +939,13 @@ int main(int argc, char **argv) {
             slot_picker_render(renderer, &slot_picker, w, h);
         }
 
+        if (using_frame_target) {
+            SDL_SetRenderTarget(renderer, NULL);
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderClear(renderer);
+            SDL_Rect output = { 0, 0, SCREEN_W, SCREEN_H };
+            SDL_RenderCopy(renderer, frame_target, NULL, &output);
+        }
         SDL_RenderPresent(renderer);
     }
 
@@ -968,6 +989,9 @@ int main(int argc, char **argv) {
     for (int fl = LEVEL_COUNT - 1; fl >= 0; fl--) { texture_free(&floor_tex[fl]); }
     for (int wl = LEVEL_COUNT - 1; wl >= 0; wl--) { texture_free(&wall_tex[wl]); }
     map_free(&map);
+    if (frame_target) {
+        SDL_DestroyTexture(frame_target);
+    }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
