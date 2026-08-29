@@ -75,7 +75,7 @@ Pull requests are welcome. Please keep changes small and focused — one feature
 MIT
 
 ## Roadmap
-- Additional weapons (grenade launcher?)
+- Additional levels
 
 ## Sound Effects courtesy of
 https://pixabay.com
