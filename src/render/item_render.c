@@ -3,7 +3,7 @@
 
 #define FOV_FACTOR 0.66f
 
-void item_render_all(SDL_Renderer *renderer, const Player *p, const ItemList *il, const float *zbuf, const Texture *ammo_tex, const Texture *health_tex, const Texture *weapon_kit_tex, const Texture *weapon_kit_ak47_tex, const Texture *weapon_kit_dual_tex, const Texture *weapon_kit_battle_rifle_tex, int screen_w, int screen_h) {
+void item_render_all(SDL_Renderer *renderer, const Player *p, const ItemList *il, float *depth_buffer, const Texture *ammo_tex, const Texture *health_tex, const Texture *weapon_kit_tex, const Texture *weapon_kit_ak47_tex, const Texture *weapon_kit_dual_tex, const Texture *weapon_kit_battle_rifle_tex, const Texture *weapon_kit_rifle_grenade_tex, int screen_w, int screen_h) {
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
     float plane_x = -dir_y * FOV_FACTOR;
@@ -42,12 +42,14 @@ void item_render_all(SDL_Renderer *renderer, const Player *p, const ItemList *il
                            : (it->type == ITEM_WEAPON_KIT_AK47) ? weapon_kit_ak47_tex
                            : (it->type == ITEM_WEAPON_KIT_DUAL) ? weapon_kit_dual_tex
                            : (it->type == ITEM_WEAPON_KIT_BATTLE_RIFLE) ? weapon_kit_battle_rifle_tex
+                           : (it->type == ITEM_WEAPON_KIT_RIFLE_GRENADE) ? weapon_kit_rifle_grenade_tex
                            : weapon_kit_tex;
 
         for (int x = draw_x0; x < draw_x1; x++) {
-            if (transform_y >= zbuf[x]) { continue; }
             float u = (float)(x - (screen_x - sprite_w / 2)) / sprite_w;
             for (int y = draw_y0; y < draw_y1; y++) {
+                int depth_index = y * screen_w + x;
+                if (transform_y >= depth_buffer[depth_index]) { continue; }
                 float v = (float)(y - tex_y_base) / sprite_h;
                 unsigned int colour = texture_sample(tex, u, v);
                 unsigned char r = (colour >> 16) & 0xFF;
@@ -56,6 +58,7 @@ void item_render_all(SDL_Renderer *renderer, const Player *p, const ItemList *il
                 if (r == 255 && g == 0 && b == 255) { continue; }
                 SDL_SetRenderDrawColor(renderer, r, g, b, 255);
                 SDL_RenderDrawPoint(renderer, x, y);
+                depth_buffer[depth_index] = transform_y;
             }
         }
     }

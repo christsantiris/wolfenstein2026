@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include "core/difficulty.h"
 #include "core/map.h"
@@ -23,7 +24,7 @@
 
 #define SCREEN_W 800
 #define SCREEN_H 600
-#define LEVEL_COUNT 11
+#define LEVEL_COUNT 12
 
 typedef enum {
     APP_LANDING,
@@ -122,10 +123,11 @@ int main(int argc, char **argv) {
         "assets/textures/wall_level5_wood.ppm",
         "assets/textures/wall_level6_command_bunker.ppm",
         "assets/textures/wall_level7_moss_stone.ppm",
-        "assets/textures/wall_level8_military_brick.ppm",
-        "assets/textures/wall_level9_steel.ppm",
-        "assets/textures/wall_level10_bunker.ppm",
-        "assets/textures/wall_level11_obsidian.ppm"
+        "assets/textures/wall_level8_kennels.ppm",
+        "assets/textures/wall_level9_military_brick.ppm",
+        "assets/textures/wall_level10_steel.ppm",
+        "assets/textures/wall_level11_bunker.ppm",
+        "assets/textures/wall_level12_obsidian.ppm"
     };
     void (*wall_fallbacks[LEVEL_COUNT])(Texture *) = {
         texture_generate_brick,
@@ -135,6 +137,7 @@ int main(int argc, char **argv) {
         texture_generate_wood,
         texture_generate_command_bunker,
         texture_generate_moss_stone,
+        texture_generate_stone,
         texture_generate_red_blue_brick,
         texture_generate_metal_panels,
         texture_generate_command_bunker,
@@ -168,10 +171,11 @@ int main(int argc, char **argv) {
         "assets/textures/floor_level5_wood.ppm",
         "assets/textures/floor_level6_command_bunker.ppm",
         "assets/textures/floor_level7_moss_stone.ppm",
-        "assets/textures/floor_level8_military_brick.ppm",
-        "assets/textures/floor_level9_steel.ppm",
-        "assets/textures/floor_level10_bunker.ppm",
-        "assets/textures/floor_level11_obsidian.ppm"
+        "assets/textures/floor_level8_kennels.ppm",
+        "assets/textures/floor_level9_military_brick.ppm",
+        "assets/textures/floor_level10_steel.ppm",
+        "assets/textures/floor_level11_bunker.ppm",
+        "assets/textures/floor_level12_obsidian.ppm"
     };
     int floor_tex_ready = 1;
     for (int fl = 0; fl < LEVEL_COUNT; fl++) {
@@ -266,6 +270,10 @@ int main(int argc, char **argv) {
     texture_create(&weapon_kit_battle_rifle_tex, 64, 64);
     texture_generate_weapon_kit_battle_rifle(&weapon_kit_battle_rifle_tex);
 
+    Texture weapon_kit_rifle_grenade_tex;
+    texture_create(&weapon_kit_rifle_grenade_tex, 64, 64);
+    texture_generate_weapon_kit_rifle_grenade(&weapon_kit_rifle_grenade_tex);
+
     Texture shotgun_tex;
     if (texture_load_ppm(&shotgun_tex, "assets/sprites/shotgun.ppm") != 0) {
         texture_create(&shotgun_tex, 64, 64);
@@ -306,13 +314,20 @@ int main(int argc, char **argv) {
         for (int i = 0; i < 64 * 64 * 3; i++) { battle_rifle_tex.pixels[i] = 0; }
     }
 
+    Texture rifle_grenade_tex;
+    if (texture_load_ppm(&rifle_grenade_tex, "assets/sprites/rifle_grenade_launcher.ppm") != 0) {
+        texture_create(&rifle_grenade_tex, 64, 64);
+        for (int i = 0; i < 64 * 64 * 3; i++) { rifle_grenade_tex.pixels[i] = 0; }
+    }
+
     const Texture *weapon_textures[GUN_COUNT] = {
         [GUN_9MM_HANDGUN] = &pistol_tex,
         [GUN_DUAL_HANDGUN] = &dual_handgun_tex,
         [GUN_SHOTGUN] = &shotgun_tex,
         [GUN_AK47] = &ak47_tex,
         [GUN_BATTLE_RIFLE] = &battle_rifle_tex,
-        [GUN_KNIFE] = &knife_tex
+        [GUN_KNIFE] = &knife_tex,
+        [GUN_RIFLE_GRENADE] = &rifle_grenade_tex
     };
     Texture reload_tex[GUN_COUNT][WEAPON_RELOAD_FRAME_COUNT] = { 0 };
     const char *reload_paths[GUN_COUNT][WEAPON_RELOAD_FRAME_COUNT] = {
@@ -320,9 +335,13 @@ int main(int argc, char **argv) {
         [GUN_DUAL_HANDGUN] = { "assets/sprites/dual_handgun_reload_1.ppm", "assets/sprites/dual_handgun_reload_2.ppm", "assets/sprites/dual_handgun_reload_3.ppm" },
         [GUN_SHOTGUN] = { "assets/sprites/shotgun_reload_1.ppm", "assets/sprites/shotgun_reload_2.ppm", "assets/sprites/shotgun_reload_3.ppm" },
         [GUN_AK47] = { "assets/sprites/ak47_reload_1.ppm", "assets/sprites/ak47_reload_2.ppm", "assets/sprites/ak47_reload_3.ppm" },
-        [GUN_BATTLE_RIFLE] = { "assets/sprites/battle_rifle_reload_1.ppm", "assets/sprites/battle_rifle_reload_2.ppm", "assets/sprites/battle_rifle_reload_3.ppm" }
+        [GUN_BATTLE_RIFLE] = { "assets/sprites/battle_rifle_reload_1.ppm", "assets/sprites/battle_rifle_reload_2.ppm", "assets/sprites/battle_rifle_reload_3.ppm" },
+        [GUN_RIFLE_GRENADE] = { "assets/sprites/rifle_grenade_launcher_reload_1.ppm", "assets/sprites/rifle_grenade_launcher_reload_2.ppm", "assets/sprites/rifle_grenade_launcher_reload_3.ppm" }
     };
-    for (int gun = 0; gun < GUN_KNIFE; gun++) {
+    for (int gun = 0; gun < GUN_COUNT; gun++) {
+        if (gun == GUN_KNIFE) {
+            continue;
+        }
         const Texture *base_tex = weapon_textures[gun];
         for (int frame = 0; frame < WEAPON_RELOAD_FRAME_COUNT; frame++) {
             if (texture_load_ppm(&reload_tex[gun][frame], reload_paths[gun][frame]) != 0) {
@@ -358,7 +377,8 @@ int main(int argc, char **argv) {
         "assets/sprites/ss_front.ppm",
         "assets/sprites/boss_front.ppm",
         "assets/sprites/shotgun_guard_front.ppm",
-        "assets/sprites/miniboss_front.ppm"
+        "assets/sprites/miniboss_front.ppm",
+        "assets/sprites/dog_dir_4.ppm"
     };
     const char *enemy_walk_paths[ENEMY_TYPE_COUNT] = {
         "assets/sprites/guard_walk.ppm",
@@ -366,7 +386,8 @@ int main(int argc, char **argv) {
         "assets/sprites/ss_walk.ppm",
         "assets/sprites/boss_walk.ppm",
         "assets/sprites/shotgun_guard_walk.ppm",
-        "assets/sprites/miniboss_walk.ppm"
+        "assets/sprites/miniboss_walk.ppm",
+        "assets/sprites/dog_dir_4.ppm"
     };
     const char *enemy_aim_paths[ENEMY_TYPE_COUNT] = {
         "assets/sprites/guard_aim.ppm",
@@ -374,7 +395,8 @@ int main(int argc, char **argv) {
         "assets/sprites/ss_aim.ppm",
         "assets/sprites/boss_aim.ppm",
         "assets/sprites/shotgun_guard_aim.ppm",
-        "assets/sprites/miniboss_aim.ppm"
+        "assets/sprites/miniboss_aim.ppm",
+        "assets/sprites/dog_dir_4.ppm"
     };
     const char *enemy_corpse_paths[ENEMY_TYPE_COUNT] = {
         "assets/sprites/guard_corpse.ppm",
@@ -382,11 +404,45 @@ int main(int argc, char **argv) {
         "assets/sprites/ss_corpse.ppm",
         "assets/sprites/boss_corpse.ppm",
         "assets/sprites/shotgun_guard_corpse.ppm",
-        "assets/sprites/miniboss_corpse.ppm"
+        "assets/sprites/miniboss_corpse.ppm",
+        "assets/sprites/dog_corpse.ppm"
     };
-    const int enemy_muzzle_y[ENEMY_TYPE_COUNT] = { 14, 13, 14, 15, 14, 18 };
-    const int enemy_flash_radius[ENEMY_TYPE_COUNT] = { 3, 3, 4, 5, 5, 5 };
+    const int enemy_muzzle_y[ENEMY_TYPE_COUNT] = { 14, 13, 14, 15, 14, 18, 0 };
+    const int enemy_flash_radius[ENEMY_TYPE_COUNT] = { 3, 3, 4, 5, 5, 5, 0 };
     for (int t = 0; t < ENEMY_TYPE_COUNT; t++) {
+        if (t == ENEMY_TYPE_DOG) {
+            const char *dog_direction_paths[8] = {
+                "assets/sprites/dog_dir_0.ppm",
+                "assets/sprites/dog_dir_1.ppm",
+                "assets/sprites/dog_dir_2.ppm",
+                "assets/sprites/dog_dir_3.ppm",
+                "assets/sprites/dog_dir_4.ppm",
+                "assets/sprites/dog_dir_5.ppm",
+                "assets/sprites/dog_dir_6.ppm",
+                "assets/sprites/dog_dir_7.ppm"
+            };
+            for (int d = 0; d < 8; d++) {
+                if (texture_load_ppm(&enemy_tex[t][d], dog_direction_paths[d]) != 0) {
+                    texture_create(&enemy_tex[t][d], etw, eth);
+                    texture_generate_guard_dir(&enemy_tex[t][d], d);
+                }
+                texture_create(&enemy_tex[t][ENEMY_SPRITE_WALK_B + d], etw, eth);
+                memcpy(enemy_tex[t][ENEMY_SPRITE_WALK_B + d].pixels, enemy_tex[t][d].pixels, (size_t)etw * eth * 3);
+            }
+            if (texture_load_ppm(&enemy_tex[t][ENEMY_SPRITE_AIM], enemy_aim_paths[t]) != 0) {
+                texture_create(&enemy_tex[t][ENEMY_SPRITE_AIM], etw, eth);
+                memcpy(enemy_tex[t][ENEMY_SPRITE_AIM].pixels, enemy_tex[t][4].pixels, (size_t)etw * eth * 3);
+            }
+            if (texture_load_ppm(&enemy_tex[t][ENEMY_SPRITE_FIRE], "assets/sprites/dog_bite.ppm") != 0) {
+                texture_create(&enemy_tex[t][ENEMY_SPRITE_FIRE], etw, eth);
+                memcpy(enemy_tex[t][ENEMY_SPRITE_FIRE].pixels, enemy_tex[t][ENEMY_SPRITE_AIM].pixels, (size_t)etw * eth * 3);
+            }
+            if (texture_load_ppm(&enemy_tex[t][ENEMY_SPRITE_CORPSE], enemy_corpse_paths[t]) != 0) {
+                texture_create(&enemy_tex[t][ENEMY_SPRITE_CORPSE], etw, eth);
+                memcpy(enemy_tex[t][ENEMY_SPRITE_CORPSE].pixels, enemy_tex[t][4].pixels, (size_t)etw * eth * 3);
+            }
+            continue;
+        }
         if (texture_load_ppm(&enemy_tex[t][4], enemy_paths[t]) != 0) {
             texture_create(&enemy_tex[t][4], etw, eth);
             if (t == ENEMY_TYPE_BOSS || t == ENEMY_TYPE_MINIBOSS) {
@@ -419,6 +475,8 @@ int main(int argc, char **argv) {
 
     int zbuf_w = 0;
     float *zbuf = NULL;
+    int world_depth_size = 0;
+    float *world_depth = NULL;
 
     Sound gun_sounds[GUN_COUNT] = { 0 };
     Sound reload_sounds[GUN_COUNT] = { 0 };
@@ -437,6 +495,10 @@ int main(int argc, char **argv) {
     sound_load(&level_sound, "assets/sounds/nextlevel.mp3");
     Sound enemy_sound = { 0 };
     sound_load(&enemy_sound, "assets/sounds/die.mp3");
+    Sound dog_sound = { 0 };
+    sound_load(&dog_sound, "assets/sounds/dog.mp3");
+    Sound explosion_sound = { 0 };
+    sound_load(&explosion_sound, "assets/sounds/explosion.mp3");
 
     Music level_music[LEVEL_COUNT] = { 0 };
     music_load(&level_music[0], "assets/music/level1theme.mp3");
@@ -450,6 +512,9 @@ int main(int argc, char **argv) {
     music_load(&level_music[8], "assets/music/level9theme.mp3");
     music_load(&level_music[9], "assets/music/level10theme.mp3");
     music_load(&level_music[10], "assets/music/level11theme.mp3");
+    music_load(&level_music[11], "assets/music/level12theme.mp3");
+    music_load(&level_music[10], "assets/music/level11theme.mp3");
+    music_load(&level_music[11], "assets/music/level12theme.mp3");
 
     HighScoreTable hs_table;
     highscore_load(&hs_table);
@@ -461,6 +526,7 @@ int main(int argc, char **argv) {
     menu.sound_on = 1;
     menu.minimap_on = 1;
     menu.enemy_markers_on = 0;
+    menu.weapon_markers_on = 0;
     int current_level = 1;
 #ifdef DEBUG_START_LEVEL
     current_level = DEBUG_START_LEVEL;
@@ -506,7 +572,8 @@ int main(int argc, char **argv) {
                         .music_on = menu.music_on,
                         .sound_on = menu.sound_on,
                         .minimap_on = menu.minimap_on,
-                        .enemy_positions_on = menu.enemy_markers_on
+                        .enemy_positions_on = menu.enemy_markers_on,
+                        .weapon_pickups_on = menu.weapon_markers_on
                     };
                     if (slot_picker.is_save) {
                         save_game(picked_slot, current_level, &player, &game, &map, &settings);
@@ -516,6 +583,7 @@ int main(int argc, char **argv) {
                             menu.sound_on = settings.sound_on;
                             menu.minimap_on = settings.minimap_on;
                             menu.enemy_markers_on = settings.enemy_positions_on;
+                            menu.weapon_markers_on = settings.weapon_pickups_on;
                             sound_set_enabled(menu.sound_on);
                             game_over = 0;
                             game_won = 0;
@@ -559,6 +627,7 @@ int main(int argc, char **argv) {
                     menu.sound_on = 1;
                     menu.minimap_on = 1;
                     menu.enemy_markers_on = 0;
+                    menu.weapon_markers_on = 0;
                     sound_set_enabled(menu.sound_on);
                     start_game(&map, &player, &game, current_level);
                     music_play(&level_music[current_level - 1]);
@@ -593,7 +662,7 @@ int main(int argc, char **argv) {
                     }
                 } else if (!game_over && !game_won) {
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
-                        if (game_shoot(&game, &player)) {
+                        if (game_shoot(&game, &player, &map)) {
                             sound_play(&gun_sounds[game.current_weapon.type]);
                         } else if (game.ammo == 0) {
                             if (game_pistol_whip(&game, &player)) {
@@ -602,7 +671,7 @@ int main(int argc, char **argv) {
                         }
                     }
                     if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
-                        if (game_shoot(&game, &player)) {
+                        if (game_shoot(&game, &player, &map)) {
                             sound_play(&gun_sounds[game.current_weapon.type]);
                         } else if (game.ammo == 0) {
                             if (game_pistol_whip(&game, &player)) {
@@ -651,8 +720,15 @@ int main(int argc, char **argv) {
 
         if (app_state == APP_PLAYING && !menu.is_open && !game_over && !game_won) {
             input_update(&player, &map, dt);
-            if (game_update_enemies(&game, &player, &map, dt)) {
+            int enemy_sound_events = game_update_enemies(&game, &player, &map, dt);
+            if (enemy_sound_events & GAME_ENEMY_SOUND_GENERIC) {
                 sound_play(&enemy_sound);
+            }
+            if (enemy_sound_events & GAME_ENEMY_SOUND_DOG) {
+                sound_play(&dog_sound);
+            }
+            if (game_update_grenade(&game, &map, dt)) {
+                sound_play(&explosion_sound);
             }
             game_update_timers(&game, dt);
             if (game.health <= 0) {
@@ -671,8 +747,8 @@ int main(int argc, char **argv) {
                             continue;
                         }
                         game.reserve_ammo_per_gun[game.current_weapon.type] += game_ammo_pickup_amount(game.difficulty);
-                        if (game.reserve_ammo_per_gun[game.current_weapon.type] > AMMO_RESERVE_MAX) {
-                            game.reserve_ammo_per_gun[game.current_weapon.type] = AMMO_RESERVE_MAX;
+                        if (game.reserve_ammo_per_gun[game.current_weapon.type] > game.current_weapon.reserve_capacity) {
+                            game.reserve_ammo_per_gun[game.current_weapon.type] = game.current_weapon.reserve_capacity;
                         }
                     } else if (it->type == ITEM_HEALTH) {
                         int heal = difficulty_get((Difficulty)game.difficulty)->health_pickup_amount;
@@ -726,6 +802,18 @@ int main(int argc, char **argv) {
                             game.reload_timer = 0.0f;
                             game.shot_cooldown = 0.0f;
                         }
+                    } else if (it->type == ITEM_WEAPON_KIT_RIFLE_GRENADE) {
+                        if (!game.has_weapon[GUN_RIFLE_GRENADE]) {
+                            game.has_weapon[GUN_RIFLE_GRENADE] = 1;
+                            game.ammo_per_gun[GUN_RIFLE_GRENADE] = weapon_def(GUN_RIFLE_GRENADE)->max_ammo;
+                            game.reserve_ammo_per_gun[GUN_RIFLE_GRENADE] = game_weapon_unlock_reserve(weapon_def(GUN_RIFLE_GRENADE), game.difficulty);
+                            game.ammo_per_gun[game.current_weapon.type] = game.ammo;
+                            game.current_weapon = *weapon_def(GUN_RIFLE_GRENADE);
+                            game.ammo = game.ammo_per_gun[GUN_RIFLE_GRENADE];
+                            game.is_reloading = 0;
+                            game.reload_timer = 0.0f;
+                            game.shot_cooldown = 0.0f;
+                        }
                     }
                     it->active = 0;
                 }
@@ -762,6 +850,12 @@ int main(int argc, char **argv) {
             zbuf = realloc(zbuf, w * sizeof(float));
             zbuf_w = w;
         }
+        int view_h = h - HUD_HEIGHT;
+        int required_depth_size = w * view_h;
+        if (required_depth_size != world_depth_size) {
+            world_depth = realloc(world_depth, (size_t)required_depth_size * sizeof(float));
+            world_depth_size = required_depth_size;
+        }
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
@@ -772,15 +866,19 @@ int main(int argc, char **argv) {
             difficulty_screen_render(renderer, w, h);
         } else {
             int wall_idx = (current_level - 1 < LEVEL_COUNT) ? current_level - 1 : LEVEL_COUNT - 1;
-            raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &floor_tex[wall_idx], &door_tex[wall_idx], &exit_tex, zbuf, w, h - HUD_HEIGHT, total_time);
-            sprite_render_all(renderer, &player, &game.enemies, zbuf, enemy_tex, game.difficulty, w, h - HUD_HEIGHT);
-            item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, &weapon_kit_dual_tex, &weapon_kit_battle_rifle_tex, w, h - HUD_HEIGHT);
+            raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &floor_tex[wall_idx], &door_tex[wall_idx], &exit_tex, zbuf, w, view_h, total_time);
+            for (int y = 0; y < view_h; y++) {
+                memcpy(&world_depth[y * w], zbuf, (size_t)w * sizeof(float));
+            }
+            sprite_render_all(renderer, &player, &game.enemies, world_depth, enemy_tex, game.difficulty, w, view_h);
+            sprite_render_grenade(renderer, &player, &game.grenade, world_depth, w, view_h);
+            item_render_all(renderer, &player, &game.items, world_depth, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, &weapon_kit_dual_tex, &weapon_kit_battle_rifle_tex, &weapon_kit_rifle_grenade_tex, w, view_h);
             int knife_visible = game.current_weapon.type == GUN_KNIFE || game.pistol_whip_timer > 0.0f;
             const Texture *weapon_tex = knife_visible ? &knife_tex : weapon_textures[game.current_weapon.type];
             float shot_timer = knife_visible ? 0.0f : game.shot_timer;
             weapon_render(renderer, &game.current_weapon, weapon_tex, reload_tex[game.current_weapon.type], game.ammo, shot_timer, game.shot_cooldown, game.pistol_whip_timer, game.is_reloading, game.reload_timer, w, h - HUD_HEIGHT);
             if (menu.minimap_on) {
-                minimap_render(renderer, &map, &player, &game.enemies, menu.enemy_markers_on);
+                minimap_render(renderer, &map, &player, &game.enemies, &game.items, menu.enemy_markers_on, menu.weapon_markers_on);
             }
             int enemies_remaining = 0;
             for (int i = 0; i < game.enemies.count; i++) {
@@ -819,18 +917,25 @@ int main(int argc, char **argv) {
         SDL_RenderPresent(renderer);
     }
 
+    free(world_depth);
     free(zbuf);
     music_stop();
     for (int m = 0; m < LEVEL_COUNT; m++) { music_free(&level_music[m]); }
+    sound_free(&explosion_sound);
+    sound_free(&dog_sound);
     sound_free(&enemy_sound);
     sound_free(&level_sound);
     sound_free(&door_sound);
     sound_free(&whip_sound);
     for (int g = 0; g < GUN_COUNT; g++) { sound_free(&gun_sounds[g]); sound_free(&reload_sounds[g]); }
     Mix_CloseAudio();
-    for (int gun = GUN_KNIFE - 1; gun >= 0; gun--) {
+    for (int gun = GUN_COUNT - 1; gun >= 0; gun--) {
+        if (gun == GUN_KNIFE) {
+            continue;
+        }
         for (int frame = WEAPON_RELOAD_FRAME_COUNT - 1; frame >= 0; frame--) { texture_free(&reload_tex[gun][frame]); }
     }
+    texture_free(&rifle_grenade_tex);
     texture_free(&battle_rifle_tex);
     texture_free(&ak47_tex);
     texture_free(&shotgun_tex);
@@ -840,6 +945,7 @@ int main(int argc, char **argv) {
     texture_free(&weapon_kit_ak47_tex);
     texture_free(&weapon_kit_dual_tex);
     texture_free(&weapon_kit_battle_rifle_tex);
+    texture_free(&weapon_kit_rifle_grenade_tex);
     texture_free(&pistol_tex);
     for (int f = HUD_FACE_COUNT - 1; f >= 0; f--) { texture_free(&face_tex[f]); }
     for (int t = ENEMY_TYPE_COUNT - 1; t >= 0; t--) {

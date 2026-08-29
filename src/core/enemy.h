@@ -13,6 +13,7 @@ typedef enum {
     ENEMY_TYPE_BOSS,
     ENEMY_TYPE_GUARD_SHOTGUN,
     ENEMY_TYPE_MINIBOSS,
+    ENEMY_TYPE_DOG,
     ENEMY_TYPE_COUNT
 } EnemyType;
 

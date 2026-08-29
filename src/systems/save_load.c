@@ -12,8 +12,9 @@
 #endif
 
 #define SAVE_MAGIC   "WOLF2026"
-#define SAVE_VERSION 9
+#define SAVE_VERSION 13
 #define SAVE_GUN_COUNT_V7 5
+#define SAVE_GUN_COUNT_V10 6
 
 static void create_save_directory(void) {
 #ifdef _WIN32
@@ -67,6 +68,15 @@ int save_game(int slot, int level, const Player *p, const GameState *g, const Ma
     fwrite(&wtype, sizeof(wtype), 1, f);
     fwrite(g->has_weapon, sizeof(g->has_weapon), 1, f);
     fwrite(g->ammo_per_gun, sizeof(g->ammo_per_gun), 1, f);
+    fwrite(&g->grenade.active, sizeof(g->grenade.active), 1, f);
+    fwrite(&g->grenade.x, sizeof(g->grenade.x), 1, f);
+    fwrite(&g->grenade.y, sizeof(g->grenade.y), 1, f);
+    fwrite(&g->grenade.dir_x, sizeof(g->grenade.dir_x), 1, f);
+    fwrite(&g->grenade.dir_y, sizeof(g->grenade.dir_y), 1, f);
+    fwrite(&g->grenade.distance, sizeof(g->grenade.distance), 1, f);
+    fwrite(&g->grenade.explosion_x, sizeof(g->grenade.explosion_x), 1, f);
+    fwrite(&g->grenade.explosion_y, sizeof(g->grenade.explosion_y), 1, f);
+    fwrite(&g->grenade.explosion_timer, sizeof(g->grenade.explosion_timer), 1, f);
 
     fwrite(&g->enemies.count, sizeof(g->enemies.count), 1, f);
     for (int i = 0; i < g->enemies.count; i++) {
@@ -101,6 +111,7 @@ int save_game(int slot, int level, const Player *p, const GameState *g, const Ma
     fwrite(&s->sound_on, sizeof(s->sound_on), 1, f);
     fwrite(&s->minimap_on, sizeof(s->minimap_on), 1, f);
     fwrite(&s->enemy_positions_on, sizeof(s->enemy_positions_on), 1, f);
+    fwrite(&s->weapon_pickups_on, sizeof(s->weapon_pickups_on), 1, f);
 
     fwrite(&m->width, sizeof(m->width), 1, f);
     fwrite(&m->height, sizeof(m->height), 1, f);
@@ -131,12 +142,18 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
     }
 
     SaveSettings loaded_settings = *s;
+    if (ver < 13) {
+        loaded_settings.weapon_pickups_on = 0;
+    }
 
     if (fread(level, sizeof(*level), 1, f) != 1) {
         fclose(f);
         return -1;
     }
     if (ver < 9 && *level >= 6) {
+        (*level)++;
+    }
+    if (ver < 10 && *level >= 8) {
         (*level)++;
     }
 
@@ -158,7 +175,14 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
     if (fread(&g->difficulty, sizeof(g->difficulty), 1, f) != 1) { fclose(f); return -1; }
     if (fread(&g->health, sizeof(g->health), 1, f) != 1) { fclose(f); return -1; }
     if (fread(&g->ammo, sizeof(g->ammo), 1, f) != 1) { fclose(f); return -1; }
-    size_t saved_gun_bytes = ver >= 8 ? sizeof(g->reserve_ammo_per_gun) : sizeof(int) * SAVE_GUN_COUNT_V7;
+    size_t saved_gun_bytes;
+    if (ver >= 11) {
+        saved_gun_bytes = sizeof(g->reserve_ammo_per_gun);
+    } else if (ver >= 8) {
+        saved_gun_bytes = sizeof(int) * SAVE_GUN_COUNT_V10;
+    } else {
+        saved_gun_bytes = sizeof(int) * SAVE_GUN_COUNT_V7;
+    }
     if (fread(g->reserve_ammo_per_gun, saved_gun_bytes, 1, f) != 1) { fclose(f); return -1; }
     if (fread(&g->score, sizeof(g->score), 1, f) != 1) { fclose(f); return -1; }
     int wtype;
@@ -166,6 +190,17 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
     g->current_weapon = *weapon_def((GunType)wtype);
     if (fread(g->has_weapon, saved_gun_bytes, 1, f) != 1) { fclose(f); return -1; }
     if (fread(g->ammo_per_gun, saved_gun_bytes, 1, f) != 1) { fclose(f); return -1; }
+    if (ver >= 12) {
+        if (fread(&g->grenade.active, sizeof(g->grenade.active), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.x, sizeof(g->grenade.x), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.y, sizeof(g->grenade.y), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.dir_x, sizeof(g->grenade.dir_x), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.dir_y, sizeof(g->grenade.dir_y), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.distance, sizeof(g->grenade.distance), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.explosion_x, sizeof(g->grenade.explosion_x), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.explosion_y, sizeof(g->grenade.explosion_y), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.explosion_timer, sizeof(g->grenade.explosion_timer), 1, f) != 1) { fclose(f); return -1; }
+    }
 
     if (fread(&g->enemies.count, sizeof(g->enemies.count), 1, f) != 1) { fclose(f); return -1; }
     if (g->enemies.count < 0 || g->enemies.count > MAX_ENEMIES) { fclose(f); return -1; }
@@ -226,10 +261,15 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
             fclose(f);
             return -1;
         }
+        if (ver >= 13 && fread(&loaded_settings.weapon_pickups_on, sizeof(loaded_settings.weapon_pickups_on), 1, f) != 1) {
+            fclose(f);
+            return -1;
+        }
         loaded_settings.music_on = loaded_settings.music_on != 0;
         loaded_settings.sound_on = loaded_settings.sound_on != 0;
         loaded_settings.minimap_on = loaded_settings.minimap_on != 0;
         loaded_settings.enemy_positions_on = loaded_settings.enemy_positions_on != 0;
+        loaded_settings.weapon_pickups_on = loaded_settings.weapon_pickups_on != 0;
     }
 
     int mw, mh;
