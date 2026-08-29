@@ -283,7 +283,8 @@ void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, flo
     }
 
     const DifficultyDef *settings = difficulty_get((Difficulty)difficulty);
-    int count = 4 + level + settings->enemy_count_bonus;
+    int progression_level = level >= 9 && level <= 11 ? level - 1 : level;
+    int count = 4 + progression_level + settings->enemy_count_bonus;
     if (count > MAX_ENEMIES) { count = MAX_ENEMIES; }
 
     typedef struct { float x; float y; } Pos;
