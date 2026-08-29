@@ -29,6 +29,26 @@ typedef struct {
     float reload_time;
 } WeaponDef;
 
+#define GRENADE_EXPLOSION_DURATION 0.45f
+
+typedef struct {
+    int active;
+    float x;
+    float y;
+    float dir_x;
+    float dir_y;
+    float distance;
+    float explosion_x;
+    float explosion_y;
+    float explosion_timer;
+} GrenadeState;
+
+typedef enum {
+    GAME_ENEMY_SOUND_NONE = 0,
+    GAME_ENEMY_SOUND_GENERIC = 1,
+    GAME_ENEMY_SOUND_DOG = 2
+} GameEnemySound;
+
 typedef struct {
     int difficulty;
     int health;
@@ -47,6 +67,7 @@ typedef struct {
     int ammo_per_gun[GUN_COUNT];
     EnemyList enemies;
     ItemList items;
+    GrenadeState grenade;
 } GameState;
 
 const WeaponDef *weapon_def(GunType type);
@@ -59,6 +80,7 @@ int  game_pistol_whip(GameState *g, const Player *p);
 int  game_reload(GameState *g);
 void game_cycle_weapon(GameState *g);
 void game_update_timers(GameState *g, float dt);
-int  game_update_enemies(GameState *g, const Player *p, const Map *m, float dt);
+int game_update_grenade(GameState *g, const Map *m, float dt);
+int game_update_enemies(GameState *g, const Player *p, const Map *m, float dt);
 
 #endif

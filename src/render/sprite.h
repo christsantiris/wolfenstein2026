@@ -2,8 +2,7 @@
 #define SPRITE_H
 
 #include <SDL2/SDL.h>
-#include "core/player.h"
-#include "core/enemy.h"
+#include "core/game.h"
 #include "render/texture.h"
 
 /* Layout: [0..7] walk-A dirs, [8..15] walk-B dirs, [16] aim, [17] fire, [18] corpse */
@@ -14,5 +13,6 @@
 #define ENEMY_SPRITE_FRAMES 19
 
 void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, const float *zbuf, const Texture enemy_tex[][ENEMY_SPRITE_FRAMES], int difficulty, int screen_w, int screen_h);
+void sprite_render_grenade(SDL_Renderer *renderer, const Player *p, const GrenadeState *grenade, const float *zbuf, int screen_w, int screen_h);
 
 #endif

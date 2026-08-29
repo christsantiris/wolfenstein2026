@@ -13,6 +13,10 @@
 #define SHOTGUN_TARGET_RADIUS 0.35f
 #define GRENADE_SPLASH_RADIUS 2.5f
 #define GRENADE_SPLASH_DAMAGE 90
+#define GRENADE_SPEED 9.0f
+#define GRENADE_MAX_RANGE 20.0f
+#define GRENADE_COLLISION_STEP 0.05f
+#define GRENADE_ENEMY_RADIUS 0.35f
 
 static const WeaponDef WEAPON_PISTOL = { GUN_9MM_HANDGUN, "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3", 8, 99, 34, 0.15f, 0.50f, 0.12f, 1.5f };
 static const WeaponDef WEAPON_DUAL_HANDGUN = { GUN_DUAL_HANDGUN, "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3", 16, 99, 34, 0.15f, 0.25f, 0.10f, 1.2f };
@@ -20,7 +24,7 @@ static const WeaponDef WEAPON_SHOTGUN = { GUN_SHOTGUN, "assets/sounds/shotgun.mp
 static const WeaponDef WEAPON_AK47 = { GUN_AK47, "assets/sounds/ak-47.mp3", "assets/sounds/handgunreload.mp3", 30, 99, 30, 0.25f, 0.12f, 0.08f, 2.0f };
 static const WeaponDef WEAPON_BATTLE_RIFLE = { GUN_BATTLE_RIFLE, "assets/sounds/rifle.mp3", "assets/sounds/handgunreload.mp3", 10, 99, 75, 0.14f, 0.35f, 0.10f, 1.8f };
 static const WeaponDef WEAPON_KNIFE = { GUN_KNIFE, "assets/sounds/punch.mp3", NULL, 0, 0, WHIP_DAMAGE, WHIP_CONE, WHIP_DURATION, WHIP_DURATION, 0.0f };
-static const WeaponDef WEAPON_RIFLE_GRENADE = { GUN_RIFLE_GRENADE, "assets/sounds/shotgun.mp3", "assets/sounds/handgunreload.mp3", 1, 8, 120, 0.20f, 1.10f, 0.18f, 2.4f };
+static const WeaponDef WEAPON_RIFLE_GRENADE = { GUN_RIFLE_GRENADE, "assets/sounds/grenade.mp3", "assets/sounds/handgunreload.mp3", 1, 8, 120, 0.20f, 1.10f, 0.18f, 2.4f };
 
 static const WeaponDef *ALL_WEAPONS[GUN_COUNT] = {
     [GUN_9MM_HANDGUN]  = &WEAPON_PISTOL,
@@ -83,6 +87,7 @@ void game_init(GameState *g) {
     g->pistol_whip_timer = 0.0f;
     g->is_reloading = 0;
     g->level_clear_timer = 0.0f;
+    memset(&g->grenade, 0, sizeof(g->grenade));
     memset(&g->enemies, 0, sizeof(g->enemies));
 #ifdef DEBUG_NO_AMMO
     g->ammo = 0;
@@ -206,54 +211,24 @@ static int game_path_clear(const Map *map, float x0, float y0, float x1, float y
     return 1;
 }
 
-static void game_shoot_rifle_grenade(GameState *g, const Player *p, const Map *map) {
-    float best_dist = SHOT_RANGE;
-    Enemy *target = NULL;
+static void game_detonate_grenade(GameState *g, const Map *map, Enemy *target) {
+    GrenadeState *grenade = &g->grenade;
+    grenade->active = 0;
+    grenade->explosion_x = grenade->x;
+    grenade->explosion_y = grenade->y;
+    grenade->explosion_timer = GRENADE_EXPLOSION_DURATION;
     for (int i = 0; i < g->enemies.count; i++) {
         Enemy *enemy = &g->enemies.enemies[i];
         if (!enemy->active) {
             continue;
         }
-        float dx = enemy->x - p->x;
-        float dy = enemy->y - p->y;
-        float dist = sqrtf(dx * dx + dy * dy);
-        if (dist >= best_dist) {
-            continue;
-        }
-        if (!game_path_clear(map, p->x, p->y, enemy->x, enemy->y)) {
-            continue;
-        }
-        float angle = atan2f(dy, dx);
-        float diff = angle - p->angle;
-        while (diff > M_PI) {
-            diff -= 2.0f * (float)M_PI;
-        }
-        while (diff < -M_PI) {
-            diff += 2.0f * (float)M_PI;
-        }
-        if (fabsf(diff) < g->current_weapon.cone) {
-            best_dist = dist;
-            target = enemy;
-        }
-    }
-    if (!target) {
-        return;
-    }
-
-    float blast_x = target->x;
-    float blast_y = target->y;
-    for (int i = 0; i < g->enemies.count; i++) {
-        Enemy *enemy = &g->enemies.enemies[i];
-        if (!enemy->active) {
-            continue;
-        }
-        float dx = enemy->x - blast_x;
-        float dy = enemy->y - blast_y;
+        float dx = enemy->x - grenade->x;
+        float dy = enemy->y - grenade->y;
         float dist = sqrtf(dx * dx + dy * dy);
         if (dist > GRENADE_SPLASH_RADIUS) {
             continue;
         }
-        if (enemy != target && !game_path_clear(map, blast_x, blast_y, enemy->x, enemy->y)) {
+        if (enemy != target && !game_path_clear(map, grenade->x, grenade->y, enemy->x, enemy->y)) {
             continue;
         }
         int damage = enemy == target ? g->current_weapon.damage : GRENADE_SPLASH_DAMAGE;
@@ -265,11 +240,23 @@ static void game_shoot_rifle_grenade(GameState *g, const Player *p, const Map *m
     }
 }
 
+static void game_shoot_rifle_grenade(GameState *g, const Player *p) {
+    GrenadeState *grenade = &g->grenade;
+    grenade->active = 1;
+    grenade->x = p->x;
+    grenade->y = p->y;
+    grenade->dir_x = cosf(p->angle);
+    grenade->dir_y = sinf(p->angle);
+    grenade->distance = 0.0f;
+    grenade->explosion_timer = 0.0f;
+}
+
 int game_shoot(GameState *g, const Player *p, const Map *map) {
+    (void)map;
     if (g->current_weapon.type == GUN_KNIFE) {
         return game_pistol_whip(g, p);
     }
-    if (g->ammo <= 0 || g->shot_cooldown > 0.0f || g->is_reloading) {
+    if (g->ammo <= 0 || g->shot_cooldown > 0.0f || g->is_reloading || (g->current_weapon.type == GUN_RIFLE_GRENADE && g->grenade.active)) {
         return 0;
     }
     g->ammo--;
@@ -281,7 +268,7 @@ int game_shoot(GameState *g, const Player *p, const Map *map) {
         return 1;
     }
     if (g->current_weapon.type == GUN_RIFLE_GRENADE) {
-        game_shoot_rifle_grenade(g, p, map);
+        game_shoot_rifle_grenade(g, p);
         return 1;
     }
 
@@ -360,8 +347,60 @@ int game_pistol_whip(GameState *g, const Player *p) {
     return 1;
 }
 
+int game_update_grenade(GameState *g, const Map *map, float dt) {
+    GrenadeState *grenade = &g->grenade;
+    if (grenade->explosion_timer > 0.0f) {
+        grenade->explosion_timer -= dt;
+        if (grenade->explosion_timer < 0.0f) {
+            grenade->explosion_timer = 0.0f;
+        }
+    }
+    if (!grenade->active) {
+        return 0;
+    }
+
+    float remaining = GRENADE_SPEED * dt;
+    while (remaining > 0.0f) {
+        float step = remaining < GRENADE_COLLISION_STEP ? remaining : GRENADE_COLLISION_STEP;
+        float next_x = grenade->x + grenade->dir_x * step;
+        float next_y = grenade->y + grenade->dir_y * step;
+        if (map_is_wall(map, (int)next_x, (int)next_y)) {
+            game_detonate_grenade(g, map, NULL);
+            return 1;
+        }
+
+        Enemy *target = NULL;
+        for (int i = 0; i < g->enemies.count; i++) {
+            Enemy *enemy = &g->enemies.enemies[i];
+            if (!enemy->active) {
+                continue;
+            }
+            float dx = enemy->x - next_x;
+            float dy = enemy->y - next_y;
+            float radius = GRENADE_ENEMY_RADIUS;
+            if (enemy->type == ENEMY_TYPE_BOSS || enemy->type == ENEMY_TYPE_MINIBOSS) {
+                radius = 0.55f;
+            }
+            if (dx * dx + dy * dy <= radius * radius) {
+                target = enemy;
+                break;
+            }
+        }
+
+        grenade->x = next_x;
+        grenade->y = next_y;
+        grenade->distance += step;
+        remaining -= step;
+        if (target || grenade->distance >= GRENADE_MAX_RANGE) {
+            game_detonate_grenade(g, map, target);
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int game_update_enemies(GameState *g, const Player *p, const Map *m, float dt) {
-    int bark = 0;
+    int sound_events = GAME_ENEMY_SOUND_NONE;
     const DifficultyDef *settings = difficulty_get((Difficulty)g->difficulty);
     for (int i = 0; i < g->enemies.count; i++) {
         Enemy *e = &g->enemies.enemies[i];
@@ -375,18 +414,25 @@ int game_update_enemies(GameState *g, const Player *p, const Map *m, float dt) {
                 g->health = 0;
             }
             g->hit_flash_timer = 0.3f;
+            if (e->type == ENEMY_TYPE_DOG) {
+                sound_events |= GAME_ENEMY_SOUND_DOG;
+            }
         }
         if (prev == ENEMY_IDLE && e->state == ENEMY_ALERT) {
-            bark = 1;
+            if (e->type == ENEMY_TYPE_DOG) {
+                sound_events |= GAME_ENEMY_SOUND_DOG;
+            } else {
+                sound_events |= GAME_ENEMY_SOUND_GENERIC;
+            }
         }
     }
     if (enemy_list_call_reinforcements(&g->enemies, p, m, g->difficulty)) {
-        bark = 1;
+        sound_events |= GAME_ENEMY_SOUND_GENERIC;
     }
     if (enemy_list_all_dead(&g->enemies) && g->level_clear_timer == 0.0f) {
         g->level_clear_timer = 4.0f;
     }
-    return bark;
+    return sound_events;
 }
 
 void game_update_timers(GameState *g, float dt) {

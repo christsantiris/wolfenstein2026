@@ -490,6 +490,10 @@ int main(int argc, char **argv) {
     sound_load(&level_sound, "assets/sounds/nextlevel.mp3");
     Sound enemy_sound = { 0 };
     sound_load(&enemy_sound, "assets/sounds/die.mp3");
+    Sound dog_sound = { 0 };
+    sound_load(&dog_sound, "assets/sounds/dog.mp3");
+    Sound explosion_sound = { 0 };
+    sound_load(&explosion_sound, "assets/sounds/explosion.mp3");
 
     Music level_music[LEVEL_COUNT] = { 0 };
     music_load(&level_music[0], "assets/music/level1theme.mp3");
@@ -707,8 +711,15 @@ int main(int argc, char **argv) {
 
         if (app_state == APP_PLAYING && !menu.is_open && !game_over && !game_won) {
             input_update(&player, &map, dt);
-            if (game_update_enemies(&game, &player, &map, dt)) {
+            int enemy_sound_events = game_update_enemies(&game, &player, &map, dt);
+            if (enemy_sound_events & GAME_ENEMY_SOUND_GENERIC) {
                 sound_play(&enemy_sound);
+            }
+            if (enemy_sound_events & GAME_ENEMY_SOUND_DOG) {
+                sound_play(&dog_sound);
+            }
+            if (game_update_grenade(&game, &map, dt)) {
+                sound_play(&explosion_sound);
             }
             game_update_timers(&game, dt);
             if (game.health <= 0) {
@@ -842,6 +853,7 @@ int main(int argc, char **argv) {
             int wall_idx = (current_level - 1 < LEVEL_COUNT) ? current_level - 1 : LEVEL_COUNT - 1;
             raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &floor_tex[wall_idx], &door_tex[wall_idx], &exit_tex, zbuf, w, h - HUD_HEIGHT, total_time);
             sprite_render_all(renderer, &player, &game.enemies, zbuf, enemy_tex, game.difficulty, w, h - HUD_HEIGHT);
+            sprite_render_grenade(renderer, &player, &game.grenade, zbuf, w, h - HUD_HEIGHT);
             item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, &weapon_kit_dual_tex, &weapon_kit_battle_rifle_tex, &weapon_kit_rifle_grenade_tex, w, h - HUD_HEIGHT);
             int knife_visible = game.current_weapon.type == GUN_KNIFE || game.pistol_whip_timer > 0.0f;
             const Texture *weapon_tex = knife_visible ? &knife_tex : weapon_textures[game.current_weapon.type];
@@ -890,6 +902,8 @@ int main(int argc, char **argv) {
     free(zbuf);
     music_stop();
     for (int m = 0; m < LEVEL_COUNT; m++) { music_free(&level_music[m]); }
+    sound_free(&explosion_sound);
+    sound_free(&dog_sound);
     sound_free(&enemy_sound);
     sound_free(&level_sound);
     sound_free(&door_sound);

@@ -12,7 +12,7 @@
 #endif
 
 #define SAVE_MAGIC   "WOLF2026"
-#define SAVE_VERSION 11
+#define SAVE_VERSION 12
 #define SAVE_GUN_COUNT_V7 5
 #define SAVE_GUN_COUNT_V10 6
 
@@ -68,6 +68,15 @@ int save_game(int slot, int level, const Player *p, const GameState *g, const Ma
     fwrite(&wtype, sizeof(wtype), 1, f);
     fwrite(g->has_weapon, sizeof(g->has_weapon), 1, f);
     fwrite(g->ammo_per_gun, sizeof(g->ammo_per_gun), 1, f);
+    fwrite(&g->grenade.active, sizeof(g->grenade.active), 1, f);
+    fwrite(&g->grenade.x, sizeof(g->grenade.x), 1, f);
+    fwrite(&g->grenade.y, sizeof(g->grenade.y), 1, f);
+    fwrite(&g->grenade.dir_x, sizeof(g->grenade.dir_x), 1, f);
+    fwrite(&g->grenade.dir_y, sizeof(g->grenade.dir_y), 1, f);
+    fwrite(&g->grenade.distance, sizeof(g->grenade.distance), 1, f);
+    fwrite(&g->grenade.explosion_x, sizeof(g->grenade.explosion_x), 1, f);
+    fwrite(&g->grenade.explosion_y, sizeof(g->grenade.explosion_y), 1, f);
+    fwrite(&g->grenade.explosion_timer, sizeof(g->grenade.explosion_timer), 1, f);
 
     fwrite(&g->enemies.count, sizeof(g->enemies.count), 1, f);
     for (int i = 0; i < g->enemies.count; i++) {
@@ -177,6 +186,17 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
     g->current_weapon = *weapon_def((GunType)wtype);
     if (fread(g->has_weapon, saved_gun_bytes, 1, f) != 1) { fclose(f); return -1; }
     if (fread(g->ammo_per_gun, saved_gun_bytes, 1, f) != 1) { fclose(f); return -1; }
+    if (ver >= 12) {
+        if (fread(&g->grenade.active, sizeof(g->grenade.active), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.x, sizeof(g->grenade.x), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.y, sizeof(g->grenade.y), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.dir_x, sizeof(g->grenade.dir_x), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.dir_y, sizeof(g->grenade.dir_y), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.distance, sizeof(g->grenade.distance), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.explosion_x, sizeof(g->grenade.explosion_x), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.explosion_y, sizeof(g->grenade.explosion_y), 1, f) != 1) { fclose(f); return -1; }
+        if (fread(&g->grenade.explosion_timer, sizeof(g->grenade.explosion_timer), 1, f) != 1) { fclose(f); return -1; }
+    }
 
     if (fread(&g->enemies.count, sizeof(g->enemies.count), 1, f) != 1) { fclose(f); return -1; }
     if (g->enemies.count < 0 || g->enemies.count > MAX_ENEMIES) { fclose(f); return -1; }

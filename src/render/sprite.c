@@ -5,6 +5,109 @@
 #define FOV_FACTOR 0.66f
 #define CORPSE_MIN_RENDER_DISTANCE2 1.0f
 
+static int sprite_project_point(const Player *p, float x, float y, int screen_w, float *depth, int *screen_x) {
+    float dir_x = cosf(p->angle);
+    float dir_y = sinf(p->angle);
+    float plane_x = -dir_y * FOV_FACTOR;
+    float plane_y = dir_x * FOV_FACTOR;
+    float inv_det = 1.0f / (plane_x * dir_y - dir_x * plane_y);
+    float rel_x = x - p->x;
+    float rel_y = y - p->y;
+    float transform_x = inv_det * (dir_y * rel_x - dir_x * rel_y);
+    *depth = inv_det * (-plane_y * rel_x + plane_x * rel_y);
+    if (*depth <= 0.1f) {
+        return 0;
+    }
+    *screen_x = (int)((screen_w / 2) * (1.0f + transform_x / *depth));
+    return 1;
+}
+
+static void sprite_draw_grenade_body(SDL_Renderer *renderer, const GrenadeState *grenade, const float *zbuf, float depth, int center_x, int center_y, int screen_w, int screen_h) {
+    int radius = (int)(screen_h * 0.075f / depth);
+    if (radius < 2) {
+        radius = 2;
+    }
+    if (radius > 18) {
+        radius = 18;
+    }
+    int spin = (int)(grenade->distance * 24.0f) % (radius * 2 + 1);
+    for (int dy = -radius; dy <= radius; dy++) {
+        for (int dx = -radius; dx <= radius; dx++) {
+            int screen_x = center_x + dx;
+            int screen_y = center_y + dy;
+            if (screen_x < 0 || screen_x >= screen_w || screen_y < 0 || screen_y >= screen_h || depth >= zbuf[screen_x]) {
+                continue;
+            }
+            float nx = (float)dx / radius;
+            float ny = (float)dy / radius;
+            float dist2 = nx * nx + ny * ny;
+            if (dist2 > 1.0f) {
+                continue;
+            }
+            if (dist2 > 0.72f) {
+                SDL_SetRenderDrawColor(renderer, 24, 25, 18, 255);
+            } else if ((dy + spin) % (radius + 1) == 0 || (dy + spin + 1) % (radius + 1) == 0) {
+                SDL_SetRenderDrawColor(renderer, 185, 132, 48, 255);
+            } else if (dx < 0) {
+                SDL_SetRenderDrawColor(renderer, 92, 99, 53, 255);
+            } else {
+                SDL_SetRenderDrawColor(renderer, 55, 61, 34, 255);
+            }
+            SDL_RenderDrawPoint(renderer, screen_x, screen_y);
+        }
+    }
+}
+
+static void sprite_draw_explosion(SDL_Renderer *renderer, const GrenadeState *grenade, const float *zbuf, float depth, int center_x, int center_y, int screen_w, int screen_h) {
+    float progress = 1.0f - grenade->explosion_timer / GRENADE_EXPLOSION_DURATION;
+    float pulse = sinf(progress * (float)M_PI);
+    int radius = (int)(screen_h * (0.08f + pulse * 0.34f) / depth);
+    if (radius < 5) {
+        radius = 5;
+    }
+    if (radius > 150) {
+        radius = 150;
+    }
+    for (int dy = -radius; dy <= radius; dy++) {
+        for (int dx = -radius; dx <= radius; dx++) {
+            int screen_x = center_x + dx;
+            int screen_y = center_y + dy;
+            if (screen_x < 0 || screen_x >= screen_w || screen_y < 0 || screen_y >= screen_h || depth >= zbuf[screen_x]) {
+                continue;
+            }
+            float nx = (float)dx / radius;
+            float ny = (float)dy / radius;
+            float radial = sqrtf(nx * nx + ny * ny);
+            if (radial > 1.0f) {
+                continue;
+            }
+            if (progress < 0.22f && radial < 0.72f) {
+                SDL_SetRenderDrawColor(renderer, 255, 245, 190, 255);
+            } else if (progress < 0.68f && radial < 0.62f) {
+                SDL_SetRenderDrawColor(renderer, 255, 164, 35, 255);
+            } else if (progress < 0.68f) {
+                SDL_SetRenderDrawColor(renderer, 190, 54, 16, 255);
+            } else if (((dx * 17 + dy * 31) & 7) < 5) {
+                SDL_SetRenderDrawColor(renderer, 74, 69, 63, 255);
+            } else {
+                continue;
+            }
+            SDL_RenderDrawPoint(renderer, screen_x, screen_y);
+        }
+    }
+}
+
+void sprite_render_grenade(SDL_Renderer *renderer, const Player *p, const GrenadeState *grenade, const float *zbuf, int screen_w, int screen_h) {
+    float depth;
+    int screen_x;
+    if (grenade->active && sprite_project_point(p, grenade->x, grenade->y, screen_w, &depth, &screen_x)) {
+        sprite_draw_grenade_body(renderer, grenade, zbuf, depth, screen_x, screen_h / 2, screen_w, screen_h);
+    }
+    if (grenade->explosion_timer > 0.0f && sprite_project_point(p, grenade->explosion_x, grenade->explosion_y, screen_w, &depth, &screen_x)) {
+        sprite_draw_explosion(renderer, grenade, zbuf, depth, screen_x, screen_h / 2, screen_w, screen_h);
+    }
+}
+
 void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, const float *zbuf, const Texture enemy_tex[][ENEMY_SPRITE_FRAMES], int difficulty, int screen_w, int screen_h) {
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
