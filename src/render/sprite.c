@@ -22,7 +22,7 @@ static int sprite_project_point(const Player *p, float x, float y, int screen_w,
     return 1;
 }
 
-static void sprite_draw_grenade_body(SDL_Renderer *renderer, const GrenadeState *grenade, const float *zbuf, float depth, int center_x, int center_y, int screen_w, int screen_h) {
+static void sprite_draw_grenade_body(SDL_Renderer *renderer, const GrenadeState *grenade, float *depth_buffer, float depth, int center_x, int center_y, int screen_w, int screen_h) {
     int radius = (int)(screen_h * 0.075f / depth);
     if (radius < 2) {
         radius = 2;
@@ -35,7 +35,11 @@ static void sprite_draw_grenade_body(SDL_Renderer *renderer, const GrenadeState 
         for (int dx = -radius; dx <= radius; dx++) {
             int screen_x = center_x + dx;
             int screen_y = center_y + dy;
-            if (screen_x < 0 || screen_x >= screen_w || screen_y < 0 || screen_y >= screen_h || depth >= zbuf[screen_x]) {
+            if (screen_x < 0 || screen_x >= screen_w || screen_y < 0 || screen_y >= screen_h) {
+                continue;
+            }
+            int depth_index = screen_y * screen_w + screen_x;
+            if (depth >= depth_buffer[depth_index]) {
                 continue;
             }
             float nx = (float)dx / radius;
@@ -54,11 +58,12 @@ static void sprite_draw_grenade_body(SDL_Renderer *renderer, const GrenadeState 
                 SDL_SetRenderDrawColor(renderer, 55, 61, 34, 255);
             }
             SDL_RenderDrawPoint(renderer, screen_x, screen_y);
+            depth_buffer[depth_index] = depth;
         }
     }
 }
 
-static void sprite_draw_explosion(SDL_Renderer *renderer, const GrenadeState *grenade, const float *zbuf, float depth, int center_x, int center_y, int screen_w, int screen_h) {
+static void sprite_draw_explosion(SDL_Renderer *renderer, const GrenadeState *grenade, float *depth_buffer, float depth, int center_x, int center_y, int screen_w, int screen_h) {
     float progress = 1.0f - grenade->explosion_timer / GRENADE_EXPLOSION_DURATION;
     float pulse = sinf(progress * (float)M_PI);
     int radius = (int)(screen_h * (0.08f + pulse * 0.34f) / depth);
@@ -72,7 +77,11 @@ static void sprite_draw_explosion(SDL_Renderer *renderer, const GrenadeState *gr
         for (int dx = -radius; dx <= radius; dx++) {
             int screen_x = center_x + dx;
             int screen_y = center_y + dy;
-            if (screen_x < 0 || screen_x >= screen_w || screen_y < 0 || screen_y >= screen_h || depth >= zbuf[screen_x]) {
+            if (screen_x < 0 || screen_x >= screen_w || screen_y < 0 || screen_y >= screen_h) {
+                continue;
+            }
+            int depth_index = screen_y * screen_w + screen_x;
+            if (depth >= depth_buffer[depth_index]) {
                 continue;
             }
             float nx = (float)dx / radius;
@@ -93,22 +102,23 @@ static void sprite_draw_explosion(SDL_Renderer *renderer, const GrenadeState *gr
                 continue;
             }
             SDL_RenderDrawPoint(renderer, screen_x, screen_y);
+            depth_buffer[depth_index] = depth;
         }
     }
 }
 
-void sprite_render_grenade(SDL_Renderer *renderer, const Player *p, const GrenadeState *grenade, const float *zbuf, int screen_w, int screen_h) {
+void sprite_render_grenade(SDL_Renderer *renderer, const Player *p, const GrenadeState *grenade, float *depth_buffer, int screen_w, int screen_h) {
     float depth;
     int screen_x;
     if (grenade->active && sprite_project_point(p, grenade->x, grenade->y, screen_w, &depth, &screen_x)) {
-        sprite_draw_grenade_body(renderer, grenade, zbuf, depth, screen_x, screen_h / 2, screen_w, screen_h);
+        sprite_draw_grenade_body(renderer, grenade, depth_buffer, depth, screen_x, screen_h / 2, screen_w, screen_h);
     }
     if (grenade->explosion_timer > 0.0f && sprite_project_point(p, grenade->explosion_x, grenade->explosion_y, screen_w, &depth, &screen_x)) {
-        sprite_draw_explosion(renderer, grenade, zbuf, depth, screen_x, screen_h / 2, screen_w, screen_h);
+        sprite_draw_explosion(renderer, grenade, depth_buffer, depth, screen_x, screen_h / 2, screen_w, screen_h);
     }
 }
 
-void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, const float *zbuf, const Texture enemy_tex[][ENEMY_SPRITE_FRAMES], int difficulty, int screen_w, int screen_h) {
+void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, float *depth_buffer, const Texture enemy_tex[][ENEMY_SPRITE_FRAMES], int difficulty, int screen_w, int screen_h) {
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
     float plane_x = -dir_y * FOV_FACTOR;
@@ -169,13 +179,15 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
         if (draw_x1 > screen_w) { draw_x1 = screen_w; }
 
         int tex_y_base = screen_h / 2 - sprite_h / 2;
+        int enemy_visible = 0;
 
         for (int x = draw_x0; x < draw_x1; x++) {
-            if (transform_y >= zbuf[x]) {
-                continue;
-            }
             float u = (float)(x - (screen_x - sprite_w / 2)) / sprite_w;
             for (int y = draw_y0; y < draw_y1; y++) {
+                int depth_index = y * screen_w + x;
+                if (transform_y >= depth_buffer[depth_index]) {
+                    continue;
+                }
                 float v = (float)(y - tex_y_base) / sprite_h;
                 unsigned int colour = texture_sample(sprite_tex, u, v);
                 unsigned char r = (colour >> 16) & 0xFF;
@@ -186,11 +198,13 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
                 }
                 SDL_SetRenderDrawColor(renderer, r, g, b, 255);
                 SDL_RenderDrawPoint(renderer, x, y);
+                depth_buffer[depth_index] = transform_y;
+                enemy_visible = 1;
             }
         }
 
         int is_boss = e->type == ENEMY_TYPE_BOSS || e->type == ENEMY_TYPE_MINIBOSS;
-        if (e->active && is_boss && screen_x >= 0 && screen_x < screen_w && transform_y < zbuf[screen_x]) {
+        if (e->active && is_boss && enemy_visible) {
             int max_health = enemy_max_health(e->type, difficulty);
 
             int bar_w = sprite_w * 3 / 5;

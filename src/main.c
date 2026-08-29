@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include "core/difficulty.h"
 #include "core/map.h"
@@ -474,6 +475,8 @@ int main(int argc, char **argv) {
 
     int zbuf_w = 0;
     float *zbuf = NULL;
+    int world_depth_size = 0;
+    float *world_depth = NULL;
 
     Sound gun_sounds[GUN_COUNT] = { 0 };
     Sound reload_sounds[GUN_COUNT] = { 0 };
@@ -843,6 +846,12 @@ int main(int argc, char **argv) {
             zbuf = realloc(zbuf, w * sizeof(float));
             zbuf_w = w;
         }
+        int view_h = h - HUD_HEIGHT;
+        int required_depth_size = w * view_h;
+        if (required_depth_size != world_depth_size) {
+            world_depth = realloc(world_depth, (size_t)required_depth_size * sizeof(float));
+            world_depth_size = required_depth_size;
+        }
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
@@ -853,10 +862,13 @@ int main(int argc, char **argv) {
             difficulty_screen_render(renderer, w, h);
         } else {
             int wall_idx = (current_level - 1 < LEVEL_COUNT) ? current_level - 1 : LEVEL_COUNT - 1;
-            raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &floor_tex[wall_idx], &door_tex[wall_idx], &exit_tex, zbuf, w, h - HUD_HEIGHT, total_time);
-            sprite_render_all(renderer, &player, &game.enemies, zbuf, enemy_tex, game.difficulty, w, h - HUD_HEIGHT);
-            sprite_render_grenade(renderer, &player, &game.grenade, zbuf, w, h - HUD_HEIGHT);
-            item_render_all(renderer, &player, &game.items, zbuf, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, &weapon_kit_dual_tex, &weapon_kit_battle_rifle_tex, &weapon_kit_rifle_grenade_tex, w, h - HUD_HEIGHT);
+            raycaster_render(renderer, &map, &player, &wall_tex[wall_idx], &floor_tex[wall_idx], &door_tex[wall_idx], &exit_tex, zbuf, w, view_h, total_time);
+            for (int y = 0; y < view_h; y++) {
+                memcpy(&world_depth[y * w], zbuf, (size_t)w * sizeof(float));
+            }
+            sprite_render_all(renderer, &player, &game.enemies, world_depth, enemy_tex, game.difficulty, w, view_h);
+            sprite_render_grenade(renderer, &player, &game.grenade, world_depth, w, view_h);
+            item_render_all(renderer, &player, &game.items, world_depth, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, &weapon_kit_dual_tex, &weapon_kit_battle_rifle_tex, &weapon_kit_rifle_grenade_tex, w, view_h);
             int knife_visible = game.current_weapon.type == GUN_KNIFE || game.pistol_whip_timer > 0.0f;
             const Texture *weapon_tex = knife_visible ? &knife_tex : weapon_textures[game.current_weapon.type];
             float shot_timer = knife_visible ? 0.0f : game.shot_timer;
@@ -901,6 +913,7 @@ int main(int argc, char **argv) {
         SDL_RenderPresent(renderer);
     }
 
+    free(world_depth);
     free(zbuf);
     music_stop();
     for (int m = 0; m < LEVEL_COUNT; m++) { music_free(&level_music[m]); }
