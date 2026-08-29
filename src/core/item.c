@@ -89,8 +89,8 @@ void item_list_init(ItemList *il, const Map *m, int level, float px, float py) {
     }
     if (level == 8 && il->count < MAX_ITEMS) {
         Item *it = &il->items[il->count++];
-        it->x = 14.5f;
-        it->y = 12.5f;
+        it->x = 15.5f;
+        it->y = 10.5f;
         it->type = ITEM_WEAPON_KIT_RIFLE_GRENADE;
         it->active = 1;
     }
