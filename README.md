@@ -78,5 +78,5 @@ MIT
 https://pixabay.com
 
 ## Roadmap
-- Additional weapons (grenades?)
+- Additional weapons (grenade launcher?)
 

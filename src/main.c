@@ -739,6 +739,7 @@ int main(int argc, char **argv) {
                     hs_rank = highscore_insert(&hs_table, game.score);
                     highscore_save(&hs_table);
                 } else {
+                    int previous_health = game.health;
                     current_level++;
                     if (start_game(&map, &player, &game, current_level) != 0) {
                         current_level = 1;
@@ -746,6 +747,7 @@ int main(int argc, char **argv) {
                         landing_reset();
                         app_state = APP_LANDING;
                     } else {
+                        game.health = game_level_start_health(previous_health, game.difficulty);
                         sound_play(&level_sound);
                         int idx = current_level - 1;
                         if (menu.music_on && idx >= 0 && idx < LEVEL_COUNT) {

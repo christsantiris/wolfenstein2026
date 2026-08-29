@@ -52,6 +52,7 @@ typedef struct {
 const WeaponDef *weapon_def(GunType type);
 int game_ammo_pickup_amount(int difficulty);
 int game_weapon_unlock_reserve(const WeaponDef *weapon, int difficulty);
+int game_level_start_health(int health, int difficulty);
 void game_init(GameState *g);
 int  game_shoot(GameState *g, const Player *p);
 int  game_pistol_whip(GameState *g, const Player *p);

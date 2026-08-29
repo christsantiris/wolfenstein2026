@@ -57,6 +57,12 @@ int game_weapon_unlock_reserve(const WeaponDef *weapon, int difficulty) {
     return reserve < AMMO_RESERVE_MAX ? reserve : AMMO_RESERVE_MAX;
 }
 
+int game_level_start_health(int health, int difficulty) {
+    static const int RECOVERY_FLOOR[4] = { 100, 100, 75, 50 };
+    int d = difficulty >= 0 && difficulty < 4 ? difficulty : 3;
+    return health < RECOVERY_FLOOR[d] ? RECOVERY_FLOOR[d] : health;
+}
+
 void game_init(GameState *g) {
     memset(g->has_weapon, 0, sizeof(g->has_weapon));
     memset(g->ammo_per_gun, 0, sizeof(g->ammo_per_gun));
