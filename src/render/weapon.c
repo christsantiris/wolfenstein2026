@@ -24,7 +24,7 @@ static const WeaponAnimDef WEAPON_ANIMS[GUN_COUNT] = {
     [GUN_9MM_HANDGUN] = { 32, 6, 32, 1, 9, 0.12f, 14, 255, 150, 35 },
     [GUN_DUAL_HANDGUN] = { 25, 11, 38, 0, 8, 0.06f, 12, 255, 165, 45 },
     [GUN_SHOTGUN] = { 31, -6, 31, 1, 18, 0.22f, 22, 255, 120, 25 },
-    [GUN_AK47] = { 27, 2, 27, 3, 7, 0.10f, 15, 255, 135, 25 },
+    [GUN_AK47] = { 32, 2, 32, 4, 11, 0.13f, 18, 255, 135, 25 },
     [GUN_BATTLE_RIFLE] = { 24, 3, 24, 2, 12, 0.15f, 17, 255, 185, 60 },
     [GUN_KNIFE] = { 32, 0, 32, 0, 0, 0.0f, 0, 0, 0, 0 },
     [GUN_RIFLE_GRENADE] = { 27, 2, 27, 0, 24, 0.28f, 28, 255, 110, 20 },
@@ -64,6 +64,47 @@ static void draw_muzzle_flash(SDL_Renderer *renderer, int cx, int cy, const Weap
     SDL_SetRenderDrawColor(renderer, 255, 255, 225, 255);
     SDL_RenderDrawLine(renderer, cx, cy - anim->flash_radius - 5, cx, cy + anim->flash_radius + 5);
     SDL_RenderDrawLine(renderer, cx - anim->flash_radius - 5, cy, cx + anim->flash_radius + 5, cy);
+}
+
+static void draw_ak47_action(SDL_Renderer *renderer, const WeaponDef *weapon, float shot_cooldown, int x0, int y0, float scale) {
+    if (weapon->type != GUN_AK47 || weapon->shot_cooldown <= 0.0f || shot_cooldown <= 0.0f) {
+        return;
+    }
+
+    float progress = 1.0f - shot_cooldown / weapon->shot_cooldown;
+    if (progress < 0.0f) {
+        progress = 0.0f;
+    }
+    if (progress > 1.0f) {
+        progress = 1.0f;
+    }
+    float action = sinf(progress * 3.14159f);
+
+    SDL_SetRenderDrawColor(renderer, 18, 18, 20, 255);
+    SDL_Rect port = {
+        x0 + (int)(36.0f * scale),
+        y0 + (int)(27.0f * scale),
+        (int)(10.0f * scale),
+        (int)(7.0f * scale)
+    };
+    SDL_RenderFillRect(renderer, &port);
+
+    SDL_SetRenderDrawColor(renderer, 82, 82, 86, 255);
+    SDL_Rect bolt = {
+        port.x + (int)(action * 5.0f * scale),
+        port.y,
+        (int)(3.0f * scale),
+        port.h
+    };
+    SDL_RenderFillRect(renderer, &bolt);
+
+    int casing_x = x0 + (int)((48.0f + progress * 11.0f) * scale);
+    int casing_y = y0 + (int)((29.0f - action * 8.0f + progress * 3.0f) * scale);
+    int casing_length = (int)(3.0f * scale);
+    SDL_SetRenderDrawColor(renderer, 218, 170, 62, 255);
+    SDL_RenderDrawLine(renderer, casing_x, casing_y, casing_x + casing_length, casing_y - casing_length / 2);
+    SDL_SetRenderDrawColor(renderer, 126, 83, 27, 255);
+    SDL_RenderDrawLine(renderer, casing_x, casing_y + 1, casing_x + casing_length, casing_y - casing_length / 2 + 1);
 }
 
 void weapon_render(SDL_Renderer *renderer, const WeaponDef *weapon, const Texture *tex, const Texture reload_tex[WEAPON_RELOAD_FRAME_COUNT], int ammo, float shot_timer, float shot_cooldown, float whip_timer, int is_reloading, float reload_timer, int screen_w, int screen_h) {
@@ -133,4 +174,6 @@ void weapon_render(SDL_Renderer *renderer, const WeaponDef *weapon, const Textur
             SDL_RenderDrawPoint(renderer, x0 + sx, draw_y);
         }
     }
+
+    draw_ak47_action(renderer, weapon, shot_cooldown, x0, y0, scale);
 }
