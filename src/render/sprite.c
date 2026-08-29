@@ -154,7 +154,7 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
         } else if (e->type == ENEMY_TYPE_MINIBOSS) {
             sprite_scale = 1.18f;
         } else if (e->type == ENEMY_TYPE_DOG) {
-            sprite_scale = 0.72f;
+            sprite_scale = e->state == ENEMY_ATTACK && e->attack_flash_timer > 0.0f ? 0.84f : 0.72f;
         }
         int sprite_h = abs((int)(screen_h * sprite_scale / transform_y));
         int draw_y0 = (screen_h - sprite_h) / 2;

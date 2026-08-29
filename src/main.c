@@ -395,7 +395,7 @@ int main(int argc, char **argv) {
         "assets/sprites/boss_aim.ppm",
         "assets/sprites/shotgun_guard_aim.ppm",
         "assets/sprites/miniboss_aim.ppm",
-        "assets/sprites/dog_bite.ppm"
+        "assets/sprites/dog_dir_4.ppm"
     };
     const char *enemy_corpse_paths[ENEMY_TYPE_COUNT] = {
         "assets/sprites/guard_corpse.ppm",
@@ -432,8 +432,10 @@ int main(int argc, char **argv) {
                 texture_create(&enemy_tex[t][ENEMY_SPRITE_AIM], etw, eth);
                 memcpy(enemy_tex[t][ENEMY_SPRITE_AIM].pixels, enemy_tex[t][4].pixels, (size_t)etw * eth * 3);
             }
-            texture_create(&enemy_tex[t][ENEMY_SPRITE_FIRE], etw, eth);
-            memcpy(enemy_tex[t][ENEMY_SPRITE_FIRE].pixels, enemy_tex[t][ENEMY_SPRITE_AIM].pixels, (size_t)etw * eth * 3);
+            if (texture_load_ppm(&enemy_tex[t][ENEMY_SPRITE_FIRE], "assets/sprites/dog_bite.ppm") != 0) {
+                texture_create(&enemy_tex[t][ENEMY_SPRITE_FIRE], etw, eth);
+                memcpy(enemy_tex[t][ENEMY_SPRITE_FIRE].pixels, enemy_tex[t][ENEMY_SPRITE_AIM].pixels, (size_t)etw * eth * 3);
+            }
             if (texture_load_ppm(&enemy_tex[t][ENEMY_SPRITE_CORPSE], enemy_corpse_paths[t]) != 0) {
                 texture_create(&enemy_tex[t][ENEMY_SPRITE_CORPSE], etw, eth);
                 memcpy(enemy_tex[t][ENEMY_SPRITE_CORPSE].pixels, enemy_tex[t][4].pixels, (size_t)etw * eth * 3);
