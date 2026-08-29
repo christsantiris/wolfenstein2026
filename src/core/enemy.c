@@ -14,6 +14,7 @@ static const EnemyDef ENEMY_DEFS[ENEMY_TYPE_COUNT] = {
     { ENEMY_TYPE_BOSS,           850, 1.5f, 18.0f, 2.5f, 1.2f, 26 },
     { ENEMY_TYPE_GUARD_SHOTGUN,  100, 1.8f, 12.0f, 2.0f, 2.0f,  8 },
     { ENEMY_TYPE_MINIBOSS, 700, 1.6f, 16.0f, 7.0f, 1.5f, 18 },
+    { ENEMY_TYPE_DOG, 1, 3.8f, 16.0f, 0.85f, 0.65f, 10 },
 };
 
 const EnemyDef *enemy_def(EnemyType type) {
@@ -122,7 +123,12 @@ int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficul
             e->angle = atan2f(dy, dx);
             float nx = e->x + (dx / dist) * speed * dt;
             float ny = e->y + (dy / dist) * speed * dt;
-            float collision_radius = e->type == ENEMY_TYPE_MINIBOSS ? 0.48f : 0.28f;
+            float collision_radius = 0.28f;
+            if (e->type == ENEMY_TYPE_MINIBOSS) {
+                collision_radius = 0.48f;
+            } else if (e->type == ENEMY_TYPE_DOG) {
+                collision_radius = 0.20f;
+            }
             if (enemy_can_stand(m, nx, e->y, collision_radius)) {
                 e->x = nx;
             }

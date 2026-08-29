@@ -358,7 +358,8 @@ int main(int argc, char **argv) {
         "assets/sprites/ss_front.ppm",
         "assets/sprites/boss_front.ppm",
         "assets/sprites/shotgun_guard_front.ppm",
-        "assets/sprites/miniboss_front.ppm"
+        "assets/sprites/miniboss_front.ppm",
+        "assets/sprites/dog_dir_4.ppm"
     };
     const char *enemy_walk_paths[ENEMY_TYPE_COUNT] = {
         "assets/sprites/guard_walk.ppm",
@@ -366,7 +367,8 @@ int main(int argc, char **argv) {
         "assets/sprites/ss_walk.ppm",
         "assets/sprites/boss_walk.ppm",
         "assets/sprites/shotgun_guard_walk.ppm",
-        "assets/sprites/miniboss_walk.ppm"
+        "assets/sprites/miniboss_walk.ppm",
+        "assets/sprites/dog_dir_4.ppm"
     };
     const char *enemy_aim_paths[ENEMY_TYPE_COUNT] = {
         "assets/sprites/guard_aim.ppm",
@@ -374,7 +376,8 @@ int main(int argc, char **argv) {
         "assets/sprites/ss_aim.ppm",
         "assets/sprites/boss_aim.ppm",
         "assets/sprites/shotgun_guard_aim.ppm",
-        "assets/sprites/miniboss_aim.ppm"
+        "assets/sprites/miniboss_aim.ppm",
+        "assets/sprites/dog_bite.ppm"
     };
     const char *enemy_corpse_paths[ENEMY_TYPE_COUNT] = {
         "assets/sprites/guard_corpse.ppm",
@@ -382,11 +385,43 @@ int main(int argc, char **argv) {
         "assets/sprites/ss_corpse.ppm",
         "assets/sprites/boss_corpse.ppm",
         "assets/sprites/shotgun_guard_corpse.ppm",
-        "assets/sprites/miniboss_corpse.ppm"
+        "assets/sprites/miniboss_corpse.ppm",
+        "assets/sprites/dog_corpse.ppm"
     };
-    const int enemy_muzzle_y[ENEMY_TYPE_COUNT] = { 14, 13, 14, 15, 14, 18 };
-    const int enemy_flash_radius[ENEMY_TYPE_COUNT] = { 3, 3, 4, 5, 5, 5 };
+    const int enemy_muzzle_y[ENEMY_TYPE_COUNT] = { 14, 13, 14, 15, 14, 18, 0 };
+    const int enemy_flash_radius[ENEMY_TYPE_COUNT] = { 3, 3, 4, 5, 5, 5, 0 };
     for (int t = 0; t < ENEMY_TYPE_COUNT; t++) {
+        if (t == ENEMY_TYPE_DOG) {
+            const char *dog_direction_paths[8] = {
+                "assets/sprites/dog_dir_0.ppm",
+                "assets/sprites/dog_dir_1.ppm",
+                "assets/sprites/dog_dir_2.ppm",
+                "assets/sprites/dog_dir_3.ppm",
+                "assets/sprites/dog_dir_4.ppm",
+                "assets/sprites/dog_dir_5.ppm",
+                "assets/sprites/dog_dir_6.ppm",
+                "assets/sprites/dog_dir_7.ppm"
+            };
+            for (int d = 0; d < 8; d++) {
+                if (texture_load_ppm(&enemy_tex[t][d], dog_direction_paths[d]) != 0) {
+                    texture_create(&enemy_tex[t][d], etw, eth);
+                    texture_generate_guard_dir(&enemy_tex[t][d], d);
+                }
+                texture_create(&enemy_tex[t][ENEMY_SPRITE_WALK_B + d], etw, eth);
+                memcpy(enemy_tex[t][ENEMY_SPRITE_WALK_B + d].pixels, enemy_tex[t][d].pixels, (size_t)etw * eth * 3);
+            }
+            if (texture_load_ppm(&enemy_tex[t][ENEMY_SPRITE_AIM], enemy_aim_paths[t]) != 0) {
+                texture_create(&enemy_tex[t][ENEMY_SPRITE_AIM], etw, eth);
+                memcpy(enemy_tex[t][ENEMY_SPRITE_AIM].pixels, enemy_tex[t][4].pixels, (size_t)etw * eth * 3);
+            }
+            texture_create(&enemy_tex[t][ENEMY_SPRITE_FIRE], etw, eth);
+            memcpy(enemy_tex[t][ENEMY_SPRITE_FIRE].pixels, enemy_tex[t][ENEMY_SPRITE_AIM].pixels, (size_t)etw * eth * 3);
+            if (texture_load_ppm(&enemy_tex[t][ENEMY_SPRITE_CORPSE], enemy_corpse_paths[t]) != 0) {
+                texture_create(&enemy_tex[t][ENEMY_SPRITE_CORPSE], etw, eth);
+                memcpy(enemy_tex[t][ENEMY_SPRITE_CORPSE].pixels, enemy_tex[t][4].pixels, (size_t)etw * eth * 3);
+            }
+            continue;
+        }
         if (texture_load_ppm(&enemy_tex[t][4], enemy_paths[t]) != 0) {
             texture_create(&enemy_tex[t][4], etw, eth);
             if (t == ENEMY_TYPE_BOSS || t == ENEMY_TYPE_MINIBOSS) {
