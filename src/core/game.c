@@ -21,7 +21,7 @@
 static const WeaponDef WEAPON_PISTOL = { GUN_9MM_HANDGUN, "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3", 8, 99, 34, 0.15f, 0.50f, 0.12f, 1.5f };
 static const WeaponDef WEAPON_DUAL_HANDGUN = { GUN_DUAL_HANDGUN, "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3", 16, 99, 34, 0.15f, 0.25f, 0.10f, 1.2f };
 static const WeaponDef WEAPON_SHOTGUN = { GUN_SHOTGUN, "assets/sounds/shotgun.mp3", "assets/sounds/handgunreload.mp3", 2, 99, 20, 0.30f, 0.80f, 0.15f, 2.0f };
-static const WeaponDef WEAPON_AK47 = { GUN_AK47, "assets/sounds/ak-47.mp3", "assets/sounds/handgunreload.mp3", 30, 99, 30, 0.25f, 0.12f, 0.08f, 2.0f };
+static const WeaponDef WEAPON_AK47 = { GUN_AK47, "assets/sounds/ak-47.mp3", "assets/sounds/handgunreload.mp3", 30, 99, 30, 0.25f, 0.12f, 0.12f, 2.0f };
 static const WeaponDef WEAPON_BATTLE_RIFLE = { GUN_BATTLE_RIFLE, "assets/sounds/rifle.mp3", "assets/sounds/handgunreload.mp3", 10, 99, 75, 0.14f, 0.35f, 0.10f, 1.8f };
 static const WeaponDef WEAPON_KNIFE = { GUN_KNIFE, "assets/sounds/punch.mp3", NULL, 0, 0, WHIP_DAMAGE, WHIP_CONE, WHIP_DURATION, WHIP_DURATION, 0.0f };
 static const WeaponDef WEAPON_RIFLE_GRENADE = { GUN_RIFLE_GRENADE, "assets/sounds/grenade.mp3", "assets/sounds/handgunreload.mp3", 1, 8, 120, 0.20f, 1.10f, 0.18f, 2.4f };

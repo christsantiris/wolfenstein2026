@@ -308,6 +308,14 @@ int main(int argc, char **argv) {
         for (int i = 0; i < 64 * 64 * 3; i++) { ak47_tex.pixels[i] = 0; }
     }
 
+    Texture ak47_fire_tex;
+    if (texture_load_ppm(&ak47_fire_tex, "assets/sprites/ak47_fire.ppm") != 0) {
+        texture_create(&ak47_fire_tex, ak47_tex.width, ak47_tex.height);
+        for (int i = 0; i < ak47_tex.width * ak47_tex.height * 3; i++) {
+            ak47_fire_tex.pixels[i] = ak47_tex.pixels[i];
+        }
+    }
+
     Texture battle_rifle_tex;
     if (texture_load_ppm(&battle_rifle_tex, "assets/sprites/battle_rifle.ppm") != 0) {
         texture_create(&battle_rifle_tex, 64, 64);
@@ -876,6 +884,9 @@ int main(int argc, char **argv) {
             int knife_visible = game.current_weapon.type == GUN_KNIFE || game.pistol_whip_timer > 0.0f;
             const Texture *weapon_tex = knife_visible ? &knife_tex : weapon_textures[game.current_weapon.type];
             float shot_timer = knife_visible ? 0.0f : game.shot_timer;
+            if (!knife_visible && game.current_weapon.type == GUN_AK47 && shot_timer > 0.0f) {
+                weapon_tex = &ak47_fire_tex;
+            }
             weapon_render(renderer, &game.current_weapon, weapon_tex, reload_tex[game.current_weapon.type], game.ammo, shot_timer, game.shot_cooldown, game.pistol_whip_timer, game.is_reloading, game.reload_timer, w, h - HUD_HEIGHT);
             if (menu.minimap_on) {
                 minimap_render(renderer, &map, &player, &game.enemies, &game.items, menu.enemy_markers_on, menu.weapon_markers_on);
@@ -937,6 +948,7 @@ int main(int argc, char **argv) {
     }
     texture_free(&rifle_grenade_tex);
     texture_free(&battle_rifle_tex);
+    texture_free(&ak47_fire_tex);
     texture_free(&ak47_tex);
     texture_free(&shotgun_tex);
     texture_free(&dual_handgun_tex);
