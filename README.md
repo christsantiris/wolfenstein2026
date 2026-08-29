@@ -74,9 +74,9 @@ Pull requests are welcome. Please keep changes small and focused — one feature
 ## License
 MIT
 
-## Sound Effects courtesy of
-https://pixabay.com
-
 ## Roadmap
 - Additional weapons (grenade launcher?)
+
+## Sound Effects courtesy of
+https://pixabay.com
 

@@ -148,20 +148,12 @@ LandingResult landing_handle_event(const SDL_Event *e, int sw, int sh) {
 
 /* --- difficulty screen --- */
 
-static const char *DIFF_NAMES[DIFF_COUNT] = {
-    "CAN I PLAY, DADDY?",
-    "DONT HURT ME.",
-    "BRING EM ON!",
-    "I AM DEATH INCARNATE!"
-};
-static const int DIFF_ENABLED[DIFF_COUNT] = { 1, 1, 1, 1 };
-
 static int diff_selected = 0;
 static int diff_hover = -1;
 
 static int diff_next(int cur, int dir) {
     int n = (cur + dir + DIFF_COUNT) % DIFF_COUNT;
-    while (!DIFF_ENABLED[n]) {
+    while (!difficulty_get((Difficulty)n)->enabled) {
         n = (n + dir + DIFF_COUNT) % DIFF_COUNT;
     }
     return n;
@@ -194,8 +186,9 @@ void difficulty_screen_render(SDL_Renderer *r, int sw, int sh) {
     int cx = sw / 2;
     int by = sh / 2 - (DIFF_COUNT * (FONT_LHEIGHT + 10)) / 2;
     for (int i = 0; i < DIFF_COUNT; i++) {
-        int highlight = (diff_selected == i) || (diff_hover == i && DIFF_ENABLED[i]);
-        draw_item(r, DIFF_NAMES[i], cx, by + i * (FONT_LHEIGHT + 10), DIFF_ENABLED[i], highlight);
+        const DifficultyDef *difficulty = difficulty_get((Difficulty)i);
+        int highlight = (diff_selected == i) || (diff_hover == i && difficulty->enabled);
+        draw_item(r, difficulty->name, cx, by + i * (FONT_LHEIGHT + 10), difficulty->enabled, highlight);
     }
 }
 
@@ -215,7 +208,7 @@ Difficulty difficulty_screen_handle_event(const SDL_Event *e, int sw, int sh) {
             return DIFF_COUNT;
         }
         if (k == SDLK_RETURN || k == SDLK_KP_ENTER) {
-            if (DIFF_ENABLED[diff_selected]) {
+            if (difficulty_get((Difficulty)diff_selected)->enabled) {
                 return (Difficulty)diff_selected;
             }
         }
@@ -225,7 +218,8 @@ Difficulty difficulty_screen_handle_event(const SDL_Event *e, int sw, int sh) {
         int my = e->motion.y;
         diff_hover = -1;
         for (int i = 0; i < DIFF_COUNT; i++) {
-            SDL_Rect rect = item_rect(DIFF_NAMES[i], cx, by + i * (FONT_LHEIGHT + 10));
+            const char *name = difficulty_get((Difficulty)i)->name;
+            SDL_Rect rect = item_rect(name, cx, by + i * (FONT_LHEIGHT + 10));
             if (mx >= rect.x && mx < rect.x + rect.w && my >= rect.y && my < rect.y + rect.h) {
                 diff_hover = i;
                 break;
@@ -236,8 +230,9 @@ Difficulty difficulty_screen_handle_event(const SDL_Event *e, int sw, int sh) {
         int mx = e->button.x;
         int my = e->button.y;
         for (int i = 0; i < DIFF_COUNT; i++) {
-            if (!DIFF_ENABLED[i]) { continue; }
-            SDL_Rect rect = item_rect(DIFF_NAMES[i], cx, by + i * (FONT_LHEIGHT + 10));
+            const DifficultyDef *difficulty = difficulty_get((Difficulty)i);
+            if (!difficulty->enabled) { continue; }
+            SDL_Rect rect = item_rect(difficulty->name, cx, by + i * (FONT_LHEIGHT + 10));
             if (mx >= rect.x && mx < rect.x + rect.w && my >= rect.y && my < rect.y + rect.h) {
                 diff_selected = i;
                 return (Difficulty)i;
