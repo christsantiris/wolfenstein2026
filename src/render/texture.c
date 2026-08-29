@@ -2,6 +2,29 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+static int texture_is_magenta_key(const unsigned char *pixel) {
+    return pixel[0] == 255 && pixel[1] == 0 && pixel[2] == 255;
+}
+
+static int texture_is_magenta_fringe(const unsigned char *pixel) {
+    int r = pixel[0];
+    int g = pixel[1];
+    int b = pixel[2];
+    return r >= 96 && b >= 64 && b > g * 3 / 2 && r > g * 3 / 2;
+}
+
+static void texture_remove_magenta_fringe(Texture *t) {
+    int pixel_count = t->width * t->height;
+    for (int i = 0; i < pixel_count; i++) {
+        unsigned char *pixel = &t->pixels[i * 3];
+        if (!texture_is_magenta_key(pixel) && texture_is_magenta_fringe(pixel)) {
+            pixel[0] = 255;
+            pixel[1] = 0;
+            pixel[2] = 255;
+        }
+    }
+}
+
 int texture_create(Texture *t, int width, int height) {
     t->pixels = malloc(width * height * 3);
     if (!t->pixels) {
@@ -58,6 +81,7 @@ int texture_load_ppm(Texture *t, const char *path) {
         return -1;
     }
 
+    texture_remove_magenta_fringe(t);
     fclose(f);
     return 0;
 }
