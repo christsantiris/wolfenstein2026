@@ -12,7 +12,7 @@
 #define ENEMY_SPRITE_CORPSE 18
 #define ENEMY_SPRITE_FRAMES 19
 
-void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, float *depth_buffer, const Texture enemy_tex[][ENEMY_SPRITE_FRAMES], int difficulty, int screen_w, int screen_h);
+void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, float *depth_buffer, const Texture enemy_tex[][ENEMY_SPRITE_FRAMES], int difficulty, int health_bars_on, int screen_w, int screen_h);
 void sprite_render_grenade(SDL_Renderer *renderer, const Player *p, const GrenadeState *grenade, float *depth_buffer, int screen_w, int screen_h);
 
 #endif

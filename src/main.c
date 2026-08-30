@@ -544,6 +544,7 @@ int main(int argc, char **argv) {
     menu.minimap_on = 1;
     menu.enemy_markers_on = 0;
     menu.weapon_markers_on = 0;
+    menu.health_bars_on = 1;
     int current_level = 1;
 #ifdef DEBUG_START_LEVEL
     current_level = DEBUG_START_LEVEL;
@@ -558,12 +559,13 @@ int main(int argc, char **argv) {
     int running = 1;
     float total_time = 0.0f;
     SDL_Event e;
-    Uint32 last_ticks = SDL_GetTicks();
+    Uint64 counter_frequency = SDL_GetPerformanceFrequency();
+    Uint64 last_counter = SDL_GetPerformanceCounter();
 
     while (running) {
-        Uint32 now = SDL_GetTicks();
-        float dt = (now - last_ticks) / 1000.0f;
-        last_ticks = now;
+        Uint64 current_counter = SDL_GetPerformanceCounter();
+        float dt = (float)((double)(current_counter - last_counter) / (double)counter_frequency);
+        last_counter = current_counter;
         total_time += dt;
 
         int w = SCREEN_W, h = SCREEN_H;
@@ -590,7 +592,8 @@ int main(int argc, char **argv) {
                         .sound_on = menu.sound_on,
                         .minimap_on = menu.minimap_on,
                         .enemy_positions_on = menu.enemy_markers_on,
-                        .weapon_pickups_on = menu.weapon_markers_on
+                        .weapon_pickups_on = menu.weapon_markers_on,
+                        .enemy_health_bars_on = menu.health_bars_on
                     };
                     if (slot_picker.is_save) {
                         save_game(picked_slot, current_level, &player, &game, &map, &settings);
@@ -601,6 +604,7 @@ int main(int argc, char **argv) {
                             menu.minimap_on = settings.minimap_on;
                             menu.enemy_markers_on = settings.enemy_positions_on;
                             menu.weapon_markers_on = settings.weapon_pickups_on;
+                            menu.health_bars_on = settings.enemy_health_bars_on;
                             sound_set_enabled(menu.sound_on);
                             game_over = 0;
                             game_won = 0;
@@ -645,6 +649,7 @@ int main(int argc, char **argv) {
                     menu.minimap_on = 1;
                     menu.enemy_markers_on = 0;
                     menu.weapon_markers_on = 0;
+                    menu.health_bars_on = 1;
                     sound_set_enabled(menu.sound_on);
                     start_game(&map, &player, &game, current_level);
                     music_play(&level_music[current_level - 1]);
@@ -892,7 +897,7 @@ int main(int argc, char **argv) {
             for (int y = 0; y < view_h; y++) {
                 memcpy(&world_depth[y * w], zbuf, (size_t)w * sizeof(float));
             }
-            sprite_render_all(renderer, &player, &game.enemies, world_depth, enemy_tex, game.difficulty, w, view_h);
+            sprite_render_all(renderer, &player, &game.enemies, world_depth, enemy_tex, game.difficulty, menu.health_bars_on, w, view_h);
             sprite_render_grenade(renderer, &player, &game.grenade, world_depth, w, view_h);
             item_render_all(renderer, &player, &game.items, world_depth, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, &weapon_kit_dual_tex, &weapon_kit_battle_rifle_tex, &weapon_kit_rifle_grenade_tex, w, view_h);
             int knife_visible = game.current_weapon.type == GUN_KNIFE || game.pistol_whip_timer > 0.0f;

@@ -10,16 +10,17 @@
 #define CSTRIDE   (CW + SCALE)
 #define LHEIGHT   (CH + SCALE * 4)
 
-#define MENU_ITEM_COUNT    9
+#define MENU_ITEM_COUNT    10
 #define MENU_ITEM_MUSIC    0
 #define MENU_ITEM_SOUND    1
 #define MENU_ITEM_MINIMAP  2
 #define MENU_ITEM_ENEMIES  3
 #define MENU_ITEM_WEAPONS  4
-#define MENU_ITEM_SAVE     5
-#define MENU_ITEM_LOAD     6
-#define MENU_ITEM_NEW_GAME 7
-#define MENU_ITEM_QUIT     8
+#define MENU_ITEM_HEALTH   5
+#define MENU_ITEM_SAVE     6
+#define MENU_ITEM_LOAD     7
+#define MENU_ITEM_NEW_GAME 8
+#define MENU_ITEM_QUIT     9
 
 static const uint8_t GLYPHS[96][7] = {
     { 0x00,0x00,0x00,0x00,0x00,0x00,0x00 }, /* ' '  32 */
@@ -147,7 +148,7 @@ static int button_hit(int mx, int my, int bx, int by, const char *label) {
 typedef struct {
     int bx, by, bw, bh;
     int music_y, sound_y;
-    int minimap_y, enemies_y, weapons_y;
+    int minimap_y, enemies_y, weapons_y, health_y;
     int save_x, load_x, row1_y;
     int new_game_x, quit_x, row2_y;
 } MenuLayout;
@@ -169,7 +170,8 @@ static void menu_compute_layout(int sw, int sh, MenuLayout *l) {
     l->sound_y = y; y += LHEIGHT;
     l->minimap_y = y; y += LHEIGHT;
     l->enemies_y = y; y += LHEIGHT;
-    l->weapons_y = y; y += LHEIGHT + 4 + 14;
+    l->weapons_y = y; y += LHEIGHT;
+    l->health_y = y; y += LHEIGHT + 4 + 14;
 
     l->save_x = l->bx + l->bw / 2 - str_px_w("SAVE") - 24;
     l->load_x = l->bx + l->bw / 2 + 8;
@@ -204,6 +206,10 @@ static MenuAction activate_item(Menu *m, int item) {
     if (item == MENU_ITEM_WEAPONS) {
         m->weapon_markers_on = !m->weapon_markers_on;
         return MENU_ACTION_WEAPON_MARKERS_TOGGLE;
+    }
+    if (item == MENU_ITEM_HEALTH) {
+        m->health_bars_on = !m->health_bars_on;
+        return MENU_ACTION_HEALTH_BARS_TOGGLE;
     }
     if (item == MENU_ITEM_SAVE) {
         return MENU_ACTION_SAVE;
@@ -276,6 +282,11 @@ MenuAction menu_handle_event(Menu *m, const SDL_Event *e, int sw, int sh) {
         mx >= l.bx && mx < l.bx + l.bw) {
         m->selected = MENU_ITEM_WEAPONS;
         return activate_item(m, MENU_ITEM_WEAPONS);
+    }
+    if (my >= l.health_y && my < l.health_y + CH &&
+        mx >= l.bx && mx < l.bx + l.bw) {
+        m->selected = MENU_ITEM_HEALTH;
+        return activate_item(m, MENU_ITEM_HEALTH);
     }
     if (button_hit(mx, my, l.save_x, l.row1_y, "SAVE")) {
         return MENU_ACTION_SAVE;
@@ -380,6 +391,13 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
         SDL_RenderFillRect(r, &hl);
     }
     draw_row(r, "WEAPON LOCATOR", m->weapon_markers_on ? "ON" : "OFF", l.bx, y, l.bw);
+    y += LHEIGHT;
+    if (m->selected == MENU_ITEM_HEALTH) {
+        SDL_SetRenderDrawColor(r, 70, 52, 12, 255);
+        SDL_Rect hl = { l.bx + 4, y - 2, l.bw - 8, CH + 4 };
+        SDL_RenderFillRect(r, &hl);
+    }
+    draw_row(r, "ENEMY HEALTH BARS", m->health_bars_on ? "ON" : "OFF", l.bx, y, l.bw);
     y += LHEIGHT + 4;
 
     SDL_SetRenderDrawColor(r, 80, 60, 20, 255);

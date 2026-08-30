@@ -118,7 +118,7 @@ void sprite_render_grenade(SDL_Renderer *renderer, const Player *p, const Grenad
     }
 }
 
-void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, float *depth_buffer, const Texture enemy_tex[][ENEMY_SPRITE_FRAMES], int difficulty, int screen_w, int screen_h) {
+void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList *el, float *depth_buffer, const Texture enemy_tex[][ENEMY_SPRITE_FRAMES], int difficulty, int health_bars_on, int screen_w, int screen_h) {
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
     float plane_x = -dir_y * FOV_FACTOR;
@@ -204,15 +204,17 @@ void sprite_render_all(SDL_Renderer *renderer, const Player *p, const EnemyList 
         }
 
         int is_boss = e->type == ENEMY_TYPE_BOSS || e->type == ENEMY_TYPE_MINIBOSS;
-        if (e->active && is_boss && enemy_visible) {
+        if (e->active && health_bars_on && enemy_visible) {
             int max_health = enemy_max_health(e->type, difficulty);
 
             int bar_w = sprite_w * 3 / 5;
-            if (bar_w < 36) { bar_w = 36; }
-            if (bar_w > 140) { bar_w = 140; }
-            int bar_h = 6;
+            int min_bar_w = is_boss ? 36 : 18;
+            int max_bar_w = is_boss ? 140 : 72;
+            if (bar_w < min_bar_w) { bar_w = min_bar_w; }
+            if (bar_w > max_bar_w) { bar_w = max_bar_w; }
+            int bar_h = is_boss ? 6 : 4;
             int bar_x = screen_x - bar_w / 2;
-            int bar_y = draw_y0 - 12;
+            int bar_y = draw_y0 - (is_boss ? 12 : 8);
             if (bar_y < 2) { bar_y = 2; }
 
             int fill_w = (max_health > 0) ? (bar_w - 2) * e->health / max_health : 0;
