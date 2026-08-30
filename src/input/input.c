@@ -4,6 +4,7 @@
 
 #define TURN_START_SPEED 0.70f
 #define TURN_ACCELERATION 3.75f
+#define AIM_TURN_SPEED 0.85f
 
 static float turn_speed = 0.0f;
 static int turn_direction = 0;
@@ -31,14 +32,24 @@ void input_update(Player *p, const Map *m, float dt) {
         try_move(p, m, -cosf(p->angle) * move, -sinf(p->angle) * move);
     }
 
+    int aim_turn = 0;
+    if (keys[SDL_SCANCODE_LEFT] && !keys[SDL_SCANCODE_RIGHT]) {
+        aim_turn = -1;
+    } else if (keys[SDL_SCANCODE_RIGHT] && !keys[SDL_SCANCODE_LEFT]) {
+        aim_turn = 1;
+    }
+
     int requested_turn = 0;
-    if ((keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_LEFT]) && !(keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT])) {
+    if (keys[SDL_SCANCODE_A] && !keys[SDL_SCANCODE_D]) {
         requested_turn = -1;
-    } else if ((keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT]) && !(keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_LEFT])) {
+    } else if (keys[SDL_SCANCODE_D] && !keys[SDL_SCANCODE_A]) {
         requested_turn = 1;
     }
 
-    if (requested_turn == 0) {
+    if (aim_turn != 0) {
+        turn_speed = 0.0f;
+        p->angle += aim_turn * AIM_TURN_SPEED * dt;
+    } else if (requested_turn == 0) {
         turn_speed = 0.0f;
     } else {
         if (requested_turn != turn_direction) {
