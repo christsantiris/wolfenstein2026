@@ -11,6 +11,7 @@
 #define WHIP_DURATION 0.4f
 #define SHOTGUN_PELLET_COUNT 6
 #define SHOTGUN_TARGET_RADIUS 0.35f
+#define SHOTGUN_UNLOCK_BONUS_MAGAZINES 2
 #define GRENADE_SPLASH_RADIUS 2.5f
 #define GRENADE_SPLASH_DAMAGE 90
 #define GRENADE_SPEED 9.0f
@@ -59,7 +60,11 @@ int game_ammo_pickup_amount(int difficulty) {
 
 int game_weapon_unlock_reserve(const WeaponDef *weapon, int difficulty) {
     const DifficultyDef *settings = difficulty_get((Difficulty)difficulty);
-    int reserve = weapon->max_ammo * settings->weapon_unlock_spare_magazines;
+    int spare_magazines = settings->weapon_unlock_spare_magazines;
+    if (weapon->type == GUN_SHOTGUN) {
+        spare_magazines += SHOTGUN_UNLOCK_BONUS_MAGAZINES;
+    }
+    int reserve = weapon->max_ammo * spare_magazines;
     return reserve < weapon->reserve_capacity ? reserve : weapon->reserve_capacity;
 }
 
