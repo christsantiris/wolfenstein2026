@@ -124,12 +124,12 @@ void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, 
         SDL_RenderFillRect(renderer, &block);
     }
 
-    char reserve_buf[16];
-    snprintf(reserve_buf, sizeof(reserve_buf), "| %d", reserve_ammo);
-    int reserve_x = ammo_right - font_str_px_w(reserve_buf) - (ammo * (AMMO_BLOCK_W + AMMO_GAP));
-    int reserve_y = bar_y + (HUD_HEIGHT - FONT_CH) / 2;
+    char ammo_buf[32];
+    snprintf(ammo_buf, sizeof(ammo_buf), "CLIP %d  RES %d", ammo, reserve_ammo);
+    int ammo_x = ammo_right - font_str_px_w(ammo_buf);
+    int ammo_y = bar_y + HUD_HEIGHT - FONT_CH - 4;
     SDL_Color grey = { 160, 160, 160, 255 };
-    font_draw_string(renderer, reserve_buf, reserve_x, reserve_y, grey);
+    font_draw_string(renderer, ammo_buf, ammo_x, ammo_y, grey);
 
     char score_buf[32];
     snprintf(score_buf, sizeof(score_buf), "%d", score);
