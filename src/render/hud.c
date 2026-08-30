@@ -62,6 +62,25 @@ void hud_draw_exit_open(SDL_Renderer *renderer, int screen_w, int screen_h) {
     font_draw_string(renderer, msg, tx, ty, gold);
 }
 
+void hud_draw_boss_final_stand(SDL_Renderer *renderer, int screen_w, float timer) {
+    if (fmodf(timer, 0.5f) < 0.25f) {
+        return;
+    }
+    const char *msg = "THE BOSS IS NOT DEAD YET";
+    int tw = font_str_px_w(msg);
+    int tx = (screen_w - tw) / 2;
+    int ty = 16;
+
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 150);
+    SDL_Rect bar = { tx - 16, ty - 8, tw + 32, FONT_CH + 16 };
+    SDL_RenderFillRect(renderer, &bar);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+
+    SDL_Color gold = { 220, 180, 50, 255 };
+    font_draw_string(renderer, msg, tx, ty, gold);
+}
+
 void hud_render(SDL_Renderer *renderer, int screen_w, int screen_h, int health, int ammo, int reserve_ammo, int score, int enemies_remaining, const Texture face_tex[HUD_FACE_COUNT]) {
     int bar_y = screen_h - HUD_HEIGHT;
 

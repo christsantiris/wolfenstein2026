@@ -62,6 +62,7 @@ typedef struct {
     float pistol_whip_timer;
     int is_reloading;
     float level_clear_timer;
+    float boss_final_stand_timer;
     WeaponDef current_weapon;
     int has_weapon[GUN_COUNT];
     int ammo_per_gun[GUN_COUNT];

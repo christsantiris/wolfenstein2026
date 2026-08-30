@@ -57,6 +57,7 @@ const EnemyDef *enemy_def(EnemyType type);
 int enemy_max_health(EnemyType type, int difficulty);
 void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, float px, float py);
 int enemy_list_call_reinforcements(EnemyList *el, const Player *p, const Map *m, int difficulty);
+int enemy_list_begin_boss_final_stand(EnemyList *el, int difficulty);
 int enemy_update(Enemy *e, const Player *p, const Map *m, float dt, int difficulty);
 int enemy_list_all_dead(const EnemyList *el);
 

@@ -12,7 +12,7 @@
 #endif
 
 #define SAVE_MAGIC   "WOLF2026"
-#define SAVE_VERSION 14
+#define SAVE_VERSION 15
 #define SAVE_GUN_COUNT_V7 5
 #define SAVE_GUN_COUNT_V10 6
 
@@ -77,6 +77,7 @@ int save_game(int slot, int level, const Player *p, const GameState *g, const Ma
     fwrite(&g->grenade.explosion_x, sizeof(g->grenade.explosion_x), 1, f);
     fwrite(&g->grenade.explosion_y, sizeof(g->grenade.explosion_y), 1, f);
     fwrite(&g->grenade.explosion_timer, sizeof(g->grenade.explosion_timer), 1, f);
+    fwrite(&g->boss_final_stand_timer, sizeof(g->boss_final_stand_timer), 1, f);
 
     fwrite(&g->enemies.count, sizeof(g->enemies.count), 1, f);
     for (int i = 0; i < g->enemies.count; i++) {
@@ -204,6 +205,9 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
         if (fread(&g->grenade.explosion_x, sizeof(g->grenade.explosion_x), 1, f) != 1) { fclose(f); return -1; }
         if (fread(&g->grenade.explosion_y, sizeof(g->grenade.explosion_y), 1, f) != 1) { fclose(f); return -1; }
         if (fread(&g->grenade.explosion_timer, sizeof(g->grenade.explosion_timer), 1, f) != 1) { fclose(f); return -1; }
+    }
+    if (ver >= 15) {
+        if (fread(&g->boss_final_stand_timer, sizeof(g->boss_final_stand_timer), 1, f) != 1) { fclose(f); return -1; }
     }
 
     if (fread(&g->enemies.count, sizeof(g->enemies.count), 1, f) != 1) { fclose(f); return -1; }

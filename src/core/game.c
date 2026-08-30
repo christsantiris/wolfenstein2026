@@ -18,6 +18,7 @@
 #define GRENADE_MAX_RANGE 20.0f
 #define GRENADE_COLLISION_STEP 0.05f
 #define GRENADE_ENEMY_RADIUS 0.35f
+#define BOSS_FINAL_STAND_ALERT_TIME 3.0f
 
 static const WeaponDef WEAPON_PISTOL = { GUN_9MM_HANDGUN, "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3", 8, 99, 34, 0.15f, 0.50f, 0.12f, 1.5f };
 static const WeaponDef WEAPON_DUAL_HANDGUN = { GUN_DUAL_HANDGUN, "assets/sounds/handgunshot.mp3", "assets/sounds/handgunreload.mp3", 16, 99, 34, 0.15f, 0.25f, 0.10f, 1.2f };
@@ -92,6 +93,7 @@ void game_init(GameState *g) {
     g->pistol_whip_timer = 0.0f;
     g->is_reloading = 0;
     g->level_clear_timer = 0.0f;
+    g->boss_final_stand_timer = 0.0f;
     memset(&g->grenade, 0, sizeof(g->grenade));
     memset(&g->enemies, 0, sizeof(g->enemies));
 #ifdef DEBUG_NO_AMMO
@@ -434,6 +436,10 @@ int game_update_enemies(GameState *g, const Player *p, const Map *m, float dt) {
     if (enemy_list_call_reinforcements(&g->enemies, p, m, g->difficulty)) {
         sound_events |= GAME_ENEMY_SOUND_GENERIC;
     }
+    if (enemy_list_begin_boss_final_stand(&g->enemies, g->difficulty)) {
+        g->boss_final_stand_timer = BOSS_FINAL_STAND_ALERT_TIME;
+        sound_events |= GAME_ENEMY_SOUND_GENERIC;
+    }
     if (enemy_list_all_dead(&g->enemies) && g->level_clear_timer == 0.0f) {
         g->level_clear_timer = 4.0f;
     }
@@ -446,6 +452,7 @@ void game_update_timers(GameState *g, float dt) {
     if (g->pistol_whip_timer > 0.0f) { g->pistol_whip_timer -= dt; }
     if (g->hit_flash_timer > 0.0f) { g->hit_flash_timer -= dt; }
     if (g->level_clear_timer > 0.0f) { g->level_clear_timer -= dt; }
+    if (g->boss_final_stand_timer > 0.0f) { g->boss_final_stand_timer -= dt; }
     if (g->is_reloading) {
         g->reload_timer -= dt;
         if (g->reload_timer <= 0.0f) {

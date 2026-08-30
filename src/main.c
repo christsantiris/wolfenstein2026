@@ -917,7 +917,9 @@ int main(int argc, char **argv) {
                 }
             }
             hud_render(renderer, w, h, game.health, game.ammo, game.reserve_ammo_per_gun[game.current_weapon.type], game.score, enemies_remaining, face_tex);
-            if (game.level_clear_timer > 0.0f) {
+            if (game.boss_final_stand_timer > 0.0f) {
+                hud_draw_boss_final_stand(renderer, w, game.boss_final_stand_timer);
+            } else if (game.level_clear_timer > 0.0f) {
                 hud_draw_level_clear(renderer, w, h - HUD_HEIGHT, game.level_clear_timer);
             } else if (enemy_list_all_dead(&game.enemies)) {
                 hud_draw_exit_open(renderer, w, h - HUD_HEIGHT);

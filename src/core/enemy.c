@@ -304,6 +304,34 @@ int enemy_list_call_reinforcements(EnemyList *el, const Player *p, const Map *m,
     return spawned > 0;
 }
 
+int enemy_list_begin_boss_final_stand(EnemyList *el, int difficulty) {
+    Enemy *boss = NULL;
+    for (int i = 0; i < el->count; i++) {
+        Enemy *enemy = &el->enemies[i];
+        if (enemy->type == ENEMY_TYPE_BOSS) {
+            boss = enemy;
+            continue;
+        }
+        if (enemy->active) {
+            return 0;
+        }
+    }
+    if (!boss || boss->active || boss->reinforcements_called >= 2) {
+        return 0;
+    }
+
+    boss->health = enemy_max_health(ENEMY_TYPE_BOSS, difficulty) / 10;
+    if (boss->health < 1) {
+        boss->health = 1;
+    }
+    boss->active = 1;
+    boss->state = ENEMY_ALERT;
+    boss->attack_timer = 0.0f;
+    boss->attack_flash_timer = 0.0f;
+    boss->reinforcements_called = 2;
+    return 1;
+}
+
 void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, float px, float py) {
     memset(el, 0, sizeof(EnemyList));
     int campaign_level_count = (int)(sizeof(LEVEL_ENCOUNTERS) / sizeof(LEVEL_ENCOUNTERS[0]));
