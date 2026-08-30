@@ -17,7 +17,6 @@ typedef struct {
     float enemy_speed_multiplier;
     float enemy_sight_multiplier;
     float enemy_damage_multiplier;
-    int enemy_count_bonus;
     int health_pickup_amount;
     int ammo_pickup_amount;
     int weapon_unlock_spare_magazines;
@@ -25,6 +24,7 @@ typedef struct {
     int kill_score;
     int boss_max_health;
     int miniboss_max_health;
+    int miniboss_support_count;
     int miniboss_wave_count;
     int boss_support_count;
     int boss_wave_count;

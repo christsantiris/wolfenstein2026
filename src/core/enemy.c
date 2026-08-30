@@ -6,6 +6,19 @@
 
 #define ATTACK_AIM_TIME 0.25f
 #define ATTACK_FLASH_TIME 0.12f
+#define NORMAL_ENEMY_TYPE_COUNT 4
+
+typedef enum {
+    ENCOUNTER_INTRO = 0,
+    ENCOUNTER_EARLY,
+    ENCOUNTER_MIDDLE,
+    ENCOUNTER_LATE,
+    ENCOUNTER_ELITE,
+    ENCOUNTER_KENNELS,
+    ENCOUNTER_MINIBOSS,
+    ENCOUNTER_BOSS,
+    ENCOUNTER_COUNT
+} EncounterProfile;
 
 static const EnemyDef ENEMY_DEFS[ENEMY_TYPE_COUNT] = {
     { ENEMY_TYPE_GUARD,          100, 1.8f, 12.0f, 2.0f, 2.0f,  8 },
@@ -15,6 +28,62 @@ static const EnemyDef ENEMY_DEFS[ENEMY_TYPE_COUNT] = {
     { ENEMY_TYPE_GUARD_SHOTGUN,  100, 1.8f, 12.0f, 2.0f, 2.0f,  8 },
     { ENEMY_TYPE_MINIBOSS, 700, 1.6f, 16.0f, 7.0f, 1.5f, 18 },
     { ENEMY_TYPE_DOG, 1, 3.8f, 16.0f, 0.85f, 0.65f, 10 },
+};
+
+static const EnemyType NORMAL_ENEMY_TYPES[NORMAL_ENEMY_TYPE_COUNT] = {
+    ENEMY_TYPE_GUARD,
+    ENEMY_TYPE_GUARD_SHOTGUN,
+    ENEMY_TYPE_OFFICER,
+    ENEMY_TYPE_SS
+};
+
+static const EncounterProfile LEVEL_ENCOUNTERS[] = {
+    ENCOUNTER_COUNT,
+    ENCOUNTER_INTRO,
+    ENCOUNTER_EARLY,
+    ENCOUNTER_EARLY,
+    ENCOUNTER_MIDDLE,
+    ENCOUNTER_MIDDLE,
+    ENCOUNTER_MINIBOSS,
+    ENCOUNTER_LATE,
+    ENCOUNTER_KENNELS,
+    ENCOUNTER_LATE,
+    ENCOUNTER_ELITE,
+    ENCOUNTER_ELITE,
+    ENCOUNTER_BOSS
+};
+
+static const int PROFILE_ROSTERS[ENCOUNTER_COUNT][DIFF_COUNT][NORMAL_ENEMY_TYPE_COUNT] = {
+    [ENCOUNTER_INTRO] = {
+        [DIFF_CAN_I_PLAY_DADDY] = { 4, 0, 0, 0 },
+        [DIFF_DONT_HURT_ME] = { 5, 0, 0, 0 },
+        [DIFF_BRING_EM_ON] = { 6, 0, 0, 0 },
+        [DIFF_I_AM_DEATH_INCARNATE] = { 6, 1, 0, 0 }
+    },
+    [ENCOUNTER_EARLY] = {
+        [DIFF_CAN_I_PLAY_DADDY] = { 4, 1, 1, 0 },
+        [DIFF_DONT_HURT_ME] = { 5, 1, 2, 0 },
+        [DIFF_BRING_EM_ON] = { 4, 2, 2, 1 },
+        [DIFF_I_AM_DEATH_INCARNATE] = { 4, 2, 2, 2 }
+    },
+    [ENCOUNTER_MIDDLE] = {
+        [DIFF_CAN_I_PLAY_DADDY] = { 3, 1, 3, 1 },
+        [DIFF_DONT_HURT_ME] = { 4, 2, 3, 2 },
+        [DIFF_BRING_EM_ON] = { 3, 3, 3, 4 },
+        [DIFF_I_AM_DEATH_INCARNATE] = { 3, 3, 3, 5 }
+    },
+    [ENCOUNTER_LATE] = {
+        [DIFF_CAN_I_PLAY_DADDY] = { 3, 2, 3, 2 },
+        [DIFF_DONT_HURT_ME] = { 3, 3, 4, 3 },
+        [DIFF_BRING_EM_ON] = { 3, 3, 4, 5 },
+        [DIFF_I_AM_DEATH_INCARNATE] = { 3, 3, 4, 7 }
+    },
+    [ENCOUNTER_ELITE] = {
+        [DIFF_CAN_I_PLAY_DADDY] = { 2, 2, 3, 4 },
+        [DIFF_DONT_HURT_ME] = { 3, 3, 4, 4 },
+        [DIFF_BRING_EM_ON] = { 3, 3, 4, 6 },
+        [DIFF_I_AM_DEATH_INCARNATE] = { 3, 3, 5, 7 }
+    }
 };
 
 const EnemyDef *enemy_def(EnemyType type) {
@@ -237,17 +306,31 @@ int enemy_list_call_reinforcements(EnemyList *el, const Player *p, const Map *m,
 
 void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, float px, float py) {
     memset(el, 0, sizeof(EnemyList));
+    int campaign_level_count = (int)(sizeof(LEVEL_ENCOUNTERS) / sizeof(LEVEL_ENCOUNTERS[0]));
+    if (level < 1 || level >= campaign_level_count) {
+        return;
+    }
+    EncounterProfile profile = LEVEL_ENCOUNTERS[level];
 
-    if (level == 6) {
+    if (profile == ENCOUNTER_MINIBOSS) {
+        static const EnemyType SUPPORT_TYPES[DIFF_COUNT][5] = {
+            { ENEMY_TYPE_GUARD, ENEMY_TYPE_OFFICER },
+            { ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER },
+            { ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS },
+            { ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS, ENEMY_TYPE_SS }
+        };
+        static const float SUPPORT_X[5] = { 5.5f, 22.5f, 5.5f, 21.5f, 22.5f };
+        static const float SUPPORT_Y[5] = { 4.5f, 4.5f, 14.5f, 10.5f, 14.5f };
+        const DifficultyDef *settings = difficulty_get((Difficulty)difficulty);
+        int d = settings->id;
         place(el, 14.5f, 4.5f, ENEMY_TYPE_MINIBOSS, difficulty);
-        place(el, 5.5f, 4.5f, ENEMY_TYPE_GUARD, difficulty);
-        place(el, 22.5f, 4.5f, ENEMY_TYPE_OFFICER, difficulty);
-        place(el, 5.5f, 14.5f, ENEMY_TYPE_GUARD, difficulty);
-        place(el, 21.5f, 10.5f, ENEMY_TYPE_GUARD_SHOTGUN, difficulty);
+        for (int i = 0; i < settings->miniboss_support_count; i++) {
+            place(el, SUPPORT_X[i], SUPPORT_Y[i], SUPPORT_TYPES[d][i], difficulty);
+        }
         return;
     }
 
-    if (level == 8) {
+    if (profile == ENCOUNTER_KENNELS) {
         static const float DOG_X[20] = {
             3.5f, 24.5f, 3.5f, 24.5f, 3.5f, 24.5f, 3.5f, 24.5f, 3.5f, 24.5f,
             8.5f, 19.5f, 8.5f, 19.5f, 8.5f, 19.5f, 8.5f, 19.5f, 8.5f, 19.5f
@@ -256,15 +339,16 @@ void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, flo
             1.5f, 1.5f, 5.5f, 5.5f, 9.5f, 9.5f, 14.5f, 14.5f, 18.5f, 18.5f,
             3.5f, 3.5f, 7.5f, 7.5f, 11.5f, 11.5f, 16.5f, 16.5f, 20.5f, 20.5f
         };
-        const DifficultyDef *settings = difficulty_get((Difficulty)difficulty);
-        int dog_count = 14 + settings->enemy_count_bonus;
+        static const int DOG_COUNTS[DIFF_COUNT] = { 11, 14, 16, 18 };
+        int d = difficulty_get((Difficulty)difficulty)->id;
+        int dog_count = DOG_COUNTS[d];
         for (int i = 0; i < dog_count; i++) {
             place(el, DOG_X[i], DOG_Y[i], ENEMY_TYPE_DOG, difficulty);
         }
         return;
     }
 
-    if (level == 12) {
+    if (profile == ENCOUNTER_BOSS) {
         static const EnemyType SUPPORT_TYPES[4][6] = {
             { ENEMY_TYPE_GUARD, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS },
             { ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_SS },
@@ -282,10 +366,11 @@ void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, flo
         return;
     }
 
-    const DifficultyDef *settings = difficulty_get((Difficulty)difficulty);
-    int progression_level = level >= 9 && level <= 11 ? level - 1 : level;
-    int count = 4 + progression_level + settings->enemy_count_bonus;
-    if (count > MAX_ENEMIES) { count = MAX_ENEMIES; }
+    int d = difficulty_get((Difficulty)difficulty)->id;
+    int count = 0;
+    for (int type_index = 0; type_index < NORMAL_ENEMY_TYPE_COUNT; type_index++) {
+        count += PROFILE_ROSTERS[profile][d][type_index];
+    }
 
     typedef struct { float x; float y; } Pos;
     Pos candidates[1024];
@@ -313,22 +398,15 @@ void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, flo
         candidates[i] = candidates[j];
         candidates[j] = tmp;
 
-        EnemyType type;
-        if (level == 1) {
-            type = ENEMY_TYPE_GUARD;
-        } else if (level == 2) {
-            type = (i < count * 6 / 10) ? ENEMY_TYPE_GUARD : ENEMY_TYPE_OFFICER;
-        } else {
-            if (i < count / 2) {
-                type = ENEMY_TYPE_GUARD;
-            } else if (i < count * 3 / 4) {
-                type = ENEMY_TYPE_OFFICER;
-            } else {
-                type = ENEMY_TYPE_SS;
+        int roster_index = i;
+        EnemyType type = ENEMY_TYPE_GUARD;
+        for (int type_index = 0; type_index < NORMAL_ENEMY_TYPE_COUNT; type_index++) {
+            int type_count = PROFILE_ROSTERS[profile][d][type_index];
+            if (roster_index < type_count) {
+                type = NORMAL_ENEMY_TYPES[type_index];
+                break;
             }
-        }
-        if (type == ENEMY_TYPE_GUARD && (rand() % 2) == 0) {
-            type = ENEMY_TYPE_GUARD_SHOTGUN;
+            roster_index -= type_count;
         }
         place(el, candidates[i].x, candidates[i].y, type, difficulty);
     }
