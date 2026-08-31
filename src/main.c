@@ -689,6 +689,9 @@ int main(int argc, char **argv) {
                         slot_picker_open(&slot_picker, 0);
                     }
                 } else if (!game_over && !game_won) {
+                    if (e.type == SDL_KEYDOWN && !e.key.repeat && e.key.keysym.sym == SDLK_t) {
+                        input_turn_around(&player);
+                    }
                     if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
                         if (game_shoot(&game, &player, &map)) {
                             sound_play(&gun_sounds[game.current_weapon.type]);

@@ -21,6 +21,12 @@ static float normalize_angle(float angle) {
     return angle;
 }
 
+void input_turn_around(Player *p) {
+    p->angle = normalize_angle(p->angle + (float)M_PI);
+    turn_speed = 0.0f;
+    turn_direction = 0;
+}
+
 static int aim_target_visible(const Player *p, const Enemy *e, const Map *m) {
     float dx = e->x - p->x;
     float dy = e->y - p->y;

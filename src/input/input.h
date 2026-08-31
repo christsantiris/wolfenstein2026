@@ -6,5 +6,6 @@
 #include "core/enemy.h"
 
 void input_update(Player *p, const Map *m, const EnemyList *enemies, float dt);
+void input_turn_around(Player *p);
 
 #endif
