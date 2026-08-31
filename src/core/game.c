@@ -60,6 +60,9 @@ int game_ammo_pickup_amount(int difficulty) {
 }
 
 int game_weapon_unlock_reserve(const WeaponDef *weapon, int difficulty) {
+    if (weapon->type == GUN_RIFLE_GRENADE) {
+        return weapon->reserve_capacity;
+    }
     const DifficultyDef *settings = difficulty_get((Difficulty)difficulty);
     int spare_magazines = settings->weapon_unlock_spare_magazines;
     if (weapon->type == GUN_SHOTGUN) {

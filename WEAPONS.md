@@ -11,10 +11,22 @@ The game models ammunition with a loaded magazine and a separate reserve for eac
 | 9mm handgun | Level 1 | 8 | 99 | 107 | 34 | 0.50 s | 2.00 shots/s | 1.5 s | 0.15 rad | 68.0 |
 | Dual handguns | Level 2 | 16 | 99 | 115 | 34 | 0.25 s | 4.00 shots/s | 1.2 s | 0.15 rad | 136.0 |
 | Shotgun | Level 5 | 2 | 99 | 101 | Up to 120 | 0.80 s | 1.25 shots/s | 2.0 s | 0.30 rad | Up to 150.0 |
-| Battle rifle | Level 7 | 10 | 99 | 109 | 55 | 0.35 s | 2.86 shots/s | 1.8 s | 0.08 rad | 157.1 |
-| AK-47 | Level 11 | 30 | 99 | 129 | 30 | 0.12 s | 8.33 shots/s | 2.0 s | 0.25 rad | 250.0 |
+| Battle rifle | Level 9 | 10 | 99 | 109 | 55 | 0.35 s | 2.86 shots/s | 1.8 s | 0.08 rad | 157.1 |
+| AK-47 | Level 12 | 30 | 99 | 129 | 30 | 0.12 s | 8.33 shots/s | 2.0 s | 0.25 rad | 250.0 |
 
 Burst DPS is damage per trigger divided by the shot interval. It excludes reload time and assumes every projectile hits.
+
+## Campaign weapon pickups
+
+| Level | Weapon pickup | Placement |
+| ---: | --- | --- |
+| 2 | Dual handguns | Random eligible floor tile |
+| 5 | Shotgun | Random eligible floor tile |
+| 7 | Rifle grenade | Random eligible floor tile |
+| 9 | Battle rifle | Fixed position in the miniboss arena |
+| 12 | AK-47 | Random eligible floor tile |
+
+The 9mm handgun and knife are starting equipment rather than level pickups. Levels not listed above contain no weapon pickup.
 
 ## Shared ammunition behavior
 
@@ -53,4 +65,4 @@ The timing column is `(magazine size - 1) * shot interval`. It does not include 
 
 Maximum close-range burst DPS now progresses from 68 for the handgun, to 136 for the dual handguns, 150 for the shotgun, 157.1 for the battle rifle, and 250 for the AK-47.
 
-The shotgun remains intentionally situational: it can exceed the dual handguns at close range and can hit multiple clustered enemies, but its effectiveness drops with distance and its two-shell magazine forces frequent reloads. The battle rifle remains the stronger precise, sustained option at Level 7, while the AK-47 remains the strongest general-purpose weapon at Level 11.
+The shotgun remains intentionally situational: it can exceed the dual handguns at close range and can hit multiple clustered enemies, but its effectiveness drops with distance and its two-shell magazine forces frequent reloads. The battle rifle remains the stronger precise, sustained option at Level 9, while the AK-47 remains the strongest general-purpose weapon at Level 12.

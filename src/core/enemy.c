@@ -6,12 +6,13 @@
 
 #define ATTACK_AIM_TIME 0.25f
 #define ATTACK_FLASH_TIME 0.12f
-#define NORMAL_ENEMY_TYPE_COUNT 4
+#define NORMAL_ENEMY_TYPE_COUNT 5
 
 typedef enum {
     ENCOUNTER_INTRO = 0,
     ENCOUNTER_EARLY,
     ENCOUNTER_MIDDLE,
+    ENCOUNTER_MIDDLE_DOGS,
     ENCOUNTER_LATE,
     ENCOUNTER_ELITE,
     ENCOUNTER_KENNELS,
@@ -34,7 +35,8 @@ static const EnemyType NORMAL_ENEMY_TYPES[NORMAL_ENEMY_TYPE_COUNT] = {
     ENEMY_TYPE_GUARD,
     ENEMY_TYPE_GUARD_SHOTGUN,
     ENEMY_TYPE_OFFICER,
-    ENEMY_TYPE_SS
+    ENEMY_TYPE_SS,
+    ENEMY_TYPE_DOG
 };
 
 static const EncounterProfile LEVEL_ENCOUNTERS[] = {
@@ -44,10 +46,11 @@ static const EncounterProfile LEVEL_ENCOUNTERS[] = {
     ENCOUNTER_EARLY,
     ENCOUNTER_EARLY,
     ENCOUNTER_MIDDLE,
+    ENCOUNTER_KENNELS,
     ENCOUNTER_MIDDLE,
+    ENCOUNTER_MIDDLE_DOGS,
     ENCOUNTER_MINIBOSS,
     ENCOUNTER_LATE,
-    ENCOUNTER_KENNELS,
     ENCOUNTER_LATE,
     ENCOUNTER_ELITE,
     ENCOUNTER_ELITE,
@@ -72,6 +75,12 @@ static const int PROFILE_ROSTERS[ENCOUNTER_COUNT][DIFF_COUNT][NORMAL_ENEMY_TYPE_
         [DIFF_DONT_HURT_ME] = { 4, 2, 3, 2 },
         [DIFF_BRING_EM_ON] = { 3, 3, 3, 4 },
         [DIFF_I_AM_DEATH_INCARNATE] = { 3, 3, 3, 5 }
+    },
+    [ENCOUNTER_MIDDLE_DOGS] = {
+        [DIFF_CAN_I_PLAY_DADDY] = { 3, 1, 2, 0, 2 },
+        [DIFF_DONT_HURT_ME] = { 3, 1, 2, 1, 2 },
+        [DIFF_BRING_EM_ON] = { 3, 2, 2, 2, 3 },
+        [DIFF_I_AM_DEATH_INCARNATE] = { 3, 2, 3, 3, 4 }
     },
     [ENCOUNTER_LATE] = {
         [DIFF_CAN_I_PLAY_DADDY] = { 3, 2, 3, 2 },
@@ -309,7 +318,7 @@ int enemy_list_begin_boss_final_stand(EnemyList *el, int difficulty) {
     Enemy *boss = NULL;
     for (int i = 0; i < el->count; i++) {
         Enemy *enemy = &el->enemies[i];
-        if (enemy->type == ENEMY_TYPE_BOSS) {
+        if (enemy->type == ENEMY_TYPE_BOSS || enemy->type == ENEMY_TYPE_MINIBOSS) {
             boss = enemy;
             continue;
         }
@@ -321,7 +330,7 @@ int enemy_list_begin_boss_final_stand(EnemyList *el, int difficulty) {
         return 0;
     }
 
-    boss->health = enemy_max_health(ENEMY_TYPE_BOSS, difficulty) / 10;
+    boss->health = enemy_max_health(boss->type, difficulty) / 10;
     if (boss->health < 1) {
         boss->health = 1;
     }
