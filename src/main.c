@@ -741,7 +741,7 @@ int main(int argc, char **argv) {
         }
 
         if (app_state == APP_PLAYING && !menu.is_open && !game_over && !game_won) {
-            input_update(&player, &map, dt);
+            input_update(&player, &map, &game.enemies, dt);
             int enemy_sound_events = game_update_enemies(&game, &player, &map, dt);
             if (enemy_sound_events & GAME_ENEMY_SOUND_GENERIC) {
                 sound_play(&enemy_sound);
