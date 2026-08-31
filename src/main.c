@@ -24,7 +24,7 @@
 
 #define SCREEN_W 800
 #define SCREEN_H 600
-#define LEVEL_COUNT 12
+#define LEVEL_COUNT 13
 
 typedef enum {
     APP_LANDING,
@@ -128,20 +128,22 @@ int main(int argc, char **argv) {
         "assets/textures/wall_level1_brick.ppm",
         "assets/textures/wall_level2_stone.ppm",
         "assets/textures/wall_level3_sandstone.ppm",
-        "assets/textures/wall_level4_blue_brick.ppm",
-        "assets/textures/wall_level5_wood.ppm",
-        "assets/textures/wall_level6_command_bunker.ppm",
-        "assets/textures/wall_level7_moss_stone.ppm",
-        "assets/textures/wall_level8_kennels.ppm",
-        "assets/textures/wall_level9_military_brick.ppm",
-        "assets/textures/wall_level10_steel.ppm",
-        "assets/textures/wall_level11_bunker.ppm",
-        "assets/textures/wall_level12_obsidian.ppm"
+        "assets/textures/wall_level4_cellar.ppm",
+        "assets/textures/wall_level5_blue_brick.ppm",
+        "assets/textures/wall_level6_wood.ppm",
+        "assets/textures/wall_level7_command_bunker.ppm",
+        "assets/textures/wall_level8_moss_stone.ppm",
+        "assets/textures/wall_level9_kennels.ppm",
+        "assets/textures/wall_level10_military_brick.ppm",
+        "assets/textures/wall_level11_steel.ppm",
+        "assets/textures/wall_level12_bunker.ppm",
+        "assets/textures/wall_level13_obsidian.ppm"
     };
     void (*wall_fallbacks[LEVEL_COUNT])(Texture *) = {
         texture_generate_brick,
         texture_generate_stone,
         texture_generate_sandstone,
+        texture_generate_stone,
         texture_generate_blue_brick,
         texture_generate_wood,
         texture_generate_command_bunker,
@@ -176,15 +178,16 @@ int main(int argc, char **argv) {
         "assets/textures/floor_level1_flagstone.ppm",
         "assets/textures/floor_level2_stone.ppm",
         "assets/textures/floor_level3_sandstone.ppm",
-        "assets/textures/floor_level4_blue_slate.ppm",
-        "assets/textures/floor_level5_wood.ppm",
-        "assets/textures/floor_level6_command_bunker.ppm",
-        "assets/textures/floor_level7_moss_stone.ppm",
-        "assets/textures/floor_level8_kennels.ppm",
-        "assets/textures/floor_level9_military_brick.ppm",
-        "assets/textures/floor_level10_steel.ppm",
-        "assets/textures/floor_level11_bunker.ppm",
-        "assets/textures/floor_level12_obsidian.ppm"
+        "assets/textures/floor_level4_cellar.ppm",
+        "assets/textures/floor_level5_blue_slate.ppm",
+        "assets/textures/floor_level6_wood.ppm",
+        "assets/textures/floor_level7_command_bunker.ppm",
+        "assets/textures/floor_level8_moss_stone.ppm",
+        "assets/textures/floor_level9_kennels.ppm",
+        "assets/textures/floor_level10_military_brick.ppm",
+        "assets/textures/floor_level11_steel.ppm",
+        "assets/textures/floor_level12_bunker.ppm",
+        "assets/textures/floor_level13_obsidian.ppm"
     };
     int floor_tex_ready = 1;
     for (int fl = 0; fl < LEVEL_COUNT; fl++) {
@@ -530,8 +533,7 @@ int main(int argc, char **argv) {
     music_load(&level_music[9], "assets/music/level10theme.mp3");
     music_load(&level_music[10], "assets/music/level11theme.mp3");
     music_load(&level_music[11], "assets/music/level12theme.mp3");
-    music_load(&level_music[10], "assets/music/level11theme.mp3");
-    music_load(&level_music[11], "assets/music/level12theme.mp3");
+    music_load(&level_music[12], "assets/music/level13theme.mp3");
 
     HighScoreTable hs_table;
     highscore_load(&hs_table);

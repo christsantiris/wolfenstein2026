@@ -8,7 +8,7 @@
 void item_list_init(ItemList *il, const Map *m, int level, float px, float py) {
     memset(il, 0, sizeof(*il));
 
-    if (level == 6) {
+    if (level == 7) {
         Item *ammo = &il->items[il->count++];
         ammo->x = 8.5f;
         ammo->y = 10.5f;
@@ -85,7 +85,7 @@ void item_list_init(ItemList *il, const Map *m, int level, float px, float py) {
         it->type = ITEM_WEAPON_KIT_DUAL;
         it->active = 1;
     }
-    if (level == 4 && il->count < MAX_ITEMS && nc > count) {
+    if (level == 5 && il->count < MAX_ITEMS && nc > count) {
         int j = count + rand() % (nc - count);
         Item *it = &il->items[il->count++];
         it->x = candidates[j].x;
@@ -93,14 +93,14 @@ void item_list_init(ItemList *il, const Map *m, int level, float px, float py) {
         it->type = ITEM_WEAPON_KIT;
         it->active = 1;
     }
-    if (level == 8 && il->count < MAX_ITEMS) {
+    if (level == 9 && il->count < MAX_ITEMS) {
         Item *it = &il->items[il->count++];
         it->x = 15.5f;
         it->y = 10.5f;
         it->type = ITEM_WEAPON_KIT_RIFLE_GRENADE;
         it->active = 1;
     }
-    if (level == 10 && il->count < MAX_ITEMS && nc > count) {
+    if (level == 11 && il->count < MAX_ITEMS && nc > count) {
         int j = count + rand() % (nc - count);
         Item *it = &il->items[il->count++];
         it->x = candidates[j].x;
