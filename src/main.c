@@ -925,7 +925,7 @@ int main(int argc, char **argv) {
                     enemies_remaining++;
                 }
             }
-            hud_render(renderer, w, h, game.health, game.ammo, game.reserve_ammo_per_gun[game.current_weapon.type], game.score, enemies_remaining, face_tex);
+            hud_render(renderer, w, h, game.health, game.ammo, game.reserve_ammo_per_gun[game.current_weapon.type], game.score, enemies_remaining, current_level, face_tex);
             if (game.boss_final_stand_timer > 0.0f) {
                 hud_draw_boss_final_stand(renderer, w, game.boss_final_stand_timer);
             } else if (game.level_clear_timer > 0.0f) {
