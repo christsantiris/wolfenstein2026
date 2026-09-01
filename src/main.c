@@ -39,7 +39,11 @@ static int start_game(Map *map, Player *player, GameState *game, int level) {
     if (map_load(map, path) != 0) {
         return -1;
     }
-    player_init(player, 14.5f, 10.5f, 0.0f);
+    if (level == 9) {
+        player_init(player, 14.5f, 19.5f, -M_PI_2);
+    } else {
+        player_init(player, 14.5f, 10.5f, 0.0f);
+    }
     int saved_score = game->score;
     int saved_difficulty = game->difficulty;
     int saved_has_weapon[GUN_COUNT];
@@ -270,24 +274,34 @@ int main(int argc, char **argv) {
     }
 
     Texture weapon_kit_tex;
-    texture_create(&weapon_kit_tex, 64, 64);
-    texture_generate_weapon_kit(&weapon_kit_tex);
+    if (texture_load_ppm(&weapon_kit_tex, "assets/sprites/weapon_pickup_shotgun.ppm") != 0) {
+        texture_create(&weapon_kit_tex, 64, 64);
+        texture_generate_weapon_kit(&weapon_kit_tex);
+    }
 
     Texture weapon_kit_ak47_tex;
-    texture_create(&weapon_kit_ak47_tex, 64, 64);
-    texture_generate_weapon_kit_ak47(&weapon_kit_ak47_tex);
+    if (texture_load_ppm(&weapon_kit_ak47_tex, "assets/sprites/weapon_pickup_ak47.ppm") != 0) {
+        texture_create(&weapon_kit_ak47_tex, 64, 64);
+        texture_generate_weapon_kit_ak47(&weapon_kit_ak47_tex);
+    }
 
     Texture weapon_kit_dual_tex;
-    texture_create(&weapon_kit_dual_tex, 64, 64);
-    texture_generate_weapon_kit_dual(&weapon_kit_dual_tex);
+    if (texture_load_ppm(&weapon_kit_dual_tex, "assets/sprites/weapon_pickup_dual.ppm") != 0) {
+        texture_create(&weapon_kit_dual_tex, 64, 64);
+        texture_generate_weapon_kit_dual(&weapon_kit_dual_tex);
+    }
 
     Texture weapon_kit_battle_rifle_tex;
-    texture_create(&weapon_kit_battle_rifle_tex, 64, 64);
-    texture_generate_weapon_kit_battle_rifle(&weapon_kit_battle_rifle_tex);
+    if (texture_load_ppm(&weapon_kit_battle_rifle_tex, "assets/sprites/weapon_pickup_battle_rifle.ppm") != 0) {
+        texture_create(&weapon_kit_battle_rifle_tex, 64, 64);
+        texture_generate_weapon_kit_battle_rifle(&weapon_kit_battle_rifle_tex);
+    }
 
     Texture weapon_kit_rifle_grenade_tex;
-    texture_create(&weapon_kit_rifle_grenade_tex, 64, 64);
-    texture_generate_weapon_kit_rifle_grenade(&weapon_kit_rifle_grenade_tex);
+    if (texture_load_ppm(&weapon_kit_rifle_grenade_tex, "assets/sprites/weapon_pickup_rifle_grenade.ppm") != 0) {
+        texture_create(&weapon_kit_rifle_grenade_tex, 64, 64);
+        texture_generate_weapon_kit_rifle_grenade(&weapon_kit_rifle_grenade_tex);
+    }
 
     Texture shotgun_tex;
     if (texture_load_ppm(&shotgun_tex, "assets/sprites/shotgun.ppm") != 0) {

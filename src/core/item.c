@@ -34,8 +34,8 @@ void item_list_init(ItemList *il, const Map *m, int level, float px, float py) {
         reserve->active = 1;
 
         Item *rifle = &il->items[il->count++];
-        rifle->x = 18.5f;
-        rifle->y = 10.5f;
+        rifle->x = 13.5f;
+        rifle->y = 19.5f;
         rifle->type = ITEM_WEAPON_KIT_BATTLE_RIFLE;
         rifle->active = 1;
         return;
