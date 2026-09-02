@@ -10,6 +10,7 @@ A first-person shooter inspired by *Wolfenstein 3D* by id Software. Navigate maz
   - [Run the Game](#run-the-game)
   - [Clean the Build](#clean-the-build)
   - [macOS Production Release](#macos-production-release)
+  - [Linux Production Release](#linux-production-release)
 - [Dependencies](#dependencies)
 - [Contributing](#contributing)
 - [License](#license)
@@ -95,6 +96,36 @@ spctl --assess --type execute --verbose=4 \
 ```
 
 The expected result is `accepted` with `source=Notarized Developer ID`. Do not rebuild or modify the DMG after notarization; doing so requires another submission and ticket.
+
+## Linux Production Release
+
+Install and start Docker Desktop, then create the portable x86_64 AppImage:
+
+```bash
+make production-linux
+```
+
+The release files are written to `dist/Wolfenstein2026-1.0.0-x86_64.AppImage` and `dist/SHA256SUMS`. The AppImage includes the game assets and required SDL libraries and targets glibc-based desktop distributions on x86_64 systems.
+
+Copy both files from `dist/` to an x86_64 Linux computer. From the directory containing the downloaded files, verify and launch the release with:
+
+```bash
+sha256sum --check SHA256SUMS
+chmod +x Wolfenstein2026-1.0.0-x86_64.AppImage
+./Wolfenstein2026-1.0.0-x86_64.AppImage
+```
+
+The executable permission only needs to be enabled once. Afterward, most Linux file managers allow the AppImage to be launched by double-clicking it. If double-clicking does not launch it, open the file's **Properties → Permissions**, enable **Allow executing file as program**, and try again. AppImages run without installation and do not automatically add an application-menu entry.
+
+The Linux AppImage cannot run directly on macOS or Windows. It must be tested on a Linux installation or a Linux virtual machine with a graphical desktop.
+
+An ARM64 AppImage can be built on an ARM64 Docker host with:
+
+```bash
+make production-linux-arm64
+```
+
+Do not run the ARM64 target on an Intel Mac: Docker Desktop must emulate the entire ARM64 build and its QEMU emulator can fail while configuring system libraries.
 
 ## Dependencies
 - `cmake`
