@@ -14,6 +14,7 @@ typedef enum {
     ENCOUNTER_MIDDLE,
     ENCOUNTER_MIDDLE_DOGS,
     ENCOUNTER_LATE,
+    ENCOUNTER_GRENADE_HALLWAYS,
     ENCOUNTER_ELITE,
     ENCOUNTER_KENNELS,
     ENCOUNTER_MINIBOSS,
@@ -51,6 +52,7 @@ static const EncounterProfile LEVEL_ENCOUNTERS[] = {
     ENCOUNTER_MIDDLE_DOGS,
     ENCOUNTER_MINIBOSS,
     ENCOUNTER_LATE,
+    ENCOUNTER_GRENADE_HALLWAYS,
     ENCOUNTER_LATE,
     ENCOUNTER_ELITE,
     ENCOUNTER_ELITE,
@@ -364,6 +366,30 @@ void enemy_list_init(EnemyList *el, const Map *m, int level, int difficulty, flo
         place(el, 14.5f, 4.5f, ENEMY_TYPE_MINIBOSS, difficulty);
         for (int i = 0; i < settings->miniboss_support_count; i++) {
             place(el, SUPPORT_X[i], SUPPORT_Y[i], SUPPORT_TYPES[d][i], difficulty);
+        }
+        return;
+    }
+
+    if (profile == ENCOUNTER_GRENADE_HALLWAYS) {
+        static const float ENEMY_X[18] = {
+            5.5f, 7.5f, 6.5f, 5.5f, 17.5f, 18.5f, 18.5f, 17.5f, 6.5f,
+            8.5f, 7.5f, 6.5f, 18.5f, 19.5f, 19.5f, 18.5f, 7.5f, 20.5f
+        };
+        static const float ENEMY_Y[18] = {
+            2.5f, 7.5f, 15.5f, 19.5f, 2.5f, 7.5f, 15.5f, 19.5f, 3.5f,
+            8.5f, 16.5f, 20.5f, 3.5f, 8.5f, 16.5f, 20.5f, 2.5f, 15.5f
+        };
+        static const EnemyType ENEMY_TYPES[18] = {
+            ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD, ENEMY_TYPE_GUARD,
+            ENEMY_TYPE_OFFICER, ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER, ENEMY_TYPE_GUARD_SHOTGUN,
+            ENEMY_TYPE_GUARD, ENEMY_TYPE_OFFICER, ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER,
+            ENEMY_TYPE_SS, ENEMY_TYPE_SS, ENEMY_TYPE_SS, ENEMY_TYPE_SS,
+            ENEMY_TYPE_GUARD_SHOTGUN, ENEMY_TYPE_OFFICER
+        };
+        static const int ENEMY_COUNTS[DIFF_COUNT] = { 10, 12, 15, 18 };
+        int d = difficulty_get((Difficulty)difficulty)->id;
+        for (int i = 0; i < ENEMY_COUNTS[d]; i++) {
+            place(el, ENEMY_X[i], ENEMY_Y[i], ENEMY_TYPES[i], difficulty);
         }
         return;
     }
