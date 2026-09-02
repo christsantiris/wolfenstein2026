@@ -98,7 +98,7 @@ void item_list_init(ItemList *il, const Map *m, int level, float px, float py) {
         Item *it = &il->items[il->count++];
         it->x = candidates[j].x;
         it->y = candidates[j].y;
-        it->type = ITEM_WEAPON_KIT_RIFLE_GRENADE;
+        it->type = ITEM_WEAPON_KIT_UZI;
         it->active = 1;
     }
     if (level == 12 && il->count < MAX_ITEMS && nc > count) {

@@ -9,7 +9,7 @@
 #define WEAPON_SIZE 4
 
 static int minimap_is_weapon_pickup(ItemType type) {
-    return type == ITEM_WEAPON_KIT || type == ITEM_WEAPON_KIT_AK47 || type == ITEM_WEAPON_KIT_DUAL || type == ITEM_WEAPON_KIT_BATTLE_RIFLE || type == ITEM_WEAPON_KIT_RIFLE_GRENADE;
+    return type == ITEM_WEAPON_KIT || type == ITEM_WEAPON_KIT_AK47 || type == ITEM_WEAPON_KIT_DUAL || type == ITEM_WEAPON_KIT_BATTLE_RIFLE || type == ITEM_WEAPON_KIT_RIFLE_GRENADE || type == ITEM_WEAPON_KIT_UZI;
 }
 
 void minimap_render(SDL_Renderer *renderer, const Map *m, const Player *p, const EnemyList *enemies, const ItemList *items, int show_enemy_positions, int show_weapon_pickups) {

@@ -303,6 +303,12 @@ int main(int argc, char **argv) {
         texture_generate_weapon_kit_rifle_grenade(&weapon_kit_rifle_grenade_tex);
     }
 
+    Texture weapon_kit_uzi_tex;
+    if (texture_load_ppm(&weapon_kit_uzi_tex, "assets/sprites/weapon_pickup_uzi.ppm") != 0) {
+        texture_create(&weapon_kit_uzi_tex, 64, 64);
+        texture_generate_weapon_kit_ak47(&weapon_kit_uzi_tex);
+    }
+
     Texture shotgun_tex;
     if (texture_load_ppm(&shotgun_tex, "assets/sprites/shotgun.ppm") != 0) {
         texture_create(&shotgun_tex, 64, 64);
@@ -357,6 +363,12 @@ int main(int argc, char **argv) {
         for (int i = 0; i < 64 * 64 * 3; i++) { rifle_grenade_tex.pixels[i] = 0; }
     }
 
+    Texture uzi_tex;
+    if (texture_load_ppm(&uzi_tex, "assets/sprites/uzi.ppm") != 0) {
+        texture_create(&uzi_tex, 64, 64);
+        for (int i = 0; i < 64 * 64 * 3; i++) { uzi_tex.pixels[i] = 0; }
+    }
+
     const Texture *weapon_textures[GUN_COUNT] = {
         [GUN_9MM_HANDGUN] = &pistol_tex,
         [GUN_DUAL_HANDGUN] = &dual_handgun_tex,
@@ -364,7 +376,8 @@ int main(int argc, char **argv) {
         [GUN_AK47] = &ak47_tex,
         [GUN_BATTLE_RIFLE] = &battle_rifle_tex,
         [GUN_KNIFE] = &knife_tex,
-        [GUN_RIFLE_GRENADE] = &rifle_grenade_tex
+        [GUN_RIFLE_GRENADE] = &rifle_grenade_tex,
+        [GUN_UZI] = &uzi_tex
     };
     Texture reload_tex[GUN_COUNT][WEAPON_RELOAD_FRAME_COUNT] = { 0 };
     const char *reload_paths[GUN_COUNT][WEAPON_RELOAD_FRAME_COUNT] = {
@@ -373,7 +386,8 @@ int main(int argc, char **argv) {
         [GUN_SHOTGUN] = { "assets/sprites/shotgun_reload_1.ppm", "assets/sprites/shotgun_reload_2.ppm", "assets/sprites/shotgun_reload_3.ppm" },
         [GUN_AK47] = { "assets/sprites/ak47_reload_1.ppm", "assets/sprites/ak47_reload_2.ppm", "assets/sprites/ak47_reload_3.ppm" },
         [GUN_BATTLE_RIFLE] = { "assets/sprites/battle_rifle_reload_1.ppm", "assets/sprites/battle_rifle_reload_2.ppm", "assets/sprites/battle_rifle_reload_3.ppm" },
-        [GUN_RIFLE_GRENADE] = { "assets/sprites/rifle_grenade_launcher_reload_1.ppm", "assets/sprites/rifle_grenade_launcher_reload_2.ppm", "assets/sprites/rifle_grenade_launcher_reload_3.ppm" }
+        [GUN_RIFLE_GRENADE] = { "assets/sprites/rifle_grenade_launcher_reload_1.ppm", "assets/sprites/rifle_grenade_launcher_reload_2.ppm", "assets/sprites/rifle_grenade_launcher_reload_3.ppm" },
+        [GUN_UZI] = { "assets/sprites/uzi.ppm", "assets/sprites/uzi.ppm", "assets/sprites/uzi.ppm" }
     };
     for (int gun = 0; gun < GUN_COUNT; gun++) {
         if (gun == GUN_KNIFE) {
@@ -776,6 +790,15 @@ int main(int argc, char **argv) {
                 sound_play(&explosion_sound);
             }
             game_update_timers(&game, dt);
+            if (game.current_weapon.type == GUN_UZI) {
+                const Uint8 *keys = SDL_GetKeyboardState(NULL);
+                Uint32 mouse_buttons = SDL_GetMouseState(NULL, NULL);
+                if (keys[SDL_SCANCODE_SPACE] || (mouse_buttons & SDL_BUTTON(SDL_BUTTON_LEFT))) {
+                    if (game_shoot(&game, &player, &map)) {
+                        sound_play(&gun_sounds[GUN_UZI]);
+                    }
+                }
+            }
             if (game.health <= 0) {
                 game_over = 1;
                 hs_rank = highscore_insert(&hs_table, game.score);
@@ -859,6 +882,18 @@ int main(int argc, char **argv) {
                             game.reload_timer = 0.0f;
                             game.shot_cooldown = 0.0f;
                         }
+                    } else if (it->type == ITEM_WEAPON_KIT_UZI) {
+                        if (!game.has_weapon[GUN_UZI]) {
+                            game.has_weapon[GUN_UZI] = 1;
+                            game.ammo_per_gun[GUN_UZI] = weapon_def(GUN_UZI)->max_ammo;
+                            game.reserve_ammo_per_gun[GUN_UZI] = game_weapon_unlock_reserve(weapon_def(GUN_UZI), game.difficulty);
+                            game.ammo_per_gun[game.current_weapon.type] = game.ammo;
+                            game.current_weapon = *weapon_def(GUN_UZI);
+                            game.ammo = game.ammo_per_gun[GUN_UZI];
+                            game.is_reloading = 0;
+                            game.reload_timer = 0.0f;
+                            game.shot_cooldown = 0.0f;
+                        }
                     }
                     it->active = 0;
                 }
@@ -922,7 +957,7 @@ int main(int argc, char **argv) {
             }
             sprite_render_all(renderer, &player, &game.enemies, world_depth, enemy_tex, game.difficulty, menu.health_bars_on, w, view_h);
             sprite_render_grenade(renderer, &player, &game.grenade, world_depth, w, view_h);
-            item_render_all(renderer, &player, &game.items, world_depth, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, &weapon_kit_dual_tex, &weapon_kit_battle_rifle_tex, &weapon_kit_rifle_grenade_tex, w, view_h);
+            item_render_all(renderer, &player, &game.items, world_depth, &ammo_pickup_tex, &health_pickup_tex, &weapon_kit_tex, &weapon_kit_ak47_tex, &weapon_kit_dual_tex, &weapon_kit_battle_rifle_tex, &weapon_kit_rifle_grenade_tex, &weapon_kit_uzi_tex, w, view_h);
             int knife_visible = game.current_weapon.type == GUN_KNIFE || game.pistol_whip_timer > 0.0f;
             const Texture *weapon_tex = knife_visible ? &knife_tex : weapon_textures[game.current_weapon.type];
             float shot_timer = knife_visible ? 0.0f : game.shot_timer;
@@ -997,6 +1032,7 @@ int main(int argc, char **argv) {
         }
         for (int frame = WEAPON_RELOAD_FRAME_COUNT - 1; frame >= 0; frame--) { texture_free(&reload_tex[gun][frame]); }
     }
+    texture_free(&uzi_tex);
     texture_free(&rifle_grenade_tex);
     texture_free(&battle_rifle_tex);
     texture_free(&ak47_fire_tex);
@@ -1009,6 +1045,7 @@ int main(int argc, char **argv) {
     texture_free(&weapon_kit_dual_tex);
     texture_free(&weapon_kit_battle_rifle_tex);
     texture_free(&weapon_kit_rifle_grenade_tex);
+    texture_free(&weapon_kit_uzi_tex);
     texture_free(&pistol_tex);
     for (int f = HUD_FACE_COUNT - 1; f >= 0; f--) { texture_free(&face_tex[f]); }
     for (int t = ENEMY_TYPE_COUNT - 1; t >= 0; t--) {

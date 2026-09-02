@@ -28,6 +28,7 @@ static const WeaponAnimDef WEAPON_ANIMS[GUN_COUNT] = {
     [GUN_BATTLE_RIFLE] = { 24, 3, 24, 2, 12, 0.15f, 17, 255, 185, 60 },
     [GUN_KNIFE] = { 32, 0, 32, 0, 0, 0.0f, 0, 0, 0, 0 },
     [GUN_RIFLE_GRENADE] = { 27, 2, 27, 0, 24, 0.28f, 28, 255, 110, 20 },
+    [GUN_UZI] = { 29, 5, 29, 3, 10, 0.10f, 14, 255, 155, 35 },
 };
 
 static float weapon_recoil(const WeaponDef *weapon, float shot_cooldown) {

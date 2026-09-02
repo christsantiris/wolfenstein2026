@@ -12,9 +12,10 @@
 #endif
 
 #define SAVE_MAGIC   "WOLF2026"
-#define SAVE_VERSION 18
+#define SAVE_VERSION 19
 #define SAVE_GUN_COUNT_V7 5
 #define SAVE_GUN_COUNT_V10 6
+#define SAVE_GUN_COUNT_V18 7
 
 static void create_save_directory(void) {
 #ifdef _WIN32
@@ -194,8 +195,10 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
     if (fread(&g->health, sizeof(g->health), 1, f) != 1) { fclose(f); return -1; }
     if (fread(&g->ammo, sizeof(g->ammo), 1, f) != 1) { fclose(f); return -1; }
     size_t saved_gun_bytes;
-    if (ver >= 11) {
+    if (ver >= 19) {
         saved_gun_bytes = sizeof(g->reserve_ammo_per_gun);
+    } else if (ver >= 11) {
+        saved_gun_bytes = sizeof(int) * SAVE_GUN_COUNT_V18;
     } else if (ver >= 8) {
         saved_gun_bytes = sizeof(int) * SAVE_GUN_COUNT_V10;
     } else {
@@ -262,6 +265,9 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
         int itype;
         if (fread(&itype, sizeof(itype), 1, f) != 1) { fclose(f); return -1; }
         it->type = (ItemType)itype;
+        if (ver < 19 && *level == 7 && it->type == ITEM_WEAPON_KIT_RIFLE_GRENADE) {
+            it->type = ITEM_WEAPON_KIT_UZI;
+        }
         if (fread(&it->active, sizeof(it->active), 1, f) != 1) { fclose(f); return -1; }
     }
 

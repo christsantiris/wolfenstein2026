@@ -12,7 +12,7 @@ The campaign contains 14 levels. Encounter tiers determine the normal enemy rost
 | 4 | Early | Castle cellar limestone | Standard early-tier encounter |
 | 5 | Middle | Blue brick and slate | Shotgun pickup |
 | 6 | Special: Kennels | Kennel stone | Introduces dogs with a difficulty-scaled dog pack |
-| 7 | Middle | Wood | Rifle-grenade pickup |
+| 7 | Middle | Wood | Uzi pickup |
 | 8 | Middle | Red brick and flagstone | Mixed human-and-dog encounter |
 | 9 | Special: Miniboss | Command bunker | Commander miniboss, support wave, final stand, and battle-rifle pickup |
 | 10 | Late | Moss-covered stone | Standard late-tier encounter |

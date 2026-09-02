@@ -27,6 +27,7 @@ static const WeaponDef WEAPON_AK47 = { GUN_AK47, "assets/sounds/ak-47.mp3", "ass
 static const WeaponDef WEAPON_BATTLE_RIFLE = { GUN_BATTLE_RIFLE, "assets/sounds/rifle.mp3", "assets/sounds/handgunreload.mp3", 10, 99, 75, 0.14f, 0.35f, 0.10f, 1.8f };
 static const WeaponDef WEAPON_KNIFE = { GUN_KNIFE, "assets/sounds/punch.mp3", NULL, 0, 0, WHIP_DAMAGE, WHIP_CONE, WHIP_DURATION, WHIP_DURATION, 0.0f };
 static const WeaponDef WEAPON_RIFLE_GRENADE = { GUN_RIFLE_GRENADE, "assets/sounds/grenade.mp3", "assets/sounds/handgunreload.mp3", 1, 8, 120, 0.20f, 1.10f, 0.18f, 2.4f };
+static const WeaponDef WEAPON_UZI = { GUN_UZI, "assets/sounds/ak-47.mp3", "assets/sounds/handgunreload.mp3", 25, 99, 20, 0.20f, 0.14f, 0.10f, 1.7f };
 
 static const WeaponDef *ALL_WEAPONS[GUN_COUNT] = {
     [GUN_9MM_HANDGUN]  = &WEAPON_PISTOL,
@@ -36,6 +37,7 @@ static const WeaponDef *ALL_WEAPONS[GUN_COUNT] = {
     [GUN_BATTLE_RIFLE] = &WEAPON_BATTLE_RIFLE,
     [GUN_KNIFE] = &WEAPON_KNIFE,
     [GUN_RIFLE_GRENADE] = &WEAPON_RIFLE_GRENADE,
+    [GUN_UZI] = &WEAPON_UZI,
 };
 
 static const GunType WEAPON_CYCLE_ORDER[GUN_COUNT] = {
@@ -43,6 +45,7 @@ static const GunType WEAPON_CYCLE_ORDER[GUN_COUNT] = {
     GUN_9MM_HANDGUN,
     GUN_DUAL_HANDGUN,
     GUN_SHOTGUN,
+    GUN_UZI,
     GUN_BATTLE_RIFLE,
     GUN_RIFLE_GRENADE,
     GUN_AK47,

@@ -11,7 +11,8 @@ The game models ammunition with a loaded magazine and a separate reserve for eac
 | 9mm handgun | Level 1 | 8 | 99 | 107 | 34 | 0.50 s | 2.00 shots/s | 1.5 s | 0.15 rad | 68.0 |
 | Dual handguns | Level 2 | 16 | 99 | 115 | 34 | 0.25 s | 4.00 shots/s | 1.2 s | 0.15 rad | 136.0 |
 | Shotgun | Level 5 | 2 | 99 | 101 | Up to 120 | 0.80 s | 1.25 shots/s | 2.0 s | 0.30 rad | Up to 150.0 |
-| Battle rifle | Level 9 | 10 | 99 | 109 | 55 | 0.35 s | 2.86 shots/s | 1.8 s | 0.08 rad | 157.1 |
+| Uzi | Level 7 | 25 | 99 | 124 | 20 | 0.14 s | 7.14 shots/s | 1.7 s | 0.20 rad | 142.9 |
+| Battle rifle | Level 9 | 10 | 99 | 109 | 75 | 0.35 s | 2.86 shots/s | 1.8 s | 0.14 rad | 214.3 |
 | AK-47 | Level 12 | 30 | 99 | 129 | 30 | 0.12 s | 8.33 shots/s | 2.0 s | 0.25 rad | 250.0 |
 
 Burst DPS is damage per trigger divided by the shot interval. It excludes reload time and assumes every projectile hits.
@@ -22,11 +23,11 @@ Burst DPS is damage per trigger divided by the shot interval. It excludes reload
 | ---: | --- | --- |
 | 2 | Dual handguns | Random eligible floor tile |
 | 5 | Shotgun | Random eligible floor tile |
-| 7 | Rifle grenade | Random eligible floor tile |
+| 7 | Uzi | Random eligible floor tile |
 | 9 | Battle rifle | Fixed position in the miniboss arena |
 | 12 | AK-47 | Random eligible floor tile |
 
-The 9mm handgun and knife are starting equipment rather than level pickups. Levels not listed above contain no weapon pickup.
+The 9mm handgun and knife are starting equipment rather than level pickups. Levels not listed above contain no weapon pickup. The rifle grenade remains implemented but currently has no campaign pickup.
 
 ## Shared ammunition behavior
 
@@ -46,6 +47,7 @@ The 9mm handgun and knife are starting equipment rather than level pickups. Leve
 - The dual handguns do not fire two projectiles per trigger pull. Their advantage is twice the handgun's magazine capacity and twice its maximum firing rate.
 - The shotgun fires six fixed pellets spread across its `0.30`-radian cone. Each pellet deals 20 damage and independently selects the nearest enemy intersecting its path.
 - Enemy angular width determines how many pellets connect. A close centered target can receive all six pellets for 120 damage, while distant targets receive fewer. Different pellets can hit different enemies.
+- The Uzi fires continuously while Space or the left mouse button is held. Its high fire rate makes it effective at close and medium range, but its damage remains below the later battle rifle.
 - The battle rifle is the most precise weapon, but its narrow target cone requires the player to aim closest to the target.
 - The AK-47 has the highest magazine capacity, fire rate, burst damage rate, and total damage per full magazine.
 
@@ -56,13 +58,14 @@ The 9mm handgun and knife are starting equipment rather than level pickups. Leve
 | 9mm handgun | 272 | 3.50 s |
 | Dual handguns | 544 | 3.75 s |
 | Shotgun | Up to 240 | 0.80 s |
-| Battle rifle | 550 | 3.15 s |
+| Uzi | 500 | 3.36 s |
+| Battle rifle | 750 | 3.15 s |
 | AK-47 | 900 | 3.48 s |
 
 The timing column is `(magazine size - 1) * shot interval`. It does not include player reaction time or the reload following the final shot.
 
 ## Progression assessment
 
-Maximum close-range burst DPS now progresses from 68 for the handgun, to 136 for the dual handguns, 150 for the shotgun, 157.1 for the battle rifle, and 250 for the AK-47.
+Maximum close-range burst DPS now progresses from 68 for the handgun, to 136 for the dual handguns, 142.9 for the Uzi, 150 for the shotgun, 214.3 for the battle rifle, and 250 for the AK-47.
 
-The shotgun remains intentionally situational: it can exceed the dual handguns at close range and can hit multiple clustered enemies, but its effectiveness drops with distance and its two-shell magazine forces frequent reloads. The battle rifle remains the stronger precise, sustained option at Level 9, while the AK-47 remains the strongest general-purpose weapon at Level 12.
+The shotgun remains intentionally situational: it can exceed the Uzi at close range and can hit multiple clustered enemies, but its effectiveness drops with distance and its two-shell magazine forces frequent reloads. The Uzi provides sustained automatic fire at Level 7, the battle rifle remains the stronger precise option at Level 9, and the AK-47 remains the strongest general-purpose weapon at Level 12.

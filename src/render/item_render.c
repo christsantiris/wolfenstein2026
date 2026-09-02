@@ -3,7 +3,7 @@
 
 #define FOV_FACTOR 0.66f
 
-void item_render_all(SDL_Renderer *renderer, const Player *p, const ItemList *il, float *depth_buffer, const Texture *ammo_tex, const Texture *health_tex, const Texture *weapon_kit_tex, const Texture *weapon_kit_ak47_tex, const Texture *weapon_kit_dual_tex, const Texture *weapon_kit_battle_rifle_tex, const Texture *weapon_kit_rifle_grenade_tex, int screen_w, int screen_h) {
+void item_render_all(SDL_Renderer *renderer, const Player *p, const ItemList *il, float *depth_buffer, const Texture *ammo_tex, const Texture *health_tex, const Texture *weapon_kit_tex, const Texture *weapon_kit_ak47_tex, const Texture *weapon_kit_dual_tex, const Texture *weapon_kit_battle_rifle_tex, const Texture *weapon_kit_rifle_grenade_tex, const Texture *weapon_kit_uzi_tex, int screen_w, int screen_h) {
     float dir_x = cosf(p->angle);
     float dir_y = sinf(p->angle);
     float plane_x = -dir_y * FOV_FACTOR;
@@ -43,6 +43,7 @@ void item_render_all(SDL_Renderer *renderer, const Player *p, const ItemList *il
                            : (it->type == ITEM_WEAPON_KIT_DUAL) ? weapon_kit_dual_tex
                            : (it->type == ITEM_WEAPON_KIT_BATTLE_RIFLE) ? weapon_kit_battle_rifle_tex
                            : (it->type == ITEM_WEAPON_KIT_RIFLE_GRENADE) ? weapon_kit_rifle_grenade_tex
+                           : (it->type == ITEM_WEAPON_KIT_UZI) ? weapon_kit_uzi_tex
                            : weapon_kit_tex;
 
         for (int x = draw_x0; x < draw_x1; x++) {
