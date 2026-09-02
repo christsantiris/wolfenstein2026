@@ -4,6 +4,7 @@
 #include "core/map.h"
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #ifdef _WIN32
 #include <direct.h>
@@ -18,19 +19,31 @@
 #define SAVE_GUN_COUNT_V18 7
 
 static void create_save_directory(void) {
+    const char *user_data_path = getenv("WOLF_USER_DATA_DIR");
+    char directory[1024];
+    if (user_data_path) {
+        snprintf(directory, sizeof(directory), "%ssaves", user_data_path);
+    } else {
+        snprintf(directory, sizeof(directory), "saves");
+    }
 #ifdef _WIN32
-    _mkdir("saves");
+    _mkdir(directory);
 #else
-    mkdir("saves", 0755);
+    mkdir(directory, 0755);
 #endif
 }
 
 static void save_path(int slot, char *buf, int bufsz) {
-    snprintf(buf, bufsz, "saves/slot%d.sav", slot);
+    const char *user_data_path = getenv("WOLF_USER_DATA_DIR");
+    if (user_data_path) {
+        snprintf(buf, bufsz, "%ssaves/slot%d.sav", user_data_path, slot);
+    } else {
+        snprintf(buf, bufsz, "saves/slot%d.sav", slot);
+    }
 }
 
 int save_slot_exists(int slot) {
-    char path[64];
+    char path[1024];
     save_path(slot, path, sizeof(path));
     FILE *f = fopen(path, "rb");
     if (!f) {
@@ -42,7 +55,7 @@ int save_slot_exists(int slot) {
 
 int save_game(int slot, int level, const Player *p, const GameState *g, const Map *m, const SaveSettings *s) {
     create_save_directory();
-    char path[64];
+    char path[1024];
     save_path(slot, path, sizeof(path));
 
     FILE *f = fopen(path, "wb");
@@ -125,7 +138,7 @@ int save_game(int slot, int level, const Player *p, const GameState *g, const Ma
 }
 
 int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSettings *s) {
-    char path[64];
+    char path[1024];
     save_path(slot, path, sizeof(path));
 
     FILE *f = fopen(path, "rb");

@@ -9,6 +9,7 @@ A first-person shooter inspired by *Wolfenstein 3D* by id Software. Navigate maz
   - [Compile the Game](#compile-the-game)
   - [Run the Game](#run-the-game)
   - [Clean the Build](#clean-the-build)
+  - [macOS Production Release](#macos-production-release)
 - [Dependencies](#dependencies)
 - [Contributing](#contributing)
 - [License](#license)
@@ -55,6 +56,46 @@ make run
 ## Clean the Build
 Run `make clean` to remove the compiled build and start fresh.
 
+## macOS Production Release
+
+Production releases require the `Developer ID Application: Chris Tsantiris (KVW8V4B9WS)` certificate in the login keychain. Configure notarization credentials once using an app-specific password generated at [account.apple.com](https://account.apple.com/):
+
+```bash
+xcrun notarytool store-credentials "wolfenstein2026-notary" \
+  --apple-id "chris.tsantiris@gmail.com" \
+  --team-id "KVW8V4B9WS"
+```
+
+Create the signed Universal 2 release for Apple silicon and Intel Macs:
+
+```bash
+make production
+```
+
+This creates `wolfenstein2026.dmg` in the project root. Every newly generated DMG must be submitted to Apple and receive its own notarization ticket:
+
+```bash
+xcrun notarytool submit wolfenstein2026.dmg \
+  --keychain-profile "wolfenstein2026-notary" \
+  --wait
+```
+
+After the submission reports `status: Accepted`, staple and validate the ticket:
+
+```bash
+xcrun stapler staple wolfenstein2026.dmg
+xcrun stapler validate wolfenstein2026.dmg
+```
+
+Mount the DMG by opening it in Finder, then verify the app with Gatekeeper:
+
+```bash
+spctl --assess --type execute --verbose=4 \
+  "/Volumes/Wolfenstein 2026/Wolfenstein 2026.app"
+```
+
+The expected result is `accepted` with `source=Notarized Developer ID`. Do not rebuild or modify the DMG after notarization; doing so requires another submission and ticket.
+
 ## Dependencies
 - `cmake`
 - `sdl2`
@@ -81,4 +122,3 @@ MIT
 
 ## Sound Effects courtesy of
 https://pixabay.com
-
