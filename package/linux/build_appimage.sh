@@ -59,9 +59,10 @@ fi
 cmake -S "$REPO_ROOT" -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=Release
 cmake --build "$BUILD_DIR"
 
-mkdir -p "$APP_DIR/usr/bin" "$APP_DIR/usr/share/wolfenstein2026" "$DIST_DIR"
+mkdir -p "$APP_DIR/usr/bin" "$APP_DIR/usr/share/metainfo" "$APP_DIR/usr/share/wolfenstein2026" "$DIST_DIR"
 install -m 755 "$BUILD_DIR/wolf" "$APP_DIR/usr/bin/wolf"
 install -m 755 "$SCRIPT_DIR/AppRun" "$APP_DIR/AppRun"
+install -m 644 "$SCRIPT_DIR/com.wolfenstein2026.game.metainfo.xml" "$APP_DIR/usr/share/metainfo/wolfenstein2026-appimage.appdata.xml"
 cp -R "$REPO_ROOT/assets" "$APP_DIR/usr/share/wolfenstein2026/assets"
 
 if [[ "$LINUXDEPLOY_BIN" == *.AppImage ]]; then

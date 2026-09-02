@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.wolfenstein2026.game</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Wolfenstein 2026</name>
+  <summary>Retro first-person raycasting shooter</summary>
+  <description>
+    <p>
+      Navigate maze-like levels, fight enemy soldiers and creatures, discover
+      new weapons, and survive an escalating series of encounters.
+    </p>
+  </description>
+  <launchable type="desktop-id">wolfenstein2026-appimage.desktop</launchable>
+  <categories>
+    <category>Game</category>
+    <category>ActionGame</category>
+  </categories>
+  <releases>
+    <release version="1.0.0" date="2026-09-02"/>
+  </releases>
+</component>

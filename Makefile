@@ -1,4 +1,4 @@
-.PHONY: all run clean debug debug-pistol debug-dual-handguns debug-shotgun debug-battle-rifle debug-ak47 debug-knife debug-level test linux appimage windows sprites universal-dmg production
+.PHONY: all run clean debug debug-pistol debug-dual-handguns debug-shotgun debug-battle-rifle debug-ak47 debug-knife debug-level test linux appimage production-linux production-linux-arm64 windows sprites universal-dmg production
 
 all:
 	cmake -B build -DCMAKE_BUILD_TYPE=Release
@@ -23,6 +23,16 @@ linux:
 
 appimage:
 	bash package/linux/build_appimage.sh
+
+production-linux:
+	docker build --platform linux/amd64 -f package/linux/Dockerfile.appimage -t wolfenstein2026-appimage-amd64 .
+	docker run --rm --platform linux/amd64 --user "$$(id -u):$$(id -g)" -e XDG_CACHE_HOME=/workspace/build/appimage-cache -v "$(CURDIR):/workspace" wolfenstein2026-appimage-amd64
+	docker run --rm --platform linux/amd64 --user "$$(id -u):$$(id -g)" -v "$(CURDIR):/workspace" wolfenstein2026-appimage-amd64 sh -c 'cd dist && sha256sum Wolfenstein2026-1.0.0-x86_64.AppImage > SHA256SUMS'
+
+production-linux-arm64:
+	docker build --platform linux/arm64 -f package/linux/Dockerfile.appimage -t wolfenstein2026-appimage-arm64 .
+	docker run --rm --platform linux/arm64 --user "$$(id -u):$$(id -g)" -e XDG_CACHE_HOME=/workspace/build/appimage-cache -v "$(CURDIR):/workspace" wolfenstein2026-appimage-arm64
+	docker run --rm --platform linux/arm64 --user "$$(id -u):$$(id -g)" -v "$(CURDIR):/workspace" wolfenstein2026-appimage-arm64 sh -c 'cd dist && sha256sum Wolfenstein2026-1.0.0-aarch64.AppImage > SHA256SUMS-arm64'
 
 windows:
 	bash package/windows/build_windows.sh
