@@ -12,6 +12,23 @@ ARM_BUILD="build/macos-arm64"
 INTEL_BUILD="build/macos-x86_64"
 UNIVERSAL_DIR="build/macos-universal"
 
+if [ -z "${CODESIGN_IDENTITY:-}" ]; then
+    echo 'Set CODESIGN_IDENTITY to your installed Developer ID Application certificate.'
+    exit 1
+fi
+case "$CODESIGN_IDENTITY" in
+    "Developer ID Application:"*)
+        ;;
+    *)
+        echo 'CODESIGN_IDENTITY must begin with "Developer ID Application:".'
+        exit 1
+        ;;
+esac
+if ! security find-identity -v -p codesigning | grep -Fq "$CODESIGN_IDENTITY"; then
+    echo "Signing identity is not installed or is not valid: $CODESIGN_IDENTITY"
+    exit 1
+fi
+
 download_file() {
     local url="$1"
     local output="$2"

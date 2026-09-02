@@ -9,4 +9,5 @@ build-debug/
 dist/
 highscores.dat
 wolfenstein2026.dmg
+/Wolfenstein 2026/
 .DS_Store

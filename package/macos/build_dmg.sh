@@ -13,6 +13,7 @@ RESOURCES_DIR="$BUNDLE_DIR/Contents/Resources"
 FRAMEWORKS_DIR="$BUNDLE_DIR/Contents/Frameworks"
 BINARY_SOURCE="${WOLF_BINARY:-build/wolf}"
 UNIVERSAL_FRAMEWORKS="${WOLF_FRAMEWORK_DIR:-}"
+SIGNING_IDENTITY="${CODESIGN_IDENTITY:-}"
 
 if [ ! -f package/macos/wolf.icns ]; then
     echo "Missing package/macos/wolf.icns"
@@ -89,6 +90,19 @@ else
     done
 fi
 install_name_tool -add_rpath "@executable_path/../Frameworks" "$BINARY"
+
+if [ -n "$SIGNING_IDENTITY" ]; then
+    echo "==> Signing bundled code..."
+    while IFS= read -r framework; do
+        codesign --force --sign "$SIGNING_IDENTITY" --options runtime --timestamp "$framework"
+    done < <(find "$FRAMEWORKS_DIR" -type d -name '*.framework' -prune | sort)
+    while IFS= read -r dylib; do
+        codesign --force --sign "$SIGNING_IDENTITY" --options runtime --timestamp "$dylib"
+    done < <(find "$FRAMEWORKS_DIR" -type f -name '*.dylib' | sort)
+    codesign --force --sign "$SIGNING_IDENTITY" --options runtime --timestamp "$BINARY"
+    codesign --force --sign "$SIGNING_IDENTITY" --options runtime --timestamp "$BUNDLE_DIR"
+    codesign --verify --strict --verbose=2 "$BUNDLE_DIR"
+fi
 
 echo "==> Creating DMG..."
 rm -f "$DMG_NAME"
