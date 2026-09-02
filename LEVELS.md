@@ -1,6 +1,6 @@
 # Campaign Level Progression
 
-The campaign contains 15 levels. Encounter tiers determine the normal enemy roster and enemy count for each difficulty. Special levels use dedicated encounter logic instead of a normal tier roster.
+The campaign contains 16 levels. Encounter tiers determine the normal enemy roster and enemy count for each difficulty. Special levels use dedicated encounter logic instead of a normal tier roster.
 
 ## Level sequence
 
@@ -19,8 +19,9 @@ The campaign contains 15 levels. Encounter tiers determine the normal enemy rost
 | 11 | Late: Munitions depot | Reinforced concrete and riveted steel | Long grenade-combat hallways, clustered enemies, and rifle-grenade pickup beside the player spawn |
 | 12 | Late | Military brick | Standard late-tier encounter |
 | 13 | Elite | Steel | Elite encounter and AK-47 pickup |
-| 14 | Elite | Bunker | Standard elite-tier encounter |
-| 15 | Special: Boss | Obsidian command center | Final boss, support wave, and final stand |
+| 14 | Elite: Flooded detention | Waterlogged red brick and shallow water | Flooded cross-corridors, detention wings, and four compact cell blocks |
+| 15 | Elite | Bunker | Standard elite-tier encounter |
+| 16 | Special: Boss | Obsidian command center | Final boss, support wave, and final stand |
 
 ## Tier summary
 
@@ -29,7 +30,7 @@ The campaign contains 15 levels. Encounter tiers determine the normal enemy rost
 - **Middle:** Levels 5, 7, and 8 increase enemy variety and pressure. The Kennels at Level 6 introduces dogs, which recur in Level 8's mixed roster.
 - **Miniboss:** Level 9 uses a fixed commander arena, difficulty-scaled support enemies, reinforcements, and a one-time miniboss revival.
 - **Late:** Levels 10–12 use the late-tier roster. Level 11 uses fixed hallway clusters designed around rifle-grenade splash damage.
-- **Elite:** Levels 13–14 use the campaign's strongest normal-enemy roster.
-- **Boss:** Level 15 uses a fixed final-boss arena, difficulty-scaled support enemies, reinforcements, and a one-time boss revival.
+- **Elite:** Levels 13–15 use the campaign's strongest normal-enemy roster. Level 14 is a visually flooded detention block with normal movement.
+- **Boss:** Level 16 uses a fixed final-boss arena, difficulty-scaled support enemies, reinforcements, and a one-time boss revival.
 
 Enemy health, speed, sight, damage, roster sizes, support counts, and reinforcement-wave sizes also vary by selected difficulty.

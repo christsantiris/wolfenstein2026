@@ -12,7 +12,7 @@
 #endif
 
 #define SAVE_MAGIC   "WOLF2026"
-#define SAVE_VERSION 20
+#define SAVE_VERSION 21
 #define SAVE_GUN_COUNT_V7 5
 #define SAVE_GUN_COUNT_V10 6
 #define SAVE_GUN_COUNT_V18 7
@@ -176,6 +176,9 @@ int load_game(int slot, int *level, Player *p, GameState *g, Map *m, SaveSetting
         }
     }
     if (ver < 20 && *level >= 11) {
+        (*level)++;
+    }
+    if (ver < 21 && *level >= 14) {
         (*level)++;
     }
 

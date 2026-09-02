@@ -56,6 +56,7 @@ static const EncounterProfile LEVEL_ENCOUNTERS[] = {
     ENCOUNTER_LATE,
     ENCOUNTER_ELITE,
     ENCOUNTER_ELITE,
+    ENCOUNTER_ELITE,
     ENCOUNTER_BOSS
 };
 

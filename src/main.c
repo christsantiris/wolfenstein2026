@@ -24,7 +24,7 @@
 
 #define SCREEN_W 800
 #define SCREEN_H 600
-#define LEVEL_COUNT 15
+#define LEVEL_COUNT 16
 
 typedef enum {
     APP_LANDING,
@@ -142,8 +142,9 @@ int main(int argc, char **argv) {
         "assets/textures/wall_level11_munitions_depot.ppm",
         "assets/textures/wall_level12_military_brick.ppm",
         "assets/textures/wall_level13_steel.ppm",
-        "assets/textures/wall_level14_bunker.ppm",
-        "assets/textures/wall_level15_obsidian.ppm"
+        "assets/textures/wall_level14_flooded_detention.ppm",
+        "assets/textures/wall_level15_bunker.ppm",
+        "assets/textures/wall_level16_obsidian.ppm"
     };
     void (*wall_fallbacks[LEVEL_COUNT])(Texture *) = {
         texture_generate_brick,
@@ -159,6 +160,7 @@ int main(int argc, char **argv) {
         texture_generate_metal_panels,
         texture_generate_red_blue_brick,
         texture_generate_metal_panels,
+        texture_generate_brick,
         texture_generate_command_bunker,
         texture_generate_obsidian_command
     };
@@ -196,8 +198,9 @@ int main(int argc, char **argv) {
         "assets/textures/floor_level11_munitions_depot.ppm",
         "assets/textures/floor_level12_military_brick.ppm",
         "assets/textures/floor_level13_steel.ppm",
-        "assets/textures/floor_level14_bunker.ppm",
-        "assets/textures/floor_level15_obsidian.ppm"
+        "assets/textures/floor_level14_flooded_detention.ppm",
+        "assets/textures/floor_level15_bunker.ppm",
+        "assets/textures/floor_level16_obsidian.ppm"
     };
     int floor_tex_ready = 1;
     for (int fl = 0; fl < LEVEL_COUNT; fl++) {
@@ -570,6 +573,7 @@ int main(int argc, char **argv) {
     music_load(&level_music[12], "assets/music/level13theme.mp3");
     music_load(&level_music[13], "assets/music/level14theme.mp3");
     music_load(&level_music[14], "assets/music/level15theme.mp3");
+    music_load(&level_music[15], "assets/music/level16theme.mp3");
 
     HighScoreTable hs_table;
     highscore_load(&hs_table);
