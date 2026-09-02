@@ -1,10 +1,22 @@
 #include "ui/highscore.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+static void highscore_path(char *path, int path_size) {
+    const char *user_data_path = getenv("WOLF_USER_DATA_DIR");
+    if (user_data_path) {
+        snprintf(path, path_size, "%s%s", user_data_path, HIGHSCORE_FILE);
+    } else {
+        snprintf(path, path_size, "%s", HIGHSCORE_FILE);
+    }
+}
 
 void highscore_load(HighScoreTable *t) {
     memset(t, 0, sizeof(*t));
-    FILE *f = fopen(HIGHSCORE_FILE, "r");
+    char path[1024];
+    highscore_path(path, sizeof(path));
+    FILE *f = fopen(path, "r");
     if (!f) {
         return;
     }
@@ -19,7 +31,9 @@ void highscore_load(HighScoreTable *t) {
 }
 
 void highscore_save(const HighScoreTable *t) {
-    FILE *f = fopen(HIGHSCORE_FILE, "w");
+    char path[1024];
+    highscore_path(path, sizeof(path));
+    FILE *f = fopen(path, "w");
     if (!f) {
         return;
     }

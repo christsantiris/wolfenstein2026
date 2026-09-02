@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#ifdef __APPLE__
+#include <unistd.h>
+#endif
 #include "core/difficulty.h"
 #include "core/map.h"
 #include "core/player.h"
@@ -31,6 +34,28 @@ typedef enum {
     APP_DIFFICULTY,
     APP_PLAYING
 } AppState;
+
+static void configure_macos_bundle_runtime(void) {
+#ifdef __APPLE__
+    char *base_path = SDL_GetBasePath();
+    if (!base_path) {
+        return;
+    }
+    char resources_path[1024];
+    char asset_path[1024];
+    snprintf(resources_path, sizeof(resources_path), "%s../Resources", base_path);
+    snprintf(asset_path, sizeof(asset_path), "%s/assets/maps/level1.map", resources_path);
+    SDL_free(base_path);
+    if (access(asset_path, R_OK) != 0 || chdir(resources_path) != 0) {
+        return;
+    }
+    char *user_data_path = SDL_GetPrefPath("Wolfenstein2026", "Wolfenstein2026");
+    if (user_data_path) {
+        setenv("WOLF_USER_DATA_DIR", user_data_path, 1);
+        SDL_free(user_data_path);
+    }
+#endif
+}
 
 static int start_game(Map *map, Player *player, GameState *game, int level) {
     char path[64];
@@ -77,6 +102,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
         return 1;
     }
+    configure_macos_bundle_runtime();
     Mix_Init(MIX_INIT_MP3);
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) != 0) {
         fprintf(stderr, "Mix_OpenAudio: %s\n", Mix_GetError());

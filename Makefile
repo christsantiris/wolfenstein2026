@@ -1,4 +1,4 @@
-.PHONY: all run clean debug debug-pistol debug-dual-handguns debug-shotgun debug-battle-rifle debug-ak47 debug-knife debug-level test linux appimage windows sprites
+.PHONY: all run clean debug debug-pistol debug-dual-handguns debug-shotgun debug-battle-rifle debug-ak47 debug-knife debug-level test linux appimage windows sprites universal-dmg
 
 all:
 	cmake -B build -DCMAKE_BUILD_TYPE=Release
@@ -11,6 +11,9 @@ dmg:
 	cmake -B build -DCMAKE_BUILD_TYPE=Release
 	cmake --build build
 	bash package/macos/build_dmg.sh
+
+universal-dmg:
+	bash package/macos/build_universal.sh
 
 linux:
 	bash package/linux/build_linux.sh
