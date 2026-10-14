@@ -334,16 +334,16 @@ void menu_render(SDL_Renderer *r, const Menu *m, int screen_w, int screen_h) {
 
     draw_centered(r, "CONTROLS", l.bx, y, l.bw, dim);
     y += LHEIGHT;
-    draw_row(r, "FORWARD",      "W",     l.bx, y, l.bw); y += LHEIGHT;
-    draw_row(r, "BACK",         "S",     l.bx, y, l.bw); y += LHEIGHT;
-    draw_row(r, "STRAFE LEFT",  "A",     l.bx, y, l.bw); y += LHEIGHT;
-    draw_row(r, "STRAFE RIGHT", "D",     l.bx, y, l.bw); y += LHEIGHT;
-    draw_row(r, "SHOOT",        "SPACE", l.bx, y, l.bw); y += LHEIGHT;
-    draw_row(r, "RELOAD",       "R",     l.bx, y, l.bw); y += LHEIGHT;
-    draw_row(r, "OPEN DOOR",    "O",     l.bx, y, l.bw); y += LHEIGHT;
-    draw_row(r, "MINIMAP", "M", l.bx, y, l.bw); y += LHEIGHT;
-    draw_row(r, "ENEMY POSITIONS", "N", l.bx, y, l.bw); y += LHEIGHT;
-    draw_row(r, "FULLSCREEN",   "F",     l.bx, y, l.bw); y += LHEIGHT + 4;
+    draw_row(r, "FORWARD/BACK", "UP/DOWN", l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "TURN LEFT/RIGHT", "LEFT/RIGHT", l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "FAST TURN", "A/D", l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "TURN AROUND", "T", l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "SHOOT", "SPACE / L CLICK", l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "RELOAD", "R", l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "OPEN DOOR", "O", l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "CHANGE WEAPON", "C", l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "MINIMAP/ENEMIES", "M/N", l.bx, y, l.bw); y += LHEIGHT;
+    draw_row(r, "FULLSCREEN", "F", l.bx, y, l.bw); y += LHEIGHT + 4;
 
     SDL_SetRenderDrawColor(r, 80, 60, 20, 255);
     SDL_RenderDrawLine(r, l.bx + 10, y, l.bx + l.bw - 10, y);

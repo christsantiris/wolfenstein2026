@@ -663,7 +663,7 @@ int main(int argc, char **argv) {
             if (e.type == SDL_QUIT) {
                 running = 0;
             }
-            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_f) {
+            if (e.type == SDL_KEYDOWN && !e.key.repeat && e.key.keysym.scancode == SDL_SCANCODE_F) {
                 Uint32 flags = SDL_GetWindowFlags(window);
                 if (flags & SDL_WINDOW_FULLSCREEN_DESKTOP) {
                     SDL_SetWindowFullscreen(window, 0);
@@ -748,7 +748,7 @@ int main(int argc, char **argv) {
                     app_state = APP_PLAYING;
                 }
             } else if (app_state == APP_PLAYING) {
-                if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
+                if (e.type == SDL_KEYDOWN && !e.key.repeat && e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
                     menu.is_open = !menu.is_open;
                 }
                 if (menu.is_open) {
@@ -772,10 +772,10 @@ int main(int argc, char **argv) {
                         slot_picker_open(&slot_picker, 0);
                     }
                 } else if (!game_over && !game_won) {
-                    if (e.type == SDL_KEYDOWN && !e.key.repeat && e.key.keysym.sym == SDLK_t) {
+                    if (e.type == SDL_KEYDOWN && !e.key.repeat && e.key.keysym.scancode == SDL_SCANCODE_T) {
                         input_turn_around(&player);
                     }
-                    if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
+                    if (e.type == SDL_KEYDOWN && e.key.keysym.scancode == SDL_SCANCODE_SPACE) {
                         if (game_shoot(&game, &player, &map)) {
                             sound_play(&gun_sounds[game.current_weapon.type]);
                         } else if (game.ammo == 0) {
@@ -793,21 +793,21 @@ int main(int argc, char **argv) {
                             }
                         }
                     }
-                    if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_r) {
+                    if (e.type == SDL_KEYDOWN && e.key.keysym.scancode == SDL_SCANCODE_R) {
                         if (game_reload(&game)) {
                             sound_play(&reload_sounds[game.current_weapon.type]);
                         }
                     }
-                    if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_m) {
+                    if (e.type == SDL_KEYDOWN && !e.key.repeat && e.key.keysym.scancode == SDL_SCANCODE_M) {
                         menu.minimap_on = !menu.minimap_on;
                     }
-                    if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_n) {
+                    if (e.type == SDL_KEYDOWN && !e.key.repeat && e.key.keysym.scancode == SDL_SCANCODE_N) {
                         menu.enemy_markers_on = !menu.enemy_markers_on;
                     }
-                    if (e.type == SDL_KEYDOWN && (e.key.keysym.sym == SDLK_c || e.key.keysym.sym == SDLK_w)) {
+                    if (e.type == SDL_KEYDOWN && !e.key.repeat && e.key.keysym.scancode == SDL_SCANCODE_C) {
                         game_cycle_weapon(&game);
                     }
-                    if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_o) {
+                    if (e.type == SDL_KEYDOWN && !e.key.repeat && e.key.keysym.scancode == SDL_SCANCODE_O) {
                         int door_x = (int)(player.x + cosf(player.angle));
                         int door_y = (int)(player.y + sinf(player.angle));
                         if (map_is_door(&map, door_x, door_y)) {

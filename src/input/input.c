@@ -85,10 +85,10 @@ void input_update(Player *p, const Map *m, const EnemyList *enemies, float dt) {
 
     float move = p->move_speed * dt;
 
-    if (keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_UP]) {
+    if (keys[SDL_SCANCODE_UP]) {
         try_move(p, m, cosf(p->angle) * move, sinf(p->angle) * move);
     }
-    if (keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_DOWN]) {
+    if (keys[SDL_SCANCODE_DOWN]) {
         try_move(p, m, -cosf(p->angle) * move, -sinf(p->angle) * move);
     }
 
