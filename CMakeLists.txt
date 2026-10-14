@@ -5,7 +5,9 @@ set(CMAKE_C_STANDARD 11)
 
 set(MACOS_FRAMEWORK_DIR "" CACHE PATH "Directory containing Universal SDL2 frameworks and headers")
 
-if(APPLE AND MACOS_FRAMEWORK_DIR)
+if(EMSCRIPTEN)
+    # SDL is provided by Emscripten ports for the browser build.
+elseif(APPLE AND MACOS_FRAMEWORK_DIR)
     find_library(SDL2_FRAMEWORK SDL2 PATHS "${MACOS_FRAMEWORK_DIR}" NO_DEFAULT_PATH REQUIRED)
     find_library(SDL2_MIXER_FRAMEWORK SDL2_mixer PATHS "${MACOS_FRAMEWORK_DIR}" NO_DEFAULT_PATH REQUIRED)
 elseif(UNIX AND NOT APPLE)
@@ -42,7 +44,29 @@ if(NOT DEBUG_START_LEVEL STREQUAL "0")
     target_compile_definitions(wolf PRIVATE DEBUG_START_LEVEL=${DEBUG_START_LEVEL})
 endif()
 
-if(APPLE AND MACOS_FRAMEWORK_DIR)
+if(EMSCRIPTEN)
+    target_include_directories(wolf PRIVATE ${CMAKE_SOURCE_DIR}/src)
+    target_compile_options(wolf PRIVATE -sUSE_SDL=2 -sUSE_SDL_MIXER=2)
+    target_link_options(wolf PRIVATE
+        -sUSE_SDL=2
+        -sUSE_SDL_MIXER=2
+        "-sSDL2_MIXER_FORMATS=['mp3']"
+        -sASYNCIFY=1
+        -sASYNCIFY_STACK_SIZE=131072
+        -sALLOW_MEMORY_GROWTH=1
+        -sENVIRONMENT=web
+        "-sEXPORTED_RUNTIME_METHODS=['callMain','FS','IDBFS','ENV','addRunDependency','removeRunDependency']"
+        -lidbfs.js
+        --preload-file "${CMAKE_SOURCE_DIR}/assets@/assets"
+        --shell-file "${CMAKE_SOURCE_DIR}/package/browser/shell.html"
+    )
+    set_target_properties(wolf PROPERTIES
+        OUTPUT_NAME index
+        SUFFIX .html
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/dist/browser"
+        LINK_DEPENDS "${CMAKE_SOURCE_DIR}/package/browser/shell.html"
+    )
+elseif(APPLE AND MACOS_FRAMEWORK_DIR)
     target_include_directories(wolf PRIVATE "${MACOS_FRAMEWORK_DIR}/include" ${CMAKE_SOURCE_DIR}/src)
     target_link_libraries(wolf PRIVATE ${SDL2_FRAMEWORK} ${SDL2_MIXER_FRAMEWORK} m)
 elseif(UNIX AND NOT APPLE)

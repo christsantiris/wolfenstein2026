@@ -11,6 +11,7 @@ A first-person shooter inspired by *Wolfenstein 3D* by id Software. Navigate maz
   - [Clean the Build](#clean-the-build)
   - [macOS Production Release](#macos-production-release)
   - [Linux Production Release](#linux-production-release)
+  - [Browser Play](#browser-play)
 - [Dependencies](#dependencies)
 - [Contributing](#contributing)
 - [License](#license)
@@ -126,6 +127,25 @@ make production-linux-arm64
 ```
 
 Do not run the ARM64 target on an Intel Mac: Docker Desktop must emulate the entire ARM64 build and its QEMU emulator can fail while configuring system libraries.
+
+## Browser Play
+
+The browser build uses Emscripten to compile the C/SDL2 game to WebAssembly. Players open a link and play in a desktop browser with a keyboard; no game installation or Docker is needed.
+
+From the project root, activate Emscripten and launch the browser build in the same terminal. This machine currently has the verified Emscripten 4.0.23 SDK at `/private/tmp/wolf-browser-emsdk`:
+
+```bash
+source /private/tmp/wolf-browser-emsdk/emsdk_env.sh
+make browser-run
+```
+
+Run the `source` command again whenever you open a new terminal. The current SDK is in a temporary directory; if it is removed, install the [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html) in a permanent location and update the path in the `source` command above.
+
+Open **http://localhost:8000**, then press Enter on **Play**. Arrow keys and Enter navigate the game menus; Escape opens the game menu. The controls are also listed below the game. Python 3 is needed only for this local preview server.
+
+To build without starting the preview server, run `make browser`. Upload all files in `dist/browser/` together to a static HTTPS host, keeping their filenames and relative paths intact. The entry page is `index.html`; the JavaScript, WebAssembly, and asset data files must be served alongside it. Serve `.wasm` as `application/wasm`. No game server or Windows executable signing is required.
+
+Save slots, saved settings, and high scores persist in the current browser's site storage. Clearing site data removes them; they do not transfer between browsers or devices. If browser storage is unavailable, the page reports that saves are temporary. Existing desktop save formats are reused.
 
 ## Dependencies
 - `cmake`

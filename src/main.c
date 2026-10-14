@@ -3,6 +3,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+
+EM_ASYNC_JS(void, browser_next_frame, (void), {
+    await new Promise(function(resolve) {
+        requestAnimationFrame(resolve);
+    });
+});
+#endif
 #ifdef __APPLE__
 #include <unistd.h>
 #endif
@@ -121,7 +130,11 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    Uint32 renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
+#ifdef __EMSCRIPTEN__
+    renderer_flags = SDL_RENDERER_SOFTWARE;
+#endif
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, renderer_flags);
     if (!renderer) {
         fprintf(stderr, "SDL_CreateRenderer: %s\n", SDL_GetError());
         SDL_DestroyWindow(window);
@@ -631,8 +644,16 @@ int main(int argc, char **argv) {
     Uint64 last_counter = SDL_GetPerformanceCounter();
 
     while (running) {
+#ifdef __EMSCRIPTEN__
+        browser_next_frame();
+#endif
         Uint64 current_counter = SDL_GetPerformanceCounter();
         float dt = (float)((double)(current_counter - last_counter) / (double)counter_frequency);
+#ifdef __EMSCRIPTEN__
+        if (dt > 0.1f) {
+            dt = 0.1f;
+        }
+#endif
         last_counter = current_counter;
         total_time += dt;
 
@@ -1096,5 +1117,8 @@ int main(int argc, char **argv) {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+#ifdef __EMSCRIPTEN__
+    EM_ASM({ Module.onGameExit(); });
+#endif
     return 0;
 }
