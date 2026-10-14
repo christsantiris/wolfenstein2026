@@ -1,4 +1,4 @@
-.PHONY: all run clean debug debug-pistol debug-dual-handguns debug-shotgun debug-battle-rifle debug-ak47 debug-knife debug-level test linux appimage production-linux production-linux-arm64 windows sprites universal-dmg production
+.PHONY: all run clean debug debug-pistol debug-dual-handguns debug-shotgun debug-battle-rifle debug-ak47 debug-knife debug-level test linux appimage production-linux production-linux-arm64 windows browser browser-run sprites universal-dmg production
 
 all:
 	cmake -B build -DCMAKE_BUILD_TYPE=Release
@@ -36,6 +36,13 @@ production-linux-arm64:
 
 windows:
 	bash package/windows/build_windows.sh
+
+browser:
+	emcmake cmake -S . -B build/browser -DCMAKE_BUILD_TYPE=Release
+	cmake --build build/browser
+
+browser-run: browser
+	python3 -m http.server 8000 --bind 127.0.0.1 --directory dist/browser
 
 debug: debug-shotgun
 
