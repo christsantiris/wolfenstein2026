@@ -39,7 +39,7 @@ windows:
 
 browser:
 	emcmake cmake -S . -B build/browser -DCMAKE_BUILD_TYPE=Release
-	cmake --build build/browser
+	emmake cmake --build build/browser
 
 browser-run: browser
 	python3 -m http.server 8000 --bind 127.0.0.1 --directory dist/browser
